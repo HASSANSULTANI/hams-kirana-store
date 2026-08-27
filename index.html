@@ -5,196 +5,1726 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="HAMS Kirana Store - Online Grocery Ordering">
 <title>HAMS Kirana Store</title>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,Helvetica,sans-serif;background:#f6f8f5;color:#172017}
+
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f6f8f5;
+  color:#172017
+}
+
 button,input,textarea{font:inherit}
-.top{background:#166534;color:#fff;text-align:center;padding:7px;font-size:13px}
-header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #e5e9e5}
-.head{max-width:1200px;margin:auto;padding:14px 18px;display:flex;align-items:center;gap:16px}
-.logo{display:flex;align-items:center;gap:10px;min-width:max-content}
-.logoicon{width:44px;height:44px;border-radius:12px;background:#15803d;color:#fff;display:grid;place-items:center;font-size:23px;font-weight:800}
-.logo h1{font-size:20px}.logo small{color:#68736a}
-.search{flex:1;position:relative}.search input{width:100%;padding:12px 15px 12px 40px;border:1px solid #e5e9e5;border-radius:12px;outline:none;background:#fafcf9}
-.search span{position:absolute;left:14px;top:11px}
-.cartbtn,.add,.checkout,.place{border:0;background:#15803d;color:#fff;border-radius:10px;padding:11px 14px;cursor:pointer;font-weight:700}
-.cartcount{background:#facc15;color:#111;border-radius:99px;padding:2px 7px;font-size:12px}
-main{max-width:1200px;margin:auto;padding:24px 18px 70px}
-.hero{background:linear-gradient(135deg,#166534,#15803d);color:#fff;border-radius:20px;padding:30px;margin-bottom:20px}
-.hero h2{font-size:clamp(27px,5vw,42px);margin-bottom:6px}.hero p{opacity:.92}
-.status{display:none;background:#fff;border:1px solid #e5e9e5;border-radius:10px;padding:12px;margin-bottom:16px}
-.status.show{display:block}.status.err{color:#b91c1c}
-.cats{display:flex;gap:8px;overflow:auto;margin-bottom:20px;padding-bottom:5px}
-.cat{border:1px solid #e5e9e5;background:#fff;border-radius:99px;padding:9px 14px;cursor:pointer;white-space:nowrap}
-.cat.active{background:#15803d;color:#fff;border-color:#15803d}
-.title{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.title span{font-size:13px;color:#68736a}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.card{background:#fff;border:1px solid #e5e9e5;border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
-.pic{width:100%;aspect-ratio:1;object-fit:cover;background:#eef3ed}
-.info{padding:13px;display:flex;flex-direction:column;gap:6px;flex:1}
-.category{font-size:11px;color:#15803d;font-weight:700;text-transform:uppercase}
-.name{font-weight:700;font-size:16px}.desc{font-size:12px;color:#68736a;min-height:32px}
-.meta{display:flex;justify-content:space-between;color:#68736a;font-size:12px}
-.bottom{margin-top:auto;padding-top:8px;display:flex;align-items:center;justify-content:space-between;gap:7px}
-.price{font-size:18px;font-weight:800}.add{padding:9px 12px}.add:disabled{background:#aab3ab;cursor:not-allowed}
-.empty{text-align:center;background:#fff;border:1px dashed #cdd5ce;border-radius:15px;padding:40px;color:#68736a;grid-column:1/-1}
-footer{text-align:center;color:#68736a;font-size:13px;padding:24px}
-.overlay{position:fixed;inset:0;background:#0008;z-index:30;display:none}.overlay.show{display:block}
-.drawer{position:fixed;right:0;top:0;width:min(430px,100%);height:100vh;background:#fff;z-index:31;transform:translateX(100%);transition:.25s;display:flex;flex-direction:column}
-.drawer.open{transform:translateX(0)}
-.dhead{padding:16px;border-bottom:1px solid #e5e9e5;display:flex;justify-content:space-between}.close{border:0;background:#f1f3f1;border-radius:50%;width:35px;height:35px;cursor:pointer}
-.items{flex:1;overflow:auto;padding:14px}.item{padding:12px 0;border-bottom:1px solid #e5e9e5;display:flex;justify-content:space-between;gap:10px}
-.itemname{font-weight:700}.muted{font-size:12px;color:#68736a}.qty{display:flex;align-items:center;gap:8px;margin-top:7px}.qty button{width:28px;height:28px;border:1px solid #e5e9e5;background:#fff;border-radius:7px;cursor:pointer}.remove{border:0;background:none;color:#dc2626;font-size:12px;cursor:pointer;margin-top:4px}
-.dfoot{border-top:1px solid #e5e9e5;padding:16px}.total{display:flex;justify-content:space-between;font-size:19px;font-weight:800;margin-bottom:12px}.checkout,.place{width:100%}.checkout:disabled{opacity:.5;cursor:not-allowed}
-.modal{position:fixed;inset:0;background:#0009;z-index:50;display:none;align-items:center;justify-content:center;padding:16px}.modal.show{display:flex}
-.modalbox{background:#fff;width:min(500px,100%);max-height:92vh;overflow:auto;border-radius:18px;padding:20px}
-.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
-.field{margin-bottom:13px}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}.field input,.field textarea{width:100%;border:1px solid #e5e9e5;border-radius:9px;padding:11px;outline:none}.field textarea{min-height:85px}
-.success{text-align:center;padding:20px}.check{width:60px;height:60px;border-radius:50%;background:#dcfce7;color:#166534;display:grid;place-items:center;margin:auto auto 12px;font-size:30px}.wa{display:block;margin-top:12px;color:#166534;font-weight:700;text-decoration:none}
-@media(max-width:950px){.grid{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:700px){.head{flex-wrap:wrap}.logo{flex:1}.search{order:3;flex-basis:100%}.grid{grid-template-columns:repeat(2,1fr)}main{padding:16px 12px 60px}.hero{padding:23px 18px}}
-@media(max-width:390px){.grid{gap:9px}.info{padding:9px}.name{font-size:14px}.price{font-size:15px}.add{font-size:12px;padding:8px}}
-</style>
-</head>
-<body>
-<div class="top">Fresh groceries • Easy ordering • Home delivery</div>
-<header><div class="head">
-  <div class="logo"><div class="logoicon">H</div><div><h1>HAMS Kirana Store</h1><small>Online Grocery Store</small></div></div>
-  <div class="search"><span>🔎</span><input id="search" placeholder="Search products..." type="search"></div>
-  <button class="cartbtn" onclick="openCart()">🛒 Basket <b id="count" class="cartcount">0</b></button>
-</div></header>
 
-<main>
-<section class="hero"><h2>Shop groceries easily.</h2><p>Choose products, add them to your basket, and place your order online.</p></section>
-<div id="status" class="status"></div>
-<div id="cats" class="cats"></div>
-<div class="title"><h2>Products</h2><span id="results"></span></div>
-<div id="products" class="grid"><div class="empty">Loading products...</div></div>
-</main>
-<footer>© <span id="year"></span> HAMS Kirana Store</footer>
+.top{
+  background:#166534;
+  color:#fff;
+  text-align:center;
+  padding:7px;
+  font-size:13px
+}
 
-<div id="overlay" class="overlay" onclick="closeCart()"></div>
-<aside id="drawer" class="drawer">
-  <div class="dhead"><h2>Your Basket</h2><button class="close" onclick="closeCart()">✕</button></div>
-  <div id="items" class="items"></div>
-  <div class="dfoot"><div class="total"><span>Total</span><span id="total">₹0</span></div><button id="checkout" class="checkout" onclick="checkout()" disabled>Proceed to Checkout</button></div>
-</aside>
+header{
+  position:sticky;
+  top:0;
+  z-index:20;
+  background:#fff;
+  border-bottom:1px solid #e5e9e5
+}
 
-<div id="checkoutModal" class="modal"><div class="modalbox">
-  <div class="mhead"><h2>Delivery Details</h2><button class="close" onclick="closeCheckout()">✕</button></div>
-  <form id="form">
-    <div class="field"><label>Full Name *</label><input id="name" required></div>
-    <div class="field"><label>Mobile Number *</label><input id="mobile" type="tel" inputmode="numeric" required></div>
-    <div class="field"><label>Delivery Address *</label><textarea id="address" required></textarea></div>
-    <div class="total"><span>Order Total</span><span id="checkoutTotal">₹0</span></div>
-    <button id="place" class="place" type="submit">Place Order</button>
-  </form>
-</div></div>
+.head{
+  max-width:1200px;
+  margin:auto;
+  padding:14px 18px;
+  display:flex;
+  align-items:center;
+  gap:16px
+}
 
-<div id="successModal" class="modal"><div class="modalbox"><div class="success">
-  <div class="check">✓</div><h2>Order Placed!</h2><p id="successText" class="muted" style="margin-top:8px"></p>
-  <button class="place" style="margin-top:18px" onclick="closeSuccess()">Continue Shopping</button>
-  <a id="wa" class="wa" target="_blank" rel="noopener">💬 Contact HAMS Kirana Store on WhatsApp</a>
-</div></div></div>
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:max-content
+}
 
-<script>
-const API_URL="https://script.google.com/macros/s/AKfycbwnwcBSQG9ACJy-fbZbbuc_8tiiZP1UmKwrbemlMlDEiMpTBDiR6WgAntX6_fOPkxvT/exec";
-const DEFAULT_WA="919226158611";
-let products=[],cart=[],category="All",wa=DEFAULT_WA;
+.logoicon{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  background:#15803d;
+  color:#fff;
+  display:grid;
+  place-items:center;
+  font-size:23px;
+  font-weight:800
+}
 
-document.getElementById("year").textContent=new Date().getFullYear();
-document.getElementById("search").addEventListener("input",render);
-document.getElementById("form").addEventListener("submit",placeOrder);
+.logo h1{font-size:20px}
+.logo small{color:#68736a}
 
-try{cart=JSON.parse(localStorage.getItem("hamsKiranaCart")||"[]");if(!Array.isArray(cart))cart=[]}catch(e){cart=[]}
-updateCart();loadProducts();
+.search{
+  flex:1;
+  position:relative
+}
 
-async function loadProducts(){
-  status("Loading products...");
-  try{
-    const r=await fetch(API_URL,{cache:"no-store"});
-    if(!r.ok)throw Error("Connection failed");
-    const d=await r.json();
-    if(!d.success)throw Error(d.message||"Server error");
-    products=Array.isArray(d.products)?d.products:[];
-    if(d.whatsapp)wa=String(d.whatsapp);
-    document.getElementById("status").className="status";
-    renderCats();render();
-  }catch(e){
-    console.error(e);
-    status("Products could not be loaded. Please check the Apps Script Web App URL and deployment.",true);
-    document.getElementById("products").innerHTML='<div class="empty">Products could not be loaded right now.</div>';
+.search input{
+  width:100%;
+  padding:12px 15px 12px 40px;
+  border:1px solid #e5e9e5;
+  border-radius:12px;
+  outline:none;
+  background:#fafcf9
+}
+
+.search span{
+  position:absolute;
+  left:14px;
+  top:11px
+}
+
+.cartbtn,.add,.checkout,.place{
+  border:0;
+  background:#15803d;
+  color:#fff;
+  border-radius:10px;
+  padding:11px 14px;
+  cursor:pointer;
+  font-weight:700
+}
+
+.cartbtn{
+  position:relative;
+  transition:transform .18s,box-shadow .18s
+}
+
+.cartbtn.bump{
+  animation:cartBump .45s ease
+}
+
+.add.added{
+  background:#166534;
+  transform:scale(.96)
+}
+
+@keyframes cartBump{
+  0%{
+    transform:scale(1)
+  }
+  35%{
+    transform:scale(1.12) rotate(-2deg)
+  }
+  70%{
+    transform:scale(.96) rotate(2deg)
+  }
+  100%{
+    transform:scale(1)
   }
 }
-function status(t,error=false){let x=document.getElementById("status");x.textContent=t;x.className="status show"+(error?" err":"")}
+
+.fly-item{
+  position:fixed;
+  z-index:1000;
+  pointer-events:none;
+  width:72px;
+  height:72px;
+  object-fit:cover;
+  border-radius:14px;
+  box-shadow:0 8px 24px #0003;
+  border:2px solid #fff;
+  background:#eef3ed
+}
+
+.cartcount{
+  background:#facc15;
+  color:#111;
+  border-radius:99px;
+  padding:2px 7px;
+  font-size:12px
+}
+
+main{
+  max-width:1200px;
+  margin:auto;
+  padding:24px 18px 70px
+}
+
+.hero{
+  background:linear-gradient(135deg,#166534,#15803d);
+  color:#fff;
+  border-radius:20px;
+  padding:30px;
+  margin-bottom:20px
+}
+
+.hero h2{
+  font-size:clamp(27px,5vw,42px);
+  margin-bottom:6px
+}
+
+.hero p{opacity:.92}
+
+.status{
+  display:none;
+  background:#fff;
+  border:1px solid #e5e9e5;
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:16px
+}
+
+.status.show{display:block}
+.status.err{color:#b91c1c}
+
+.cats{
+  display:flex;
+  gap:8px;
+  overflow:auto;
+  margin-bottom:20px;
+  padding-bottom:5px
+}
+
+.cat{
+  border:1px solid #e5e9e5;
+  background:#fff;
+  border-radius:99px;
+  padding:9px 14px;
+  cursor:pointer;
+  white-space:nowrap
+}
+
+.cat.active{
+  background:#15803d;
+  color:#fff;
+  border-color:#15803d
+}
+
+.title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px
+}
+
+.title span{
+  font-size:13px;
+  color:#68736a
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px
+}
+
+.card{
+  background:#fff;
+  border:1px solid #e5e9e5;
+  border-radius:16px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column
+}
+
+.pic{
+  width:100%;
+  aspect-ratio:1;
+  object-fit:cover;
+  background:#eef3ed
+}
+
+.info{
+  padding:13px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  flex:1
+}
+
+.category{
+  font-size:11px;
+  color:#15803d;
+  font-weight:700;
+  text-transform:uppercase
+}
+
+.name{
+  font-weight:700;
+  font-size:16px
+}
+
+.desc{
+  font-size:12px;
+  color:#68736a;
+  min-height:32px
+}
+
+.meta{
+  display:flex;
+  justify-content:space-between;
+  color:#68736a;
+  font-size:12px
+}
+
+.bottom{
+  margin-top:auto;
+  padding-top:8px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:7px
+}
+
+.price{
+  font-size:18px;
+  font-weight:800
+}
+
+.add{
+  padding:9px 12px
+}
+
+.add:disabled{
+  background:#aab3ab;
+  cursor:not-allowed
+}
+
+.empty{
+  text-align:center;
+  background:#fff;
+  border:1px dashed #cdd5ce;
+  border-radius:15px;
+  padding:40px;
+  color:#68736a;
+  grid-column:1/-1
+}
+
+footer{
+  text-align:center;
+  color:#68736a;
+  font-size:13px;
+  padding:24px
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  background:#0008;
+  z-index:30;
+  display:none
+}
+
+.overlay.show{display:block}
+
+.drawer{
+  position:fixed;
+  right:0;
+  top:0;
+  width:min(430px,100%);
+  height:100vh;
+  background:#fff;
+  z-index:31;
+  transform:translateX(100%);
+  transition:.25s;
+  display:flex;
+  flex-direction:column
+}
+
+.drawer.open{
+  transform:translateX(0)
+}
+
+.dhead{
+  padding:16px;
+  border-bottom:1px solid #e5e9e5;
+  display:flex;
+  justify-content:space-between
+}
+
+.close{
+  border:0;
+  background:#f1f3f1;
+  border-radius:50%;
+  width:35px;
+  height:35px;
+  cursor:pointer
+}
+
+.items{
+  flex:1;
+  overflow:auto;
+  padding:14px
+}
+
+.item{
+  padding:12px 0;
+  border-bottom:1px solid #e5e9e5;
+  display:flex;
+  justify-content:space-between;
+  gap:10px
+}
+
+.itemname{
+  font-weight:700
+}
+
+.muted{
+  font-size:12px;
+  color:#68736a
+}
+
+.qty{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:7px
+}
+
+.qty button{
+  width:28px;
+  height:28px;
+  border:1px solid #e5e9e5;
+  background:#fff;
+  border-radius:7px;
+  cursor:pointer
+}
+
+.remove{
+  border:0;
+  background:none;
+  color:#dc2626;
+  font-size:12px;
+  cursor:pointer;
+  margin-top:4px
+}
+
+.dfoot{
+  border-top:1px solid #e5e9e5;
+  padding:16px
+}
+
+.total{
+  display:flex;
+  justify-content:space-between;
+  font-size:19px;
+  font-weight:800;
+  margin-bottom:12px
+}
+
+.checkout,.place{
+  width:100%
+}
+
+.checkout:disabled{
+  opacity:.5;
+  cursor:not-allowed
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:#0009;
+  z-index:50;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px
+}
+
+.modal.show{display:flex}
+
+.modalbox{
+  background:#fff;
+  width:min(500px,100%);
+  max-height:92vh;
+  overflow:auto;
+  border-radius:18px;
+  padding:20px
+}
+
+.mhead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px
+}
+
+.field{
+  margin-bottom:13px
+}
+
+.field label{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  margin-bottom:5px
+}
+
+.field input,.field textarea{
+  width:100%;
+  border:1px solid #e5e9e5;
+  border-radius:9px;
+  padding:11px;
+  outline:none
+}
+
+.field textarea{
+  min-height:85px
+}
+
+.success{
+  text-align:center;
+  padding:20px
+}
+
+.check{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:#dcfce7;
+  color:#166534;
+  display:grid;
+  place-items:center;
+  margin:auto auto 12px;
+  font-size:30px
+}
+
+.wa{
+  display:block;
+  margin-top:12px;
+  color:#166534;
+  font-weight:700;
+  text-decoration:none
+}
+
+@media(max-width:950px){
+  .grid{
+    grid-template-columns:repeat(3,1fr)
+  }
+}
+
+@media(max-width:700px){
+  .head{
+    flex-wrap:wrap
+  }
+
+  .logo{
+    flex:1
+  }
+
+  .search{
+    order:3;
+    flex-basis:100%
+  }
+
+  .grid{
+    grid-template-columns:repeat(2,1fr)
+  }
+
+  main{
+    padding:16px 12px 60px
+  }
+
+  .hero{
+    padding:23px 18px
+  }
+}
+
+@media(max-width:390px){
+  .grid{
+    gap:9px
+  }
+
+  .info{
+    padding:9px
+  }
+
+  .name{
+    font-size:14px
+  }
+
+  .price{
+    font-size:15px
+  }
+
+  .add{
+    font-size:12px;
+    padding:8px
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+Fresh groceries • Easy ordering • Home delivery
+</div>
+
+<header>
+<div class="head">
+
+  <div class="logo">
+    <div class="logoicon">H</div>
+
+    <div>
+      <h1>HAMS Kirana Store</h1>
+      <small>Online Grocery Store</small>
+    </div>
+  </div>
+
+  <div class="search">
+    <span>🔎</span>
+    <input
+      id="search"
+      placeholder="Search products..."
+      type="search">
+  </div>
+
+  <button
+    class="cartbtn"
+    onclick="openCart()">
+    🛒 Basket
+    <b id="count" class="cartcount">0</b>
+  </button>
+
+</div>
+</header>
+
+<main>
+
+<section class="hero">
+  <h2>Shop groceries easily.</h2>
+  <p>
+    Choose products, add them to your basket,
+    and place your order online.
+  </p>
+</section>
+
+<div id="status" class="status"></div>
+
+<div id="cats" class="cats"></div>
+
+<div class="title">
+  <h2>Products</h2>
+  <span id="results"></span>
+</div>
+
+<div id="products" class="grid">
+  <div class="empty">
+    Loading products...
+  </div>
+</div>
+
+</main>
+
+<footer>
+© <span id="year"></span> HAMS Kirana Store
+</footer>
+
+
+<div
+  id="overlay"
+  class="overlay"
+  onclick="closeCart()">
+</div>
+
+
+<aside id="drawer" class="drawer">
+
+  <div class="dhead">
+    <h2>Your Basket</h2>
+
+    <button
+      class="close"
+      onclick="closeCart()">
+      ✕
+    </button>
+  </div>
+
+  <div
+    id="items"
+    class="items">
+  </div>
+
+  <div class="dfoot">
+
+    <div class="total">
+      <span>Total</span>
+      <span id="total">₹0</span>
+    </div>
+
+    <button
+      id="checkout"
+      class="checkout"
+      onclick="checkout()"
+      disabled>
+      Proceed to Checkout
+    </button>
+
+  </div>
+
+</aside>
+
+
+<div
+  id="checkoutModal"
+  class="modal">
+
+  <div class="modalbox">
+
+    <div class="mhead">
+
+      <h2>Delivery Details</h2>
+
+      <button
+        class="close"
+        onclick="closeCheckout()">
+        ✕
+      </button>
+
+    </div>
+
+    <form id="form">
+
+      <div class="field">
+        <label>Full Name *</label>
+        <input id="name" required>
+      </div>
+
+      <div class="field">
+        <label>Mobile Number *</label>
+        <input
+          id="mobile"
+          type="tel"
+          inputmode="numeric"
+          required>
+      </div>
+
+      <div class="field">
+        <label>Delivery Address *</label>
+        <textarea
+          id="address"
+          required>
+        </textarea>
+      </div>
+
+      <div class="total">
+        <span>Order Total</span>
+        <span id="checkoutTotal">₹0</span>
+      </div>
+
+      <button
+        id="place"
+        class="place"
+        type="submit">
+        Place Order
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<div
+  id="successModal"
+  class="modal">
+
+  <div class="modalbox">
+
+    <div class="success">
+
+      <div class="check">
+        ✓
+      </div>
+
+      <h2>Order Placed!</h2>
+
+      <p
+        id="successText"
+        class="muted"
+        style="margin-top:8px">
+      </p>
+
+      <button
+        class="place"
+        style="margin-top:18px"
+        onclick="closeSuccess()">
+        Continue Shopping
+      </button>
+
+      <a
+        id="wa"
+        class="wa"
+        target="_blank"
+        rel="noopener">
+        💬 Contact HAMS Kirana Store on WhatsApp
+      </a>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycbwnwcBSQG9ACJy-fbZbbuc_8tiiZP1UmKwrbemlMlDEiMpTBDiR6WgAntX6_fOPkxvT/exec";
+
+const DEFAULT_WA =
+"919226158611";
+
+let products=[];
+let cart=[];
+let category="All";
+let wa=DEFAULT_WA;
+
+
+document.getElementById("year").textContent =
+new Date().getFullYear();
+
+
+document.getElementById("search")
+.addEventListener("input",render);
+
+
+document.getElementById("form")
+.addEventListener("submit",placeOrder);
+
+
+try{
+
+  cart =
+  JSON.parse(
+    localStorage.getItem("hamsKiranaCart")||"[]"
+  );
+
+  if(!Array.isArray(cart))
+    cart=[];
+
+}catch(e){
+
+  cart=[];
+
+}
+
+
+updateCart();
+loadProducts();
+
+
+async function loadProducts(){
+
+  status("Loading products...");
+
+  try{
+
+    const r =
+    await fetch(
+      API_URL,
+      {cache:"no-store"}
+    );
+
+    if(!r.ok)
+      throw Error("Connection failed");
+
+    const d =
+    await r.json();
+
+    if(!d.success)
+      throw Error(d.message||"Server error");
+
+    products =
+    Array.isArray(d.products)
+    ? d.products
+    : [];
+
+    if(d.whatsapp)
+      wa=String(d.whatsapp);
+
+    document.getElementById("status")
+    .className="status";
+
+    renderCats();
+    render();
+
+  }catch(e){
+
+    console.error(e);
+
+    status(
+      "Products could not be loaded. Please check the Apps Script Web App URL and deployment.",
+      true
+    );
+
+    document.getElementById("products")
+    .innerHTML=
+    '<div class="empty">Products could not be loaded right now.</div>';
+
+  }
+
+}
+
+
+function status(t,error=false){
+
+  let x=
+  document.getElementById("status");
+
+  x.textContent=t;
+
+  x.className=
+  "status show"+
+  (error?" err":"");
+
+}
+
+
 function renderCats(){
-  let a=["All",...new Set(products.map(p=>String(p.category||"").trim()).filter(Boolean))];
-  document.getElementById("cats").innerHTML=a.map(c=>`<button class="cat ${c===category?"active":""}" onclick="setCategory(${JSON.stringify(c)})">${esc(c)}</button>`).join("");
+
+  let a=[
+    "All",
+    ...new Set(
+      products
+      .map(p=>String(p.category||"").trim())
+      .filter(Boolean)
+    )
+  ];
+
+  document.getElementById("cats")
+  .innerHTML=
+  a.map(c=>
+    `<button
+      class="cat ${c===category?"active":""}"
+      onclick="setCategory(${JSON.stringify(c)})">
+      ${esc(c)}
+    </button>`
+  ).join("");
+
 }
-function setCategory(c){category=c;renderCats();render()}
+
+
+function setCategory(c){
+
+  category=c;
+
+  renderCats();
+  render();
+
+}
+
+
 function render(){
-  let q=document.getElementById("search").value.trim().toLowerCase();
-  let list=products.filter(p=>{
-    let cat=category==="All"||String(p.category||"")===category;
-    let text=`${p.productName||""} ${p.description||""} ${p.category||""}`.toLowerCase();
-    return cat&&(!q||text.includes(q));
+
+  let q=
+  document.getElementById("search")
+  .value
+  .trim()
+  .toLowerCase();
+
+  let list=
+  products.filter(p=>{
+
+    let cat=
+    category==="All"||
+    String(p.category||"")===category;
+
+    let text=
+    `${p.productName||""} ${p.description||""} ${p.category||""}`
+    .toLowerCase();
+
+    return cat &&
+    (!q||text.includes(q));
+
   });
-  document.getElementById("results").textContent=list.length+" product"+(list.length===1?"":"s");
-  document.getElementById("products").innerHTML=list.length?list.map(card).join(""):'<div class="empty">No products found.</div>';
+
+
+  document.getElementById("results")
+  .textContent=
+  list.length+
+  " product"+
+  (list.length===1?"":"s");
+
+
+  document.getElementById("products")
+  .innerHTML=
+  list.length
+  ?list.map(card).join("")
+  :'<div class="empty">No products found.</div>';
+
 }
+
+
 function card(p){
-  let available=p.available!==false;
-  let image=p.imageUrl||placeholder(p.productName);
-  return `<article class="card"><img class="pic" src="${attr(image)}" alt="${attr(p.productName)}" onerror="this.src='${placeholder(p.productName)}'">
-  <div class="info"><div class="category">${esc(p.category||"Grocery")}</div><div class="name">${esc(p.productName||"")}</div>
-  <div class="desc">${esc(p.description||"")}</div><div class="meta"><span>${esc(p.packSize||p.unit||"")}</span><span>${available?"Available":"Unavailable"}</span></div>
-  <div class="bottom"><span class="price">₹${money(p.price)}</span><button class="add" ${available?"":"disabled"} onclick="add('${js(p.productId)}')">${available?"Add":"Unavailable"}</button></div></div></article>`;
+
+  let available=
+  p.available!==false;
+
+  let image=
+  p.imageUrl||
+  placeholder(p.productName);
+
+
+  return `
+
+  <article class="card">
+
+    <img
+      class="pic"
+      src="${attr(image)}"
+      alt="${attr(p.productName)}"
+      onerror="this.src='${placeholder(p.productName)}'">
+
+    <div class="info">
+
+      <div class="category">
+        ${esc(p.category||"Grocery")}
+      </div>
+
+      <div class="name">
+        ${esc(p.productName||"")}
+      </div>
+
+      <div class="desc">
+        ${esc(p.description||"")}
+      </div>
+
+      <div class="meta">
+        <span>
+          ${esc(p.packSize||p.unit||"")}
+        </span>
+
+        <span>
+          ${available?"Available":"Unavailable"}
+        </span>
+      </div>
+
+      <div class="bottom">
+
+        <span class="price">
+          ₹${money(p.price)}
+        </span>
+
+        <button
+          class="add"
+          ${available?"":"disabled"}
+          onclick="add('${js(p.productId)}', event)">
+          ${available?"Add":"Unavailable"}
+        </button>
+
+      </div>
+
+    </div>
+
+  </article>
+
+  `;
+
 }
-function add(id){
-  let p=products.find(x=>String(x.productId)===String(id));if(!p)return;
-  let x=cart.find(x=>String(x.productId)===String(id));
-  x?x.quantity++:cart.push({productId:p.productId,productName:p.productName,price:Number(p.price)||0,quantity:1});
+
+
+/* =========================================================
+   ADD PRODUCT TO BASKET
+========================================================= */
+
+function add(id,event){
+
+  let p=
+  products.find(
+    x=>String(x.productId)===String(id)
+  );
+
+  if(!p)return;
+
+
+  let x=
+  cart.find(
+    x=>String(x.productId)===String(id)
+  );
+
+
+  if(x){
+
+    x.quantity++;
+
+  }else{
+
+    cart.push({
+
+      productId:p.productId,
+
+      productName:p.productName,
+
+      price:Number(p.price)||0,
+
+      quantity:1
+
+    });
+
+  }
+
+
   save();
+
+
+  /* Animate product flying into basket */
+  animateAddToCart(event,p);
+
 }
-function change(id,n){let x=cart.find(x=>String(x.productId)===String(id));if(!x)return;x.quantity+=n;if(x.quantity<=0)cart=cart.filter(y=>String(y.productId)!==String(id));save()}
-function removeItem(id){cart=cart.filter(x=>String(x.productId)!==String(id));save()}
-function save(){localStorage.setItem("hamsKiranaCart",JSON.stringify(cart));updateCart()}
+
+
+/* =========================================================
+   PRODUCT → BASKET ANIMATION
+========================================================= */
+
+function animateAddToCart(event,p){
+
+  const button=
+  event&&event.currentTarget
+  ?event.currentTarget
+  :null;
+
+
+  const card=
+  button
+  ?button.closest(".card")
+  :null;
+
+
+  const source=
+  card
+  ?card.querySelector(".pic")
+  :null;
+
+
+  const cartButton=
+  document.querySelector(".cartbtn");
+
+
+  if(!source||!cartButton)
+    return;
+
+
+  const start=
+  source.getBoundingClientRect();
+
+
+  const end=
+  cartButton.getBoundingClientRect();
+
+
+  const flyer=
+  document.createElement("img");
+
+
+  flyer.className=
+  "fly-item";
+
+
+  flyer.src=
+  source.currentSrc||
+  source.src;
+
+
+  flyer.alt=
+  p.productName||
+  "Added product";
+
+
+  flyer.style.left=
+  (
+    start.left+
+    start.width/2-
+    36
+  )+"px";
+
+
+  flyer.style.top=
+  (
+    start.top+
+    start.height/2-
+    36
+  )+"px";
+
+
+  document.body.appendChild(flyer);
+
+
+  const dx=
+  end.left+
+  end.width/2-
+  (
+    start.left+
+    start.width/2
+  );
+
+
+  const dy=
+  end.top+
+  end.height/2-
+  (
+    start.top+
+    start.height/2
+  );
+
+
+  flyer.animate(
+
+    [
+
+      {
+        transform:
+        "translate(0,0) scale(1)",
+        opacity:1
+      },
+
+      {
+        transform:
+        `translate(${dx*.55}px,${dy*.55}px) scale(.72)`,
+        opacity:.95,
+        offset:.55
+      },
+
+      {
+        transform:
+        `translate(${dx}px,${dy}px) scale(.15)`,
+        opacity:0
+      }
+
+    ],
+
+    {
+      duration:650,
+      easing:"cubic-bezier(.2,.8,.2,1)"
+    }
+
+  )
+  .finished
+  .then(
+    ()=>flyer.remove()
+  )
+  .catch(
+    ()=>flyer.remove()
+  );
+
+
+  /* Basket bounce */
+
+  cartButton.classList.remove("bump");
+
+  void cartButton.offsetWidth;
+
+  cartButton.classList.add("bump");
+
+
+  setTimeout(
+    ()=>cartButton.classList.remove("bump"),
+    500
+  );
+
+
+  /* Add button feedback */
+
+  if(button){
+
+    const old=
+    button.textContent;
+
+    button.textContent=
+    "✓ Added";
+
+    button.classList.add("added");
+
+
+    setTimeout(()=>{
+
+      button.textContent=
+      old;
+
+      button.classList.remove("added");
+
+    },700);
+
+  }
+
+}
+
+
+/* =========================================================
+   QUANTITY
+========================================================= */
+
+function change(id,n){
+
+  let x=
+  cart.find(
+    x=>String(x.productId)===String(id)
+  );
+
+  if(!x)return;
+
+
+  x.quantity+=n;
+
+
+  if(x.quantity<=0){
+
+    cart=
+    cart.filter(
+      y=>String(y.productId)!==String(id)
+    );
+
+  }
+
+
+  save();
+
+}
+
+
+/* =========================================================
+   REMOVE
+========================================================= */
+
+function removeItem(id){
+
+  cart=
+  cart.filter(
+    x=>String(x.productId)!==String(id)
+  );
+
+  save();
+
+}
+
+
+/* =========================================================
+   SAVE CART
+========================================================= */
+
+function save(){
+
+  localStorage.setItem(
+    "hamsKiranaCart",
+    JSON.stringify(cart)
+  );
+
+  updateCart();
+
+}
+
+
+/* =========================================================
+   UPDATE BASKET
+========================================================= */
+
 function updateCart(){
-  document.getElementById("count").textContent=cart.reduce((a,x)=>a+(Number(x.quantity)||0),0);
-  let box=document.getElementById("items");
-  box.innerHTML=cart.length?cart.map(x=>`<div class="item"><div><div class="itemname">${esc(x.productName)}</div><div class="muted">₹${money(x.price)} each</div><div class="qty"><button onclick="change('${js(x.productId)}',-1)">−</button><b>${x.quantity}</b><button onclick="change('${js(x.productId)}',1)">+</button></div><button class="remove" onclick="removeItem('${js(x.productId)}')">Remove</button></div><b>₹${money(x.price*x.quantity)}</b></div>`).join(""):'<div class="empty">Your basket is empty.</div>';
-  let t=cart.reduce((a,x)=>a+(Number(x.price)||0)*(Number(x.quantity)||0),0);
-  document.getElementById("total").textContent="₹"+money(t);document.getElementById("checkoutTotal").textContent="₹"+money(t);
-  document.getElementById("checkout").disabled=!cart.length;
+
+  document.getElementById("count")
+  .textContent=
+  cart.reduce(
+    (a,x)=>
+    a+
+    (Number(x.quantity)||0),
+    0
+  );
+
+
+  let box=
+  document.getElementById("items");
+
+
+  box.innerHTML=
+
+  cart.length
+
+  ?
+
+  cart.map(x=>`
+
+    <div class="item">
+
+      <div>
+
+        <div class="itemname">
+          ${esc(x.productName)}
+        </div>
+
+        <div class="muted">
+          ₹${money(x.price)} each
+        </div>
+
+        <div class="qty">
+
+          <button
+            onclick="change('${js(x.productId)}',-1)">
+            −
+          </button>
+
+          <b>
+            ${x.quantity}
+          </b>
+
+          <button
+            onclick="change('${js(x.productId)}',1)">
+            +
+          </button>
+
+        </div>
+
+        <button
+          class="remove"
+          onclick="removeItem('${js(x.productId)}')">
+          Remove
+        </button>
+
+      </div>
+
+      <b>
+        ₹${money(x.price*x.quantity)}
+      </b>
+
+    </div>
+
+  `).join("")
+
+  :
+
+  '<div class="empty">Your basket is empty.</div>';
+
+
+  let t=
+  cart.reduce(
+    (a,x)=>
+    a+
+    (Number(x.price)||0)*
+    (Number(x.quantity)||0),
+    0
+  );
+
+
+  document.getElementById("total")
+  .textContent=
+  "₹"+money(t);
+
+
+  document.getElementById("checkoutTotal")
+  .textContent=
+  "₹"+money(t);
+
+
+  document.getElementById("checkout")
+  .disabled=
+  !cart.length;
+
 }
-function openCart(){document.getElementById("overlay").classList.add("show");document.getElementById("drawer").classList.add("open")}
-function closeCart(){document.getElementById("overlay").classList.remove("show");document.getElementById("drawer").classList.remove("open")}
-function checkout(){if(!cart.length)return;closeCart();document.getElementById("checkoutModal").classList.add("show")}
-function closeCheckout(){document.getElementById("checkoutModal").classList.remove("show")}
-function closeSuccess(){document.getElementById("successModal").classList.remove("show")}
+
+
+/* =========================================================
+   BASKET OPEN/CLOSE
+========================================================= */
+
+function openCart(){
+
+  document
+  .getElementById("overlay")
+  .classList.add("show");
+
+
+  document
+  .getElementById("drawer")
+  .classList.add("open");
+
+}
+
+
+function closeCart(){
+
+  document
+  .getElementById("overlay")
+  .classList.remove("show");
+
+
+  document
+  .getElementById("drawer")
+  .classList.remove("open");
+
+}
+
+
+/* =========================================================
+   CHECKOUT
+========================================================= */
+
+function checkout(){
+
+  if(!cart.length)
+    return;
+
+
+  closeCart();
+
+
+  document
+  .getElementById("checkoutModal")
+  .classList.add("show");
+
+}
+
+
+function closeCheckout(){
+
+  document
+  .getElementById("checkoutModal")
+  .classList.remove("show");
+
+}
+
+
+function closeSuccess(){
+
+  document
+  .getElementById("successModal")
+  .classList.remove("show");
+
+}
+
+
+/* =========================================================
+   PLACE ORDER
+========================================================= */
 
 async function placeOrder(e){
-  e.preventDefault();if(!cart.length)return;
-  let name=document.getElementById("name").value.trim(),mobile=document.getElementById("mobile").value.trim(),address=document.getElementById("address").value.trim();
-  if(!name||!mobile||!address){alert("Please fill in all required fields.");return}
-  let btn=document.getElementById("place");btn.disabled=true;btn.textContent="Placing Order...";
-  let payload={name,mobile,address,items:cart.map(x=>({productId:x.productId,productName:x.productName,quantity:x.quantity,price:Number(x.price)||0}))};
+
+  e.preventDefault();
+
+
+  if(!cart.length)
+    return;
+
+
+  let name=
+  document
+  .getElementById("name")
+  .value
+  .trim();
+
+
+  let mobile=
+  document
+  .getElementById("mobile")
+  .value
+  .trim();
+
+
+  let address=
+  document
+  .getElementById("address")
+  .value
+  .trim();
+
+
+  if(!name||!mobile||!address){
+
+    alert(
+      "Please fill in all required fields."
+    );
+
+    return;
+
+  }
+
+
+  let btn=
+  document.getElementById("place");
+
+
+  btn.disabled=true;
+
+  btn.textContent=
+  "Placing Order...";
+
+
+  let payload={
+
+    name:name,
+
+    mobile:mobile,
+
+    address:address,
+
+    items:
+    cart.map(x=>({
+
+      productId:x.productId,
+
+      productName:x.productName,
+
+      quantity:x.quantity,
+
+      price:Number(x.price)||0
+
+    }))
+
+  };
+
+
   try{
-    const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});
-    const d=await r.json();if(!d.success)throw Error(d.message||"Order failed");
-    cart=[];save();document.getElementById("form").reset();closeCheckout();
-    document.getElementById("successText").textContent=`Your order ID is ${d.orderId}. Total: ₹${money(d.total)}.`;
-    document.getElementById("wa").href="https://wa.me/"+wa+"?text="+encodeURIComponent("Hello HAMS Kirana Store, my order ID is "+d.orderId+".");
-    document.getElementById("successModal").classList.add("show");
-  }catch(err){console.error(err);alert("Order could not be placed. Please try again.")}
-  finally{btn.disabled=false;btn.textContent="Place Order"}
+
+    const r=
+    await fetch(
+
+      API_URL,
+
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":
+          "text/plain;charset=utf-8"
+        },
+
+        body:
+        JSON.stringify(payload)
+      }
+
+    );
+
+
+    const d=
+    await r.json();
+
+
+    if(!d.success)
+      throw Error(
+        d.message||
+        "Order failed"
+      );
+
+
+    cart=[];
+
+    save();
+
+
+    document
+    .getElementById("form")
+    .reset();
+
+
+    closeCheckout();
+
+
+    document
+    .getElementById("successText")
+    .textContent=
+    `Your order ID is ${d.orderId}. Total: ₹${money(d.total)}.`;
+
+
+    document
+    .getElementById("wa")
+    .href=
+    "https://wa.me/"+
+    wa+
+    "?text="+
+    encodeURIComponent(
+      "Hello HAMS Kirana Store, my order ID is "+
+      d.orderId+
+      "."
+    );
+
+
+    document
+    .getElementById("successModal")
+    .classList.add("show");
+
+
+  }catch(err){
+
+    console.error(err);
+
+    alert(
+      "Order could not be placed. Please try again."
+    );
+
+  }
+
+
+  finally{
+
+    btn.disabled=false;
+
+    btn.textContent=
+    "Place Order";
+
+  }
+
 }
-function money(v){return(Number(v)||0).toLocaleString("en-IN",{maximumFractionDigits:2})}
-function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
-function attr(v){return esc(v)}
-function js(v){return String(v??"").replaceAll("\\","\\\\").replaceAll("'","\\'")}
-function placeholder(n){return "https://placehold.co/600x600/f0f4ef/166534?text="+encodeURIComponent(String(n||"Grocery").slice(0,24))}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function money(v){
+
+  return(
+    Number(v)||0
+  ).toLocaleString(
+    "en-IN",
+    {
+      maximumFractionDigits:2
+    }
+  );
+
+}
+
+
+function esc(v){
+
+  return String(v??"")
+  .replaceAll("&","&amp;")
+  .replaceAll("<","&lt;")
+  .replaceAll(">","&gt;")
+  .replaceAll('"',"&quot;")
+  .replaceAll("'","&#039;");
+
+}
+
+
+function attr(v){
+
+  return esc(v);
+
+}
+
+
+function js(v){
+
+  return String(v??"")
+  .replaceAll("\\","\\\\")
+  .replaceAll("'","\\'");
+
+}
+
+
+function placeholder(n){
+
+  return(
+    "https://placehold.co/600x600/f0f4ef/166534?text="+
+    encodeURIComponent(
+      String(n||"Grocery").slice(0,24)
+    )
+  );
+
+}
+
 </script>
+
 </body>
 </html>
