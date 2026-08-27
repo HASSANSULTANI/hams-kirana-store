@@ -353,6 +353,46 @@ main{
 }
 
 /* ============================================================
+   ADD-TO-BASKET TOAST
+============================================================ */
+
+.basket-toast{
+    position:fixed;
+    left:50%;
+    bottom:28px;
+    transform:translate(-50%,18px);
+    z-index:3000;
+    background:#111827;
+    color:#fff;
+    padding:14px 22px;
+    border-radius:12px;
+    font-size:16px;
+    font-weight:600;
+    line-height:1.3;
+    box-shadow:0 10px 30px #0003;
+    opacity:0;
+    pointer-events:none;
+    white-space:nowrap;
+    max-width:calc(100vw - 32px);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    transition:opacity .22s ease, transform .22s ease;
+}
+
+.basket-toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+@media(max-width:600px){
+    .basket-toast{
+        bottom:18px;
+        font-size:14px;
+        padding:12px 17px;
+    }
+}
+
+/* ============================================================
    STATUS
 ============================================================ */
 
@@ -1102,6 +1142,9 @@ footer{
 
 
 <body>
+
+<!-- ADD-TO-BASKET TOAST -->
+<div id="basketToast" class="basket-toast" role="status" aria-live="polite"></div>
 
 <!-- =========================================================
      TOP BAR
@@ -2061,6 +2104,42 @@ function card(p){
 
 
 /* ============================================================
+   ADD-TO-BASKET TOAST
+============================================================ */
+
+let basketToastTimer = null;
+
+function showBasketToast(productName){
+
+    const toast =
+        document.getElementById(
+            "basketToast"
+        );
+
+    if(!toast){
+        return;
+    }
+
+    toast.textContent =
+        (productName || "Product") +
+        " added to basket.";
+
+    toast.classList.remove("show");
+
+    void toast.offsetWidth;
+
+    toast.classList.add("show");
+
+    clearTimeout(basketToastTimer);
+
+    basketToastTimer =
+        setTimeout(function(){
+            toast.classList.remove("show");
+        }, 2200);
+}
+
+
+/* ============================================================
    ADD PRODUCT
 ============================================================ */
 
@@ -2131,6 +2210,12 @@ function add(
     animateAddToCart(
         event,
         p
+    );
+
+
+    /* Show confirmation while the product flies to the basket. */
+    showBasketToast(
+        p.productName
     );
 
 
