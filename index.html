@@ -1747,8 +1747,7 @@ footer{
    GOOGLE APPS SCRIPT
 ============================================================ */
 
-const API_URL =
-"https://script.google.com/macros/s/AKfycbwnwcBSQG9ACJy-fbZbbuc_8tiiZP1UmKwrbemlMlDEiMpTBDiR6WgAntX6_fOPkxvT/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwnwcBSQG9ACJy-fbZbbuc_8tiiZP1UmKwrbemlMlDEiMpTBDiR6WgAntX6_fOPkxvT/exec";
 
 
 const DEFAULT_WA =
@@ -3276,7 +3275,7 @@ async function placeOrder(e){
         name: name,
         mobile: cleanMobile,
 
-        /* Compatibility field expected by the current Code.gs */
+        /* Detailed address fields — kept separate for Google Sheets */
         address: address,
         deliveryAddress: address,
 
@@ -3295,10 +3294,14 @@ async function placeOrder(e){
 
         paymentMethod: "Cash on Delivery",
 
+        /* IMPORTANT:
+           One basket item = one item object.
+           Code.gs saves each item on its own row
+           while keeping the same Order ID. */
         items: cart.map(function(x){
             return {
-                productId: x.productId,
-                productName: x.productName,
+                productId: String(x.productId || ""),
+                productName: String(x.productName || "").trim(),
                 quantity: Number(x.quantity) || 0,
                 price: Number(x.price) || 0
             };
