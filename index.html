@@ -1766,13 +1766,24 @@ function renderCats(){
             c =>
 
             `<button
+                type="button"
                 class="cat ${c===category?"active":""}"
-                onclick="setCategory(${JSON.stringify(c)})"
+                data-category="${attr(c)}"
             >
                 ${esc(c)}
             </button>`
 
         ).join("");
+
+    /* Use real event listeners instead of inline onclick handlers.
+       This makes the category filter reliable on GitHub Pages. */
+    document
+        .querySelectorAll("#cats .cat")
+        .forEach(function(button){
+            button.addEventListener("click", function(){
+                setCategory(button.dataset.category || "All");
+            });
+        });
 
 }
 
@@ -2942,6 +2953,17 @@ async function placeOrder(e){
     const mapsLink =
         document.getElementById("mapsLink").value.trim();
 
+    /* The Apps Script backend requires a single `address` field.
+       Keep the detailed fields too, so the Sheet can store each part. */
+    const address = [
+        houseFlat,
+        building,
+        street,
+        area,
+        city,
+        pincode
+    ].filter(Boolean).join(", ");
+
     const latitudeValue =
         document.getElementById("latitude").value.trim();
 
@@ -3003,6 +3025,10 @@ async function placeOrder(e){
 
         name: name,
         mobile: cleanMobile,
+
+        /* Compatibility field expected by the current Code.gs */
+        address: address,
+        deliveryAddress: address,
 
         houseFlat: houseFlat,
         building: building,
