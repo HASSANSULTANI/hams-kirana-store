@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -7,1720 +8,2985 @@
 <title>HAMS Kirana Store</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
 body{
-  font-family:Arial,Helvetica,sans-serif;
-  background:#f6f8f5;
-  color:#172017
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f6f8f5;
+    color:#172017;
 }
 
-button,input,textarea{font:inherit}
+button,
+input,
+textarea{
+    font:inherit;
+}
+
+/* ============================================================
+   TOP BAR
+============================================================ */
 
 .top{
-  background:#166534;
-  color:#fff;
-  text-align:center;
-  padding:7px;
-  font-size:13px
+    background:#166534;
+    color:#fff;
+    text-align:center;
+    padding:7px;
+    font-size:13px;
 }
 
+/* ============================================================
+   HEADER
+============================================================ */
+
 header{
-  position:sticky;
-  top:0;
-  z-index:20;
-  background:#fff;
-  border-bottom:1px solid #e5e9e5
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:#fff;
+    border-bottom:1px solid #e5e9e5;
 }
 
 .head{
-  max-width:1200px;
-  margin:auto;
-  padding:14px 18px;
-  display:flex;
-  align-items:center;
-  gap:16px
+    max-width:1200px;
+    margin:auto;
+    padding:14px 18px;
+    display:flex;
+    align-items:center;
+    gap:16px;
 }
 
 .logo{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width:max-content
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:max-content;
 }
 
 .logoicon{
-  width:44px;
-  height:44px;
-  border-radius:12px;
-  background:#15803d;
-  color:#fff;
-  display:grid;
-  place-items:center;
-  font-size:23px;
-  font-weight:800
+    width:44px;
+    height:44px;
+    border-radius:12px;
+    background:#15803d;
+    color:#fff;
+    display:grid;
+    place-items:center;
+    font-size:23px;
+    font-weight:800;
 }
 
-.logo h1{font-size:20px}
-.logo small{color:#68736a}
+.logo h1{
+    font-size:20px;
+}
+
+.logo small{
+    color:#68736a;
+}
+
+/* ============================================================
+   SEARCH
+============================================================ */
 
 .search{
-  flex:1;
-  position:relative
+    flex:1;
+    position:relative;
 }
 
 .search input{
-  width:100%;
-  padding:12px 15px 12px 40px;
-  border:1px solid #e5e9e5;
-  border-radius:12px;
-  outline:none;
-  background:#fafcf9
+    width:100%;
+    padding:12px 15px 12px 40px;
+    border:1px solid #e5e9e5;
+    border-radius:12px;
+    outline:none;
+    background:#fafcf9;
 }
 
 .search span{
-  position:absolute;
-  left:14px;
-  top:11px
+    position:absolute;
+    left:14px;
+    top:11px;
 }
 
-.cartbtn,.add,.checkout,.place{
-  border:0;
-  background:#15803d;
-  color:#fff;
-  border-radius:10px;
-  padding:11px 14px;
-  cursor:pointer;
-  font-weight:700
+/* ============================================================
+   BUTTONS
+============================================================ */
+
+.cartbtn,
+.add,
+.checkout,
+.place{
+    border:0;
+    background:#15803d;
+    color:#fff;
+    border-radius:10px;
+    padding:11px 14px;
+    cursor:pointer;
+    font-weight:700;
 }
 
 .cartbtn{
-  position:relative;
-  transition:transform .18s,box-shadow .18s
+    position:relative;
+    transition:
+        transform .18s,
+        box-shadow .18s;
 }
 
 .cartbtn.bump{
-  animation:cartBump .45s ease
-}
-
-.add.added{
-  background:#166534;
-  transform:scale(.96)
+    animation:cartBump .55s ease;
 }
 
 @keyframes cartBump{
-  0%{
-    transform:scale(1)
-  }
-  35%{
-    transform:scale(1.12) rotate(-2deg)
-  }
-  70%{
-    transform:scale(.96) rotate(2deg)
-  }
-  100%{
-    transform:scale(1)
-  }
+
+    0%{
+        transform:scale(1);
+    }
+
+    30%{
+        transform:scale(1.15) rotate(-2deg);
+    }
+
+    55%{
+        transform:scale(1.08) rotate(2deg);
+    }
+
+    75%{
+        transform:scale(.97);
+    }
+
+    100%{
+        transform:scale(1);
+    }
 }
+
+/* ============================================================
+   ADD BUTTON
+============================================================ */
+
+.add{
+    padding:9px 12px;
+    min-width:82px;
+    transition:
+        transform .18s,
+        background .18s;
+}
+
+.add:hover{
+    transform:translateY(-1px);
+}
+
+.add.added{
+    background:#166534;
+}
+
+/* ============================================================
+   PRODUCT QUANTITY CONTROLS
+============================================================ */
+
+.product-controls{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:3px;
+}
+
+.product-qty{
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.product-qty button{
+    width:34px;
+    height:34px;
+    border:1px solid #dce3dd;
+    background:#fff;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:20px;
+    line-height:1;
+    display:grid;
+    place-items:center;
+    transition:
+        background .15s,
+        transform .12s;
+}
+
+.product-qty button:hover{
+    background:#f1f6f2;
+}
+
+.product-qty button:active{
+    transform:scale(.9);
+}
+
+.product-qty .qty-number{
+    min-width:25px;
+    text-align:center;
+    font-weight:800;
+    font-size:16px;
+}
+
+.product-remove{
+    border:0;
+    background:none;
+    color:#dc2626;
+    cursor:pointer;
+    font-size:12px;
+    padding:1px 0;
+}
+
+.product-remove:hover{
+    text-decoration:underline;
+}
+
+/* ============================================================
+   FLYING PRODUCT ANIMATION
+============================================================ */
 
 .fly-item{
-  position:fixed;
-  z-index:1000;
-  pointer-events:none;
-  width:72px;
-  height:72px;
-  object-fit:cover;
-  border-radius:14px;
-  box-shadow:0 8px 24px #0003;
-  border:2px solid #fff;
-  background:#eef3ed
+    position:fixed;
+    z-index:1000;
+    pointer-events:none;
+
+    width:82px;
+    height:82px;
+
+    object-fit:cover;
+
+    border-radius:14px;
+
+    box-shadow:
+        0 10px 30px #0004;
+
+    border:2px solid #fff;
+
+    background:#eef3ed;
+
+    will-change:
+        transform,
+        opacity;
 }
 
-.cartcount{
-  background:#facc15;
-  color:#111;
-  border-radius:99px;
-  padding:2px 7px;
-  font-size:12px
+/* Sparkle effect around flying product */
+
+.fly-sparkle{
+    position:fixed;
+    z-index:1001;
+    pointer-events:none;
+
+    font-size:22px;
+
+    animation:
+        sparkleFloat 1.2s ease-out forwards;
 }
+
+@keyframes sparkleFloat{
+
+    0%{
+        opacity:0;
+        transform:scale(.4);
+    }
+
+    20%{
+        opacity:1;
+        transform:scale(1.1);
+    }
+
+    70%{
+        opacity:1;
+        transform:scale(.9);
+    }
+
+    100%{
+        opacity:0;
+        transform:scale(.3);
+    }
+}
+
+/* ============================================================
+   MAIN
+============================================================ */
 
 main{
-  max-width:1200px;
-  margin:auto;
-  padding:24px 18px 70px
+    max-width:1200px;
+    margin:auto;
+    padding:24px 18px 70px;
 }
 
+/* ============================================================
+   HERO
+============================================================ */
+
 .hero{
-  background:linear-gradient(135deg,#166534,#15803d);
-  color:#fff;
-  border-radius:20px;
-  padding:30px;
-  margin-bottom:20px
+    background:
+        linear-gradient(
+            135deg,
+            #166534,
+            #15803d
+        );
+
+    color:#fff;
+
+    border-radius:20px;
+
+    padding:30px;
+
+    margin-bottom:20px;
 }
 
 .hero h2{
-  font-size:clamp(27px,5vw,42px);
-  margin-bottom:6px
+    font-size:clamp(
+        27px,
+        5vw,
+        42px
+    );
+
+    margin-bottom:6px;
 }
 
-.hero p{opacity:.92}
+.hero p{
+    opacity:.92;
+}
+
+/* ============================================================
+   STATUS
+============================================================ */
 
 .status{
-  display:none;
-  background:#fff;
-  border:1px solid #e5e9e5;
-  border-radius:10px;
-  padding:12px;
-  margin-bottom:16px
+    display:none;
+
+    background:#fff;
+
+    border:1px solid #e5e9e5;
+
+    border-radius:10px;
+
+    padding:12px;
+
+    margin-bottom:16px;
 }
 
-.status.show{display:block}
-.status.err{color:#b91c1c}
+.status.show{
+    display:block;
+}
+
+.status.err{
+    color:#b91c1c;
+}
+
+/* ============================================================
+   CATEGORIES
+============================================================ */
 
 .cats{
-  display:flex;
-  gap:8px;
-  overflow:auto;
-  margin-bottom:20px;
-  padding-bottom:5px
+    display:flex;
+    gap:8px;
+    overflow:auto;
+    margin-bottom:20px;
+    padding-bottom:5px;
 }
 
 .cat{
-  border:1px solid #e5e9e5;
-  background:#fff;
-  border-radius:99px;
-  padding:9px 14px;
-  cursor:pointer;
-  white-space:nowrap
+    border:1px solid #e5e9e5;
+    background:#fff;
+    border-radius:99px;
+    padding:9px 14px;
+    cursor:pointer;
+    white-space:nowrap;
 }
 
 .cat.active{
-  background:#15803d;
-  color:#fff;
-  border-color:#15803d
+    background:#15803d;
+    color:#fff;
+    border-color:#15803d;
 }
 
+/* ============================================================
+   PRODUCT TITLE
+============================================================ */
+
 .title{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:14px
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
 }
 
 .title span{
-  font-size:13px;
-  color:#68736a
+    font-size:13px;
+    color:#68736a;
 }
+
+/* ============================================================
+   PRODUCT GRID
+============================================================ */
 
 .grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:16px
+    display:grid;
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:16px;
 }
 
+/* ============================================================
+   PRODUCT CARD
+============================================================ */
+
 .card{
-  background:#fff;
-  border:1px solid #e5e9e5;
-  border-radius:16px;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column
+    background:#fff;
+
+    border:1px solid #e5e9e5;
+
+    border-radius:16px;
+
+    overflow:hidden;
+
+    display:flex;
+
+    flex-direction:column;
+
+    transition:
+        transform .18s,
+        box-shadow .18s;
+}
+
+.card:hover{
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 8px 22px #0000000d;
 }
 
 .pic{
-  width:100%;
-  aspect-ratio:1;
-  object-fit:cover;
-  background:#eef3ed
+    width:100%;
+
+    aspect-ratio:1;
+
+    object-fit:cover;
+
+    background:#eef3ed;
 }
 
 .info{
-  padding:13px;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  flex:1
+    padding:13px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:6px;
+
+    flex:1;
 }
 
 .category{
-  font-size:11px;
-  color:#15803d;
-  font-weight:700;
-  text-transform:uppercase
+    font-size:11px;
+
+    color:#15803d;
+
+    font-weight:700;
+
+    text-transform:uppercase;
 }
 
 .name{
-  font-weight:700;
-  font-size:16px
+    font-weight:700;
+    font-size:16px;
 }
 
 .desc{
-  font-size:12px;
-  color:#68736a;
-  min-height:32px
+    font-size:12px;
+
+    color:#68736a;
+
+    min-height:32px;
 }
 
 .meta{
-  display:flex;
-  justify-content:space-between;
-  color:#68736a;
-  font-size:12px
+    display:flex;
+
+    justify-content:space-between;
+
+    color:#68736a;
+
+    font-size:12px;
 }
 
 .bottom{
-  margin-top:auto;
-  padding-top:8px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:7px
+    margin-top:auto;
+
+    padding-top:8px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:7px;
 }
 
 .price{
-  font-size:18px;
-  font-weight:800
-}
+    font-size:18px;
 
-.add{
-  padding:9px 12px
+    font-weight:800;
 }
 
 .add:disabled{
-  background:#aab3ab;
-  cursor:not-allowed
+    background:#aab3ab;
+    cursor:not-allowed;
 }
 
 .empty{
-  text-align:center;
-  background:#fff;
-  border:1px dashed #cdd5ce;
-  border-radius:15px;
-  padding:40px;
-  color:#68736a;
-  grid-column:1/-1
+    text-align:center;
+
+    background:#fff;
+
+    border:1px dashed #cdd5ce;
+
+    border-radius:15px;
+
+    padding:40px;
+
+    color:#68736a;
+
+    grid-column:1/-1;
 }
+
+/* ============================================================
+   FOOTER
+============================================================ */
 
 footer{
-  text-align:center;
-  color:#68736a;
-  font-size:13px;
-  padding:24px
+    text-align:center;
+
+    color:#68736a;
+
+    font-size:13px;
+
+    padding:24px;
 }
+
+/* ============================================================
+   CART OVERLAY
+============================================================ */
 
 .overlay{
-  position:fixed;
-  inset:0;
-  background:#0008;
-  z-index:30;
-  display:none
+    position:fixed;
+
+    inset:0;
+
+    background:#0008;
+
+    z-index:30;
+
+    display:none;
 }
 
-.overlay.show{display:block}
+.overlay.show{
+    display:block;
+}
+
+/* ============================================================
+   CART DRAWER
+============================================================ */
 
 .drawer{
-  position:fixed;
-  right:0;
-  top:0;
-  width:min(430px,100%);
-  height:100vh;
-  background:#fff;
-  z-index:31;
-  transform:translateX(100%);
-  transition:.25s;
-  display:flex;
-  flex-direction:column
+    position:fixed;
+
+    right:0;
+
+    top:0;
+
+    width:min(
+        430px,
+        100%
+    );
+
+    height:100vh;
+
+    background:#fff;
+
+    z-index:31;
+
+    transform:
+        translateX(100%);
+
+    transition:
+        transform .25s;
+
+    display:flex;
+
+    flex-direction:column;
 }
 
 .drawer.open{
-  transform:translateX(0)
+    transform:
+        translateX(0);
 }
 
 .dhead{
-  padding:16px;
-  border-bottom:1px solid #e5e9e5;
-  display:flex;
-  justify-content:space-between
+    padding:16px;
+
+    border-bottom:
+        1px solid #e5e9e5;
+
+    display:flex;
+
+    justify-content:
+        space-between;
 }
 
 .close{
-  border:0;
-  background:#f1f3f1;
-  border-radius:50%;
-  width:35px;
-  height:35px;
-  cursor:pointer
+    border:0;
+
+    background:#f1f3f1;
+
+    border-radius:50%;
+
+    width:35px;
+
+    height:35px;
+
+    cursor:pointer;
 }
 
 .items{
-  flex:1;
-  overflow:auto;
-  padding:14px
+    flex:1;
+
+    overflow:auto;
+
+    padding:14px;
 }
 
 .item{
-  padding:12px 0;
-  border-bottom:1px solid #e5e9e5;
-  display:flex;
-  justify-content:space-between;
-  gap:10px
+    padding:12px 0;
+
+    border-bottom:
+        1px solid #e5e9e5;
+
+    display:flex;
+
+    justify-content:
+        space-between;
+
+    gap:10px;
 }
 
 .itemname{
-  font-weight:700
+    font-weight:700;
 }
 
 .muted{
-  font-size:12px;
-  color:#68736a
+    font-size:12px;
+
+    color:#68736a;
 }
 
 .qty{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-top:7px
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    margin-top:7px;
 }
 
 .qty button{
-  width:28px;
-  height:28px;
-  border:1px solid #e5e9e5;
-  background:#fff;
-  border-radius:7px;
-  cursor:pointer
+    width:28px;
+
+    height:28px;
+
+    border:
+        1px solid #e5e9e5;
+
+    background:#fff;
+
+    border-radius:7px;
+
+    cursor:pointer;
 }
 
 .remove{
-  border:0;
-  background:none;
-  color:#dc2626;
-  font-size:12px;
-  cursor:pointer;
-  margin-top:4px
+    border:0;
+
+    background:none;
+
+    color:#dc2626;
+
+    font-size:12px;
+
+    cursor:pointer;
+
+    margin-top:4px;
 }
 
 .dfoot{
-  border-top:1px solid #e5e9e5;
-  padding:16px
+    border-top:
+        1px solid #e5e9e5;
+
+    padding:16px;
 }
 
 .total{
-  display:flex;
-  justify-content:space-between;
-  font-size:19px;
-  font-weight:800;
-  margin-bottom:12px
+    display:flex;
+
+    justify-content:
+        space-between;
+
+    font-size:19px;
+
+    font-weight:800;
+
+    margin-bottom:12px;
 }
 
-.checkout,.place{
-  width:100%
+.checkout,
+.place{
+    width:100%;
 }
 
 .checkout:disabled{
-  opacity:.5;
-  cursor:not-allowed
+    opacity:.5;
+
+    cursor:not-allowed;
 }
+
+/* ============================================================
+   MODALS
+============================================================ */
 
 .modal{
-  position:fixed;
-  inset:0;
-  background:#0009;
-  z-index:50;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:16px
+    position:fixed;
+
+    inset:0;
+
+    background:#0009;
+
+    z-index:50;
+
+    display:none;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:16px;
 }
 
-.modal.show{display:flex}
+.modal.show{
+    display:flex;
+}
 
 .modalbox{
-  background:#fff;
-  width:min(500px,100%);
-  max-height:92vh;
-  overflow:auto;
-  border-radius:18px;
-  padding:20px
+    background:#fff;
+
+    width:min(
+        500px,
+        100%
+    );
+
+    max-height:92vh;
+
+    overflow:auto;
+
+    border-radius:18px;
+
+    padding:20px;
 }
 
 .mhead{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:15px
+    display:flex;
+
+    justify-content:
+        space-between;
+
+    align-items:center;
+
+    margin-bottom:15px;
 }
 
 .field{
-  margin-bottom:13px
+    margin-bottom:13px;
 }
 
 .field label{
-  display:block;
-  font-size:13px;
-  font-weight:700;
-  margin-bottom:5px
+    display:block;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    margin-bottom:5px;
 }
 
-.field input,.field textarea{
-  width:100%;
-  border:1px solid #e5e9e5;
-  border-radius:9px;
-  padding:11px;
-  outline:none
+.field input,
+.field textarea{
+    width:100%;
+
+    border:
+        1px solid #e5e9e5;
+
+    border-radius:9px;
+
+    padding:11px;
+
+    outline:none;
 }
 
 .field textarea{
-  min-height:85px
+    min-height:85px;
 }
 
 .success{
-  text-align:center;
-  padding:20px
+    text-align:center;
+
+    padding:20px;
 }
 
 .check{
-  width:60px;
-  height:60px;
-  border-radius:50%;
-  background:#dcfce7;
-  color:#166534;
-  display:grid;
-  place-items:center;
-  margin:auto auto 12px;
-  font-size:30px
+    width:60px;
+
+    height:60px;
+
+    border-radius:50%;
+
+    background:#dcfce7;
+
+    color:#166534;
+
+    display:grid;
+
+    place-items:center;
+
+    margin:
+        auto auto 12px;
+
+    font-size:30px;
 }
 
 .wa{
-  display:block;
-  margin-top:12px;
-  color:#166534;
-  font-weight:700;
-  text-decoration:none
+    display:block;
+
+    margin-top:12px;
+
+    color:#166534;
+
+    font-weight:700;
+
+    text-decoration:none;
 }
 
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
 @media(max-width:950px){
-  .grid{
-    grid-template-columns:repeat(3,1fr)
-  }
+
+    .grid{
+        grid-template-columns:
+            repeat(3,1fr);
+    }
+
 }
 
 @media(max-width:700px){
-  .head{
-    flex-wrap:wrap
-  }
 
-  .logo{
-    flex:1
-  }
+    .head{
+        flex-wrap:wrap;
+    }
 
-  .search{
-    order:3;
-    flex-basis:100%
-  }
+    .logo{
+        flex:1;
+    }
 
-  .grid{
-    grid-template-columns:repeat(2,1fr)
-  }
+    .search{
+        order:3;
 
-  main{
-    padding:16px 12px 60px
-  }
+        flex-basis:100%;
+    }
 
-  .hero{
-    padding:23px 18px
-  }
+    .grid{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+    main{
+        padding:
+            16px 12px 60px;
+    }
+
+    .hero{
+        padding:23px 18px;
+    }
+
 }
 
 @media(max-width:390px){
-  .grid{
-    gap:9px
-  }
 
-  .info{
-    padding:9px
-  }
+    .grid{
+        gap:9px;
+    }
 
-  .name{
-    font-size:14px
-  }
+    .info{
+        padding:9px;
+    }
 
-  .price{
-    font-size:15px
-  }
+    .name{
+        font-size:14px;
+    }
 
-  .add{
-    font-size:12px;
-    padding:8px
-  }
+    .price{
+        font-size:15px;
+    }
+
+    .add{
+        font-size:12px;
+
+        padding:8px;
+    }
+
+    .product-qty button{
+        width:30px;
+        height:30px;
+    }
+
 }
+
 </style>
 </head>
 
+
 <body>
 
+<!-- =========================================================
+     TOP BAR
+========================================================= -->
+
 <div class="top">
-Fresh groceries • Easy ordering • Home delivery
+    Fresh groceries • Easy ordering • Home delivery
 </div>
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
 
 <header>
+
 <div class="head">
 
-  <div class="logo">
-    <div class="logoicon">H</div>
+    <div class="logo">
 
-    <div>
-      <h1>HAMS Kirana Store</h1>
-      <small>Online Grocery Store</small>
+        <div class="logoicon">
+            H
+        </div>
+
+        <div>
+
+            <h1>
+                HAMS Kirana Store
+            </h1>
+
+            <small>
+                Online Grocery Store
+            </small>
+
+        </div>
+
     </div>
-  </div>
 
-  <div class="search">
-    <span>🔎</span>
-    <input
-      id="search"
-      placeholder="Search products..."
-      type="search">
-  </div>
 
-  <button
-    class="cartbtn"
-    onclick="openCart()">
-    🛒 Basket
-    <b id="count" class="cartcount">0</b>
-  </button>
+    <div class="search">
+
+        <span>
+            🔎
+        </span>
+
+        <input
+            id="search"
+            placeholder="Search products..."
+            type="search"
+        >
+
+    </div>
+
+
+    <button
+        class="cartbtn"
+        onclick="openCart()"
+    >
+
+        🛒 Basket
+
+        <b
+            id="count"
+            class="cartcount"
+        >
+            0
+        </b>
+
+    </button>
 
 </div>
+
 </header>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
 
 <main>
 
 <section class="hero">
-  <h2>Shop groceries easily.</h2>
-  <p>
-    Choose products, add them to your basket,
-    and place your order online.
-  </p>
+
+    <h2>
+        Shop groceries easily.
+    </h2>
+
+    <p>
+        Choose products, add them to your basket,
+        and place your order online.
+    </p>
+
 </section>
 
-<div id="status" class="status"></div>
 
-<div id="cats" class="cats"></div>
+<div
+    id="status"
+    class="status"
+></div>
+
+
+<div
+    id="cats"
+    class="cats"
+></div>
+
 
 <div class="title">
-  <h2>Products</h2>
-  <span id="results"></span>
+
+    <h2>
+        Products
+    </h2>
+
+    <span id="results"></span>
+
 </div>
 
-<div id="products" class="grid">
-  <div class="empty">
-    Loading products...
-  </div>
+
+<div
+    id="products"
+    class="grid"
+>
+
+    <div class="empty">
+        Loading products...
+    </div>
+
 </div>
 
 </main>
 
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
 <footer>
-© <span id="year"></span> HAMS Kirana Store
+
+    ©
+    <span id="year"></span>
+    HAMS Kirana Store
+
 </footer>
 
 
+<!-- =========================================================
+     CART OVERLAY
+========================================================= -->
+
 <div
-  id="overlay"
-  class="overlay"
-  onclick="closeCart()">
-</div>
+    id="overlay"
+    class="overlay"
+    onclick="closeCart()"
+></div>
 
 
-<aside id="drawer" class="drawer">
+<!-- =========================================================
+     CART DRAWER
+========================================================= -->
 
-  <div class="dhead">
-    <h2>Your Basket</h2>
+<aside
+    id="drawer"
+    class="drawer"
+>
 
-    <button
-      class="close"
-      onclick="closeCart()">
-      ✕
-    </button>
-  </div>
+    <div class="dhead">
 
-  <div
-    id="items"
-    class="items">
-  </div>
+        <h2>
+            Your Basket
+        </h2>
 
-  <div class="dfoot">
+        <button
+            class="close"
+            onclick="closeCart()"
+        >
+            ✕
+        </button>
 
-    <div class="total">
-      <span>Total</span>
-      <span id="total">₹0</span>
     </div>
 
-    <button
-      id="checkout"
-      class="checkout"
-      onclick="checkout()"
-      disabled>
-      Proceed to Checkout
-    </button>
 
-  </div>
+    <div
+        id="items"
+        class="items"
+    ></div>
+
+
+    <div class="dfoot">
+
+        <div class="total">
+
+            <span>
+                Total
+            </span>
+
+            <span id="total">
+                ₹0
+            </span>
+
+        </div>
+
+
+        <button
+            id="checkout"
+            class="checkout"
+            onclick="checkout()"
+            disabled
+        >
+
+            Proceed to Checkout
+
+        </button>
+
+    </div>
 
 </aside>
 
 
-<div
-  id="checkoutModal"
-  class="modal">
+<!-- =========================================================
+     CHECKOUT MODAL
+========================================================= -->
 
-  <div class="modalbox">
+<div
+    id="checkoutModal"
+    class="modal"
+>
+
+<div class="modalbox">
 
     <div class="mhead">
 
-      <h2>Delivery Details</h2>
+        <h2>
+            Delivery Details
+        </h2>
 
-      <button
-        class="close"
-        onclick="closeCheckout()">
-        ✕
-      </button>
+        <button
+            class="close"
+            onclick="closeCheckout()"
+        >
+            ✕
+        </button>
 
     </div>
+
 
     <form id="form">
 
-      <div class="field">
-        <label>Full Name *</label>
-        <input id="name" required>
-      </div>
+        <div class="field">
 
-      <div class="field">
-        <label>Mobile Number *</label>
-        <input
-          id="mobile"
-          type="tel"
-          inputmode="numeric"
-          required>
-      </div>
+            <label>
+                Full Name *
+            </label>
 
-      <div class="field">
-        <label>Delivery Address *</label>
-        <textarea
-          id="address"
-          required>
-        </textarea>
-      </div>
+            <input
+                id="name"
+                required
+            >
 
-      <div class="total">
-        <span>Order Total</span>
-        <span id="checkoutTotal">₹0</span>
-      </div>
+        </div>
 
-      <button
-        id="place"
-        class="place"
-        type="submit">
-        Place Order
-      </button>
+
+        <div class="field">
+
+            <label>
+                Mobile Number *
+            </label>
+
+            <input
+                id="mobile"
+                type="tel"
+                inputmode="numeric"
+                required
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Delivery Address *
+            </label>
+
+            <textarea
+                id="address"
+                required
+            ></textarea>
+
+        </div>
+
+
+        <div class="total">
+
+            <span>
+                Order Total
+            </span>
+
+            <span id="checkoutTotal">
+                ₹0
+            </span>
+
+        </div>
+
+
+        <button
+            id="place"
+            class="place"
+            type="submit"
+        >
+
+            Place Order
+
+        </button>
 
     </form>
 
-  </div>
+</div>
 
 </div>
 
 
-<div
-  id="successModal"
-  class="modal">
+<!-- =========================================================
+     SUCCESS MODAL
+========================================================= -->
 
-  <div class="modalbox">
+<div
+    id="successModal"
+    class="modal"
+>
+
+<div class="modalbox">
 
     <div class="success">
 
-      <div class="check">
-        ✓
-      </div>
+        <div class="check">
+            ✓
+        </div>
 
-      <h2>Order Placed!</h2>
+        <h2>
+            Order Placed!
+        </h2>
 
-      <p
-        id="successText"
-        class="muted"
-        style="margin-top:8px">
-      </p>
+        <p
+            id="successText"
+            class="muted"
+            style="margin-top:8px"
+        ></p>
 
-      <button
-        class="place"
-        style="margin-top:18px"
-        onclick="closeSuccess()">
-        Continue Shopping
-      </button>
 
-      <a
-        id="wa"
-        class="wa"
-        target="_blank"
-        rel="noopener">
-        💬 Contact HAMS Kirana Store on WhatsApp
-      </a>
+        <button
+            class="place"
+            style="margin-top:18px"
+            onclick="closeSuccess()"
+        >
+
+            Continue Shopping
+
+        </button>
+
+
+        <a
+            id="wa"
+            class="wa"
+            target="_blank"
+            rel="noopener"
+        >
+
+            💬 Contact HAMS Kirana Store
+            on WhatsApp
+
+        </a>
 
     </div>
 
-  </div>
+</div>
 
 </div>
 
 
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
 <script>
+
+
+/* ============================================================
+   GOOGLE APPS SCRIPT
+============================================================ */
 
 const API_URL =
 "https://script.google.com/macros/s/AKfycbwnwcBSQG9ACJy-fbZbbuc_8tiiZP1UmKwrbemlMlDEiMpTBDiR6WgAntX6_fOPkxvT/exec";
 
+
 const DEFAULT_WA =
 "919226158611";
 
-let products=[];
-let cart=[];
-let category="All";
-let wa=DEFAULT_WA;
 
+/* ============================================================
+   GLOBAL VARIABLES
+============================================================ */
+
+let products = [];
+
+let cart = [];
+
+let category = "All";
+
+let wa = DEFAULT_WA;
+
+
+/* ============================================================
+   INITIAL PAGE SETUP
+============================================================ */
 
 document.getElementById("year").textContent =
-new Date().getFullYear();
+    new Date().getFullYear();
 
 
-document.getElementById("search")
-.addEventListener("input",render);
+document
+    .getElementById("search")
+    .addEventListener(
+        "input",
+        render
+    );
 
 
-document.getElementById("form")
-.addEventListener("submit",placeOrder);
+document
+    .getElementById("form")
+    .addEventListener(
+        "submit",
+        placeOrder
+    );
 
+
+/* ============================================================
+   LOAD SAVED BASKET
+============================================================ */
 
 try{
 
-  cart =
-  JSON.parse(
-    localStorage.getItem("hamsKiranaCart")||"[]"
-  );
+    cart =
+        JSON.parse(
+            localStorage.getItem(
+                "hamsKiranaCart"
+            ) || "[]"
+        );
 
-  if(!Array.isArray(cart))
-    cart=[];
+    if(!Array.isArray(cart)){
+        cart=[];
+    }
 
 }catch(e){
 
-  cart=[];
+    cart=[];
 
 }
 
 
+/* ============================================================
+   INITIAL DISPLAY
+============================================================ */
+
 updateCart();
+
 loadProducts();
 
 
+/* ============================================================
+   LOAD PRODUCTS
+============================================================ */
+
 async function loadProducts(){
 
-  status("Loading products...");
-
-  try{
-
-    const r =
-    await fetch(
-      API_URL,
-      {cache:"no-store"}
-    );
-
-    if(!r.ok)
-      throw Error("Connection failed");
-
-    const d =
-    await r.json();
-
-    if(!d.success)
-      throw Error(d.message||"Server error");
-
-    products =
-    Array.isArray(d.products)
-    ? d.products
-    : [];
-
-    if(d.whatsapp)
-      wa=String(d.whatsapp);
-
-    document.getElementById("status")
-    .className="status";
-
-    renderCats();
-    render();
-
-  }catch(e){
-
-    console.error(e);
-
     status(
-      "Products could not be loaded. Please check the Apps Script Web App URL and deployment.",
-      true
+        "Loading products..."
     );
 
-    document.getElementById("products")
-    .innerHTML=
-    '<div class="empty">Products could not be loaded right now.</div>';
+    try{
 
-  }
+        const r =
+            await fetch(
+                API_URL,
+                {
+                    cache:"no-store"
+                }
+            );
+
+
+        if(!r.ok){
+            throw Error(
+                "Connection failed"
+            );
+        }
+
+
+        const d =
+            await r.json();
+
+
+        if(!d.success){
+            throw Error(
+                d.message ||
+                "Server error"
+            );
+        }
+
+
+        products =
+            Array.isArray(
+                d.products
+            )
+            ? d.products
+            : [];
+
+
+        if(d.whatsapp){
+            wa =
+                String(
+                    d.whatsapp
+                );
+        }
+
+
+        document
+            .getElementById("status")
+            .className =
+            "status";
+
+
+        renderCats();
+
+        render();
+
+
+    }catch(e){
+
+        console.error(e);
+
+
+        status(
+            "Products could not be loaded. Please check the Apps Script Web App URL and deployment.",
+            true
+        );
+
+
+        document
+            .getElementById("products")
+            .innerHTML =
+            '<div class="empty">Products could not be loaded right now.</div>';
+
+    }
 
 }
 
 
-function status(t,error=false){
+/* ============================================================
+   STATUS MESSAGE
+============================================================ */
 
-  let x=
-  document.getElementById("status");
+function status(
+    text,
+    error=false
+){
 
-  x.textContent=t;
+    const x =
+        document.getElementById(
+            "status"
+        );
 
-  x.className=
-  "status show"+
-  (error?" err":"");
+
+    x.textContent =
+        text;
+
+
+    x.className =
+        "status show" +
+        (
+            error
+            ? " err"
+            : ""
+        );
 
 }
 
+
+/* ============================================================
+   CATEGORY BUTTONS
+============================================================ */
 
 function renderCats(){
 
-  let a=[
-    "All",
-    ...new Set(
-      products
-      .map(p=>String(p.category||"").trim())
-      .filter(Boolean)
-    )
-  ];
+    let a =
+        [
+            "All",
+            ...new Set(
+                products
+                    .map(
+                        p =>
+                        String(
+                            p.category || ""
+                        ).trim()
+                    )
+                    .filter(Boolean)
+            )
+        ];
 
-  document.getElementById("cats")
-  .innerHTML=
-  a.map(c=>
-    `<button
-      class="cat ${c===category?"active":""}"
-      onclick="setCategory(${JSON.stringify(c)})">
-      ${esc(c)}
-    </button>`
-  ).join("");
+
+    document
+        .getElementById("cats")
+        .innerHTML =
+
+        a.map(
+
+            c =>
+
+            `<button
+                class="cat ${c===category?"active":""}"
+                onclick="setCategory(${JSON.stringify(c)})"
+            >
+                ${esc(c)}
+            </button>`
+
+        ).join("");
 
 }
 
+
+/* ============================================================
+   SET CATEGORY
+============================================================ */
 
 function setCategory(c){
 
-  category=c;
+    category=c;
 
-  renderCats();
-  render();
+    renderCats();
+
+    render();
 
 }
 
+
+/* ============================================================
+   RENDER PRODUCTS
+============================================================ */
 
 function render(){
 
-  let q=
-  document.getElementById("search")
-  .value
-  .trim()
-  .toLowerCase();
-
-  let list=
-  products.filter(p=>{
-
-    let cat=
-    category==="All"||
-    String(p.category||"")===category;
-
-    let text=
-    `${p.productName||""} ${p.description||""} ${p.category||""}`
-    .toLowerCase();
-
-    return cat &&
-    (!q||text.includes(q));
-
-  });
+    let q =
+        document
+            .getElementById("search")
+            .value
+            .trim()
+            .toLowerCase();
 
 
-  document.getElementById("results")
-  .textContent=
-  list.length+
-  " product"+
-  (list.length===1?"":"s");
+    let list =
+        products.filter(
+
+            p => {
+
+                let cat =
+                    category==="All" ||
+                    String(
+                        p.category || ""
+                    ) === category;
 
 
-  document.getElementById("products")
-  .innerHTML=
-  list.length
-  ?list.map(card).join("")
-  :'<div class="empty">No products found.</div>';
+                let text =
+                    `${p.productName||""}
+                     ${p.description||""}
+                     ${p.category||""}`
+                    .toLowerCase();
+
+
+                return (
+                    cat &&
+                    (
+                        !q ||
+                        text.includes(q)
+                    )
+                );
+
+            }
+
+        );
+
+
+    document
+        .getElementById("results")
+        .textContent =
+
+        list.length +
+        " product" +
+        (
+            list.length===1
+            ? ""
+            : "s"
+        );
+
+
+    document
+        .getElementById("products")
+        .innerHTML =
+
+        list.length
+        ? list.map(card).join("")
+        : '<div class="empty">No products found.</div>';
 
 }
 
+
+/* ============================================================
+   PRODUCT CARD
+============================================================ */
 
 function card(p){
 
-  let available=
-  p.available!==false;
+    let available =
+        p.available !== false;
 
-  let image=
-  p.imageUrl||
-  placeholder(p.productName);
 
+    let image =
+        p.imageUrl ||
+        placeholder(
+            p.productName
+        );
 
-  return `
 
-  <article class="card">
+    let cartItem =
+        cart.find(
+            x =>
+            String(
+                x.productId
+            ) ===
+            String(
+                p.productId
+            )
+        );
 
-    <img
-      class="pic"
-      src="${attr(image)}"
-      alt="${attr(p.productName)}"
-      onerror="this.src='${placeholder(p.productName)}'">
 
-    <div class="info">
+    let quantity =
+        cartItem
+        ? Number(
+            cartItem.quantity
+        ) || 0
+        : 0;
 
-      <div class="category">
-        ${esc(p.category||"Grocery")}
-      </div>
 
-      <div class="name">
-        ${esc(p.productName||"")}
-      </div>
+    let actionHTML;
 
-      <div class="desc">
-        ${esc(p.description||"")}
-      </div>
 
-      <div class="meta">
-        <span>
-          ${esc(p.packSize||p.unit||"")}
-        </span>
+    /* --------------------------------------------------------
+       IF PRODUCT IS ALREADY IN BASKET
+    -------------------------------------------------------- */
 
-        <span>
-          ${available?"Available":"Unavailable"}
-        </span>
-      </div>
+    if(quantity > 0){
 
-      <div class="bottom">
+        actionHTML =
 
-        <span class="price">
-          ₹${money(p.price)}
-        </span>
+        `<div class="product-controls">
 
-        <button
-          class="add"
-          ${available?"":"disabled"}
-          onclick="add('${js(p.productId)}', event)">
-          ${available?"Add":"Unavailable"}
-        </button>
+            <div class="product-qty">
 
-      </div>
+                <button
+                    type="button"
+                    onclick="changeProductQty('${js(p.productId)}',-1)"
+                    aria-label="Decrease quantity"
+                >
+                    −
+                </button>
 
-    </div>
+                <span class="qty-number">
+                    ${quantity}
+                </span>
 
-  </article>
+                <button
+                    type="button"
+                    onclick="changeProductQty('${js(p.productId)}',1)"
+                    aria-label="Increase quantity"
+                >
+                    +
+                </button>
 
-  `;
+            </div>
 
-}
+            <button
+                type="button"
+                class="product-remove"
+                onclick="removeProduct('${js(p.productId)}')"
+            >
+                Remove
+            </button>
 
+        </div>`;
 
-/* =========================================================
-   ADD PRODUCT TO BASKET
-========================================================= */
-
-function add(id,event){
-
-  let p=
-  products.find(
-    x=>String(x.productId)===String(id)
-  );
-
-  if(!p)return;
-
-
-  let x=
-  cart.find(
-    x=>String(x.productId)===String(id)
-  );
-
-
-  if(x){
-
-    x.quantity++;
-
-  }else{
-
-    cart.push({
-
-      productId:p.productId,
-
-      productName:p.productName,
-
-      price:Number(p.price)||0,
-
-      quantity:1
-
-    });
-
-  }
-
-
-  save();
-
-
-  /* Animate product flying into basket */
-  animateAddToCart(event,p);
-
-}
-
-
-/* =========================================================
-   PRODUCT → BASKET ANIMATION
-========================================================= */
-
-function animateAddToCart(event,p){
-
-  const button=
-  event&&event.currentTarget
-  ?event.currentTarget
-  :null;
-
-
-  const card=
-  button
-  ?button.closest(".card")
-  :null;
-
-
-  const source=
-  card
-  ?card.querySelector(".pic")
-  :null;
-
-
-  const cartButton=
-  document.querySelector(".cartbtn");
-
-
-  if(!source||!cartButton)
-    return;
-
-
-  const start=
-  source.getBoundingClientRect();
-
-
-  const end=
-  cartButton.getBoundingClientRect();
-
-
-  const flyer=
-  document.createElement("img");
-
-
-  flyer.className=
-  "fly-item";
-
-
-  flyer.src=
-  source.currentSrc||
-  source.src;
-
-
-  flyer.alt=
-  p.productName||
-  "Added product";
-
-
-  flyer.style.left=
-  (
-    start.left+
-    start.width/2-
-    36
-  )+"px";
-
-
-  flyer.style.top=
-  (
-    start.top+
-    start.height/2-
-    36
-  )+"px";
-
-
-  document.body.appendChild(flyer);
-
-
-  const dx=
-  end.left+
-  end.width/2-
-  (
-    start.left+
-    start.width/2
-  );
-
-
-  const dy=
-  end.top+
-  end.height/2-
-  (
-    start.top+
-    start.height/2
-  );
-
-
-  flyer.animate(
-
-    [
-
-      {
-        transform:
-        "translate(0,0) scale(1)",
-        opacity:1
-      },
-
-      {
-        transform:
-        `translate(${dx*.55}px,${dy*.55}px) scale(.72)`,
-        opacity:.95,
-        offset:.55
-      },
-
-      {
-        transform:
-        `translate(${dx}px,${dy}px) scale(.15)`,
-        opacity:0
-      }
-
-    ],
-
-    {
-      duration:650,
-      easing:"cubic-bezier(.2,.8,.2,1)"
     }
 
-  )
-  .finished
-  .then(
-    ()=>flyer.remove()
-  )
-  .catch(
-    ()=>flyer.remove()
-  );
 
+    /* --------------------------------------------------------
+       IF PRODUCT IS NOT IN BASKET
+    -------------------------------------------------------- */
 
-  /* Basket bounce */
+    else{
 
-  cartButton.classList.remove("bump");
+        actionHTML =
 
-  void cartButton.offsetWidth;
+        `<button
+            class="add"
+            ${available ? "" : "disabled"}
+            onclick="add('${js(p.productId)}',event)"
+        >
+            ${available ? "Add" : "Unavailable"}
+        </button>`;
 
-  cartButton.classList.add("bump");
+    }
 
 
-  setTimeout(
-    ()=>cartButton.classList.remove("bump"),
-    500
-  );
+    return `
 
+    <article
+        class="card"
+        data-product-id="${attr(p.productId)}"
+    >
 
-  /* Add button feedback */
+        <img
+            class="pic"
+            src="${attr(image)}"
+            alt="${attr(p.productName)}"
+            onerror="this.src='${placeholder(p.productName)}'"
+        >
 
-  if(button){
 
-    const old=
-    button.textContent;
+        <div class="info">
 
-    button.textContent=
-    "✓ Added";
+            <div class="category">
+                ${esc(
+                    p.category ||
+                    "Grocery"
+                )}
+            </div>
 
-    button.classList.add("added");
 
+            <div class="name">
+                ${esc(
+                    p.productName ||
+                    ""
+                )}
+            </div>
 
-    setTimeout(()=>{
 
-      button.textContent=
-      old;
+            <div class="desc">
+                ${esc(
+                    p.description ||
+                    ""
+                )}
+            </div>
 
-      button.classList.remove("added");
 
-    },700);
+            <div class="meta">
 
-  }
+                <span>
+                    ${esc(
+                        p.packSize ||
+                        p.unit ||
+                        ""
+                    )}
+                </span>
 
-}
+                <span>
+                    ${
+                        available
+                        ? "Available"
+                        : "Unavailable"
+                    }
+                </span>
 
+            </div>
 
-/* =========================================================
-   QUANTITY
-========================================================= */
 
-function change(id,n){
+            <div class="bottom">
 
-  let x=
-  cart.find(
-    x=>String(x.productId)===String(id)
-  );
+                <span class="price">
+                    ₹${money(p.price)}
+                </span>
 
-  if(!x)return;
+                ${actionHTML}
 
-
-  x.quantity+=n;
-
-
-  if(x.quantity<=0){
-
-    cart=
-    cart.filter(
-      y=>String(y.productId)!==String(id)
-    );
-
-  }
-
-
-  save();
-
-}
-
-
-/* =========================================================
-   REMOVE
-========================================================= */
-
-function removeItem(id){
-
-  cart=
-  cart.filter(
-    x=>String(x.productId)!==String(id)
-  );
-
-  save();
-
-}
-
-
-/* =========================================================
-   SAVE CART
-========================================================= */
-
-function save(){
-
-  localStorage.setItem(
-    "hamsKiranaCart",
-    JSON.stringify(cart)
-  );
-
-  updateCart();
-
-}
-
-
-/* =========================================================
-   UPDATE BASKET
-========================================================= */
-
-function updateCart(){
-
-  document.getElementById("count")
-  .textContent=
-  cart.reduce(
-    (a,x)=>
-    a+
-    (Number(x.quantity)||0),
-    0
-  );
-
-
-  let box=
-  document.getElementById("items");
-
-
-  box.innerHTML=
-
-  cart.length
-
-  ?
-
-  cart.map(x=>`
-
-    <div class="item">
-
-      <div>
-
-        <div class="itemname">
-          ${esc(x.productName)}
-        </div>
-
-        <div class="muted">
-          ₹${money(x.price)} each
-        </div>
-
-        <div class="qty">
-
-          <button
-            onclick="change('${js(x.productId)}',-1)">
-            −
-          </button>
-
-          <b>
-            ${x.quantity}
-          </b>
-
-          <button
-            onclick="change('${js(x.productId)}',1)">
-            +
-          </button>
+            </div>
 
         </div>
 
-        <button
-          class="remove"
-          onclick="removeItem('${js(x.productId)}')">
-          Remove
-        </button>
+    </article>
 
-      </div>
-
-      <b>
-        ₹${money(x.price*x.quantity)}
-      </b>
-
-    </div>
-
-  `).join("")
-
-  :
-
-  '<div class="empty">Your basket is empty.</div>';
-
-
-  let t=
-  cart.reduce(
-    (a,x)=>
-    a+
-    (Number(x.price)||0)*
-    (Number(x.quantity)||0),
-    0
-  );
-
-
-  document.getElementById("total")
-  .textContent=
-  "₹"+money(t);
-
-
-  document.getElementById("checkoutTotal")
-  .textContent=
-  "₹"+money(t);
-
-
-  document.getElementById("checkout")
-  .disabled=
-  !cart.length;
+    `;
 
 }
 
 
-/* =========================================================
-   BASKET OPEN/CLOSE
-========================================================= */
+/* ============================================================
+   ADD PRODUCT
+============================================================ */
 
-function openCart(){
+function add(
+    id,
+    event
+){
 
-  document
-  .getElementById("overlay")
-  .classList.add("show");
+    let p =
+        products.find(
+            x =>
+            String(
+                x.productId
+            ) ===
+            String(id)
+        );
 
 
-  document
-  .getElementById("drawer")
-  .classList.add("open");
+    if(!p){
+        return;
+    }
 
-}
 
+    let x =
+        cart.find(
+            x =>
+            String(
+                x.productId
+            ) ===
+            String(id)
+        );
 
-function closeCart(){
 
-  document
-  .getElementById("overlay")
-  .classList.remove("show");
+    if(x){
 
+        x.quantity++;
 
-  document
-  .getElementById("drawer")
-  .classList.remove("open");
+    }else{
 
-}
+        cart.push({
 
+            productId:
+                p.productId,
 
-/* =========================================================
-   CHECKOUT
-========================================================= */
+            productName:
+                p.productName,
 
-function checkout(){
+            price:
+                Number(
+                    p.price
+                ) || 0,
 
-  if(!cart.length)
-    return;
+            quantity:1
 
+        });
 
-  closeCart();
+    }
 
-
-  document
-  .getElementById("checkoutModal")
-  .classList.add("show");
-
-}
-
-
-function closeCheckout(){
-
-  document
-  .getElementById("checkoutModal")
-  .classList.remove("show");
-
-}
-
-
-function closeSuccess(){
-
-  document
-  .getElementById("successModal")
-  .classList.remove("show");
-
-}
-
-
-/* =========================================================
-   PLACE ORDER
-========================================================= */
-
-async function placeOrder(e){
-
-  e.preventDefault();
-
-
-  if(!cart.length)
-    return;
-
-
-  let name=
-  document
-  .getElementById("name")
-  .value
-  .trim();
-
-
-  let mobile=
-  document
-  .getElementById("mobile")
-  .value
-  .trim();
-
-
-  let address=
-  document
-  .getElementById("address")
-  .value
-  .trim();
-
-
-  if(!name||!mobile||!address){
-
-    alert(
-      "Please fill in all required fields."
-    );
-
-    return;
-
-  }
-
-
-  let btn=
-  document.getElementById("place");
-
-
-  btn.disabled=true;
-
-  btn.textContent=
-  "Placing Order...";
-
-
-  let payload={
-
-    name:name,
-
-    mobile:mobile,
-
-    address:address,
-
-    items:
-    cart.map(x=>({
-
-      productId:x.productId,
-
-      productName:x.productName,
-
-      quantity:x.quantity,
-
-      price:Number(x.price)||0
-
-    }))
-
-  };
-
-
-  try{
-
-    const r=
-    await fetch(
-
-      API_URL,
-
-      {
-        method:"POST",
-
-        headers:{
-          "Content-Type":
-          "text/plain;charset=utf-8"
-        },
-
-        body:
-        JSON.stringify(payload)
-      }
-
-    );
-
-
-    const d=
-    await r.json();
-
-
-    if(!d.success)
-      throw Error(
-        d.message||
-        "Order failed"
-      );
-
-
-    cart=[];
 
     save();
 
 
-    document
-    .getElementById("form")
-    .reset();
+    /* IMPORTANT:
+       Do NOT open basket here.
+    */
 
 
-    closeCheckout();
-
-
-    document
-    .getElementById("successText")
-    .textContent=
-    `Your order ID is ${d.orderId}. Total: ₹${money(d.total)}.`;
-
-
-    document
-    .getElementById("wa")
-    .href=
-    "https://wa.me/"+
-    wa+
-    "?text="+
-    encodeURIComponent(
-      "Hello HAMS Kirana Store, my order ID is "+
-      d.orderId+
-      "."
+    animateAddToCart(
+        event,
+        p
     );
 
 
-    document
-    .getElementById("successModal")
-    .classList.add("show");
+    /*
+       Re-render the card so
+       Add becomes − 1 +
+    */
 
-
-  }catch(err){
-
-    console.error(err);
-
-    alert(
-      "Order could not be placed. Please try again."
-    );
-
-  }
-
-
-  finally{
-
-    btn.disabled=false;
-
-    btn.textContent=
-    "Place Order";
-
-  }
+    render();
 
 }
 
 
-/* =========================================================
-   HELPERS
-========================================================= */
+/* ============================================================
+   PRODUCT QUANTITY FROM CARD
+============================================================ */
+
+function changeProductQty(
+    id,
+    amount
+){
+
+    let x =
+        cart.find(
+            x =>
+            String(
+                x.productId
+            ) ===
+            String(id)
+        );
+
+
+    if(!x){
+        return;
+    }
+
+
+    x.quantity += amount;
+
+
+    if(x.quantity <= 0){
+
+        cart =
+            cart.filter(
+                y =>
+                String(
+                    y.productId
+                ) !==
+                String(id)
+            );
+
+    }
+
+
+    save();
+
+    render();
+
+}
+
+
+/* ============================================================
+   REMOVE PRODUCT FROM CARD
+============================================================ */
+
+function removeProduct(id){
+
+    cart =
+        cart.filter(
+            x =>
+            String(
+                x.productId
+            ) !==
+            String(id)
+        );
+
+
+    save();
+
+    render();
+
+}
+
+
+/* ============================================================
+   FLYING PRODUCT ANIMATION
+============================================================ */
+
+function animateAddToCart(
+    event,
+    p
+){
+
+    const button =
+        event &&
+        event.currentTarget
+        ? event.currentTarget
+        : null;
+
+
+    const card =
+        button
+        ? button.closest(".card")
+        : null;
+
+
+    const source =
+        card
+        ? card.querySelector(".pic")
+        : null;
+
+
+    const cartButton =
+        document.querySelector(
+            ".cartbtn"
+        );
+
+
+    if(
+        !source ||
+        !cartButton
+    ){
+        return;
+    }
+
+
+    /* --------------------------------------------------------
+       GET START POSITION
+    -------------------------------------------------------- */
+
+    const start =
+        source.getBoundingClientRect();
+
+
+    /* --------------------------------------------------------
+       GET BASKET POSITION
+    -------------------------------------------------------- */
+
+    const end =
+        cartButton.getBoundingClientRect();
+
+
+    /* --------------------------------------------------------
+       CREATE FLYING IMAGE
+    -------------------------------------------------------- */
+
+    const flyer =
+        document.createElement(
+            "img"
+        );
+
+
+    flyer.className =
+        "fly-item";
+
+
+    flyer.src =
+        source.currentSrc ||
+        source.src;
+
+
+    flyer.alt =
+        p.productName ||
+        "Added product";
+
+
+    const startX =
+        start.left +
+        start.width / 2 -
+        41;
+
+
+    const startY =
+        start.top +
+        start.height / 2 -
+        41;
+
+
+    flyer.style.left =
+        startX + "px";
+
+
+    flyer.style.top =
+        startY + "px";
+
+
+    document
+        .body
+        .appendChild(
+            flyer
+        );
+
+
+    /* --------------------------------------------------------
+       CALCULATE DISTANCE TO BASKET
+    -------------------------------------------------------- */
+
+    const startCenterX =
+        start.left +
+        start.width / 2;
+
+
+    const startCenterY =
+        start.top +
+        start.height / 2;
+
+
+    const endCenterX =
+        end.left +
+        end.width / 2;
+
+
+    const endCenterY =
+        end.top +
+        end.height / 2;
+
+
+    const dx =
+        endCenterX -
+        startCenterX;
+
+
+    const dy =
+        endCenterY -
+        startCenterY;
+
+
+    /* --------------------------------------------------------
+       CREATE SPARKLES
+    -------------------------------------------------------- */
+
+    const sparkle =
+        document.createElement(
+            "div"
+        );
+
+
+    sparkle.className =
+        "fly-sparkle";
+
+
+    sparkle.textContent =
+        "✨";
+
+
+    sparkle.style.left =
+        (
+            startCenterX - 10
+        ) + "px";
+
+
+    sparkle.style.top =
+        (
+            startCenterY - 10
+        ) + "px";
+
+
+    document
+        .body
+        .appendChild(
+            sparkle
+        );
+
+
+    setTimeout(
+        () => sparkle.remove(),
+        1200
+    );
+
+
+    /* --------------------------------------------------------
+       FLYING ANIMATION
+
+       DURATION = 1200ms
+       So the animation lasts
+       more than 1 second.
+    -------------------------------------------------------- */
+
+    const animation =
+        flyer.animate(
+
+            [
+
+                {
+                    transform:
+                        "translate(0,0) scale(1) rotate(0deg)",
+                    opacity:1
+                },
+
+                {
+                    transform:
+                        `translate(${dx * .25}px,${dy * .10}px)
+                         scale(.95)
+                         rotate(8deg)`,
+
+                    opacity:1,
+
+                    offset:.20
+                },
+
+                {
+                    transform:
+                        `translate(${dx * .58}px,${dy * .45}px)
+                         scale(.70)
+                         rotate(-8deg)`,
+
+                    opacity:.95,
+
+                    offset:.55
+                },
+
+                {
+                    transform:
+                        `translate(${dx * .82}px,${dy * .78}px)
+                         scale(.40)
+                         rotate(12deg)`,
+
+                    opacity:.75,
+
+                    offset:.78
+                },
+
+                {
+                    transform:
+                        `translate(${dx}px,${dy}px)
+                         scale(.12)
+                         rotate(0deg)`,
+
+                    opacity:0
+                }
+
+            ],
+
+            {
+
+                /*
+                   1.2 SECONDS
+                */
+
+                duration:1200,
+
+                easing:
+                    "cubic-bezier(.2,.75,.2,1)",
+
+                fill:"forwards"
+
+            }
+
+        );
+
+
+    animation.finished
+
+        .then(
+            () => {
+
+                flyer.remove();
+
+            }
+        )
+
+        .catch(
+            () => {
+
+                flyer.remove();
+
+            }
+        );
+
+
+    /* --------------------------------------------------------
+       BASKET BUMP
+    -------------------------------------------------------- */
+
+    cartButton.classList.remove(
+        "bump"
+    );
+
+
+    void cartButton.offsetWidth;
+
+
+    cartButton.classList.add(
+        "bump"
+    );
+
+
+    setTimeout(
+        () =>
+        cartButton.classList.remove(
+            "bump"
+        ),
+        600
+    );
+
+}
+
+
+/* ============================================================
+   CHANGE QUANTITY INSIDE BASKET
+============================================================ */
+
+function change(
+    id,
+    n
+){
+
+    let x =
+        cart.find(
+            x =>
+            String(
+                x.productId
+            ) ===
+            String(id)
+        );
+
+
+    if(!x){
+        return;
+    }
+
+
+    x.quantity += n;
+
+
+    if(
+        x.quantity <= 0
+    ){
+
+        cart =
+            cart.filter(
+                y =>
+                String(
+                    y.productId
+                ) !==
+                String(id)
+            );
+
+    }
+
+
+    save();
+
+    render();
+
+}
+
+
+/* ============================================================
+   REMOVE FROM BASKET
+============================================================ */
+
+function removeItem(id){
+
+    cart =
+        cart.filter(
+            x =>
+            String(
+                x.productId
+            ) !==
+            String(id)
+        );
+
+
+    save();
+
+    render();
+
+}
+
+
+/* ============================================================
+   SAVE BASKET
+============================================================ */
+
+function save(){
+
+    localStorage.setItem(
+        "hamsKiranaCart",
+        JSON.stringify(cart)
+    );
+
+
+    updateCart();
+
+}
+
+
+/* ============================================================
+   UPDATE BASKET
+============================================================ */
+
+function updateCart(){
+
+    const count =
+        cart.reduce(
+            (a,x) =>
+            a +
+            (
+                Number(
+                    x.quantity
+                ) || 0
+            ),
+            0
+        );
+
+
+    document
+        .getElementById("count")
+        .textContent =
+        count;
+
+
+    let box =
+        document.getElementById(
+            "items"
+        );
+
+
+    box.innerHTML =
+
+        cart.length
+
+        ?
+
+        cart.map(
+
+            x =>
+
+            `
+
+            <div class="item">
+
+                <div>
+
+                    <div class="itemname">
+                        ${esc(
+                            x.productName
+                        )}
+                    </div>
+
+
+                    <div class="muted">
+                        ₹${money(x.price)}
+                        each
+                    </div>
+
+
+                    <div class="qty">
+
+                        <button
+                            onclick="change('${js(x.productId)}',-1)"
+                        >
+                            −
+                        </button>
+
+
+                        <b>
+                            ${x.quantity}
+                        </b>
+
+
+                        <button
+                            onclick="change('${js(x.productId)}',1)"
+                        >
+                            +
+                        </button>
+
+                    </div>
+
+
+                    <button
+                        class="remove"
+                        onclick="removeItem('${js(x.productId)}')"
+                    >
+                        Remove
+                    </button>
+
+                </div>
+
+
+                <b>
+                    ₹${money(
+                        x.price *
+                        x.quantity
+                    )}
+                </b>
+
+            </div>
+
+            `
+
+        ).join("")
+
+        :
+
+        `
+        <div class="empty">
+            Your basket is empty.
+        </div>
+        `;
+
+
+    let t =
+        cart.reduce(
+            (a,x) =>
+            a +
+            (
+                Number(
+                    x.price
+                ) || 0
+            ) *
+            (
+                Number(
+                    x.quantity
+                ) || 0
+            ),
+            0
+        );
+
+
+    document
+        .getElementById("total")
+        .textContent =
+        "₹" +
+        money(t);
+
+
+    document
+        .getElementById("checkoutTotal")
+        .textContent =
+        "₹" +
+        money(t);
+
+
+    document
+        .getElementById("checkout")
+        .disabled =
+        !cart.length;
+
+}
+
+
+/* ============================================================
+   OPEN BASKET
+============================================================ */
+
+function openCart(){
+
+    document
+        .getElementById("overlay")
+        .classList.add("show");
+
+
+    document
+        .getElementById("drawer")
+        .classList.add("open");
+
+}
+
+
+/* ============================================================
+   CLOSE BASKET
+============================================================ */
+
+function closeCart(){
+
+    document
+        .getElementById("overlay")
+        .classList.remove("show");
+
+
+    document
+        .getElementById("drawer")
+        .classList.remove("open");
+
+}
+
+
+/* ============================================================
+   CHECKOUT
+============================================================ */
+
+function checkout(){
+
+    if(!cart.length){
+        return;
+    }
+
+
+    closeCart();
+
+
+    document
+        .getElementById(
+            "checkoutModal"
+        )
+        .classList.add("show");
+
+}
+
+
+/* ============================================================
+   CLOSE CHECKOUT
+============================================================ */
+
+function closeCheckout(){
+
+    document
+        .getElementById(
+            "checkoutModal"
+        )
+        .classList.remove("show");
+
+}
+
+
+/* ============================================================
+   CLOSE SUCCESS
+============================================================ */
+
+function closeSuccess(){
+
+    document
+        .getElementById(
+            "successModal"
+        )
+        .classList.remove("show");
+
+}
+
+
+/* ============================================================
+   PLACE ORDER
+============================================================ */
+
+async function placeOrder(e){
+
+    e.preventDefault();
+
+
+    if(!cart.length){
+        return;
+    }
+
+
+    let name =
+        document
+            .getElementById("name")
+            .value
+            .trim();
+
+
+    let mobile =
+        document
+            .getElementById("mobile")
+            .value
+            .trim();
+
+
+    let address =
+        document
+            .getElementById("address")
+            .value
+            .trim();
+
+
+    if(
+        !name ||
+        !mobile ||
+        !address
+    ){
+
+        alert(
+            "Please fill in all required fields."
+        );
+
+        return;
+
+    }
+
+
+    let btn =
+        document
+            .getElementById(
+                "place"
+            );
+
+
+    btn.disabled =
+        true;
+
+
+    btn.textContent =
+        "Placing Order...";
+
+
+    let payload = {
+
+        name,
+
+        mobile,
+
+        address,
+
+        items:
+
+            cart.map(
+
+                x => ({
+
+                    productId:
+                        x.productId,
+
+                    productName:
+                        x.productName,
+
+                    quantity:
+                        x.quantity,
+
+                    price:
+                        Number(
+                            x.price
+                        ) || 0
+
+                })
+
+            )
+
+    };
+
+
+    try{
+
+        const r =
+            await fetch(
+
+                API_URL,
+
+                {
+
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":
+                        "text/plain;charset=utf-8"
+                    },
+
+                    body:
+                        JSON.stringify(
+                            payload
+                        )
+
+                }
+
+            );
+
+
+        const d =
+            await r.json();
+
+
+        if(!d.success){
+
+            throw Error(
+                d.message ||
+                "Order failed"
+            );
+
+        }
+
+
+        cart=[];
+
+
+        save();
+
+
+        document
+            .getElementById(
+                "form"
+            )
+            .reset();
+
+
+        closeCheckout();
+
+
+        document
+            .getElementById(
+                "successText"
+            )
+            .textContent =
+
+            `Your order ID is ${d.orderId}. Total: ₹${money(d.total)}.`;
+
+
+        document
+            .getElementById(
+                "wa"
+            )
+            .href =
+
+            "https://wa.me/" +
+            wa +
+            "?text=" +
+            encodeURIComponent(
+
+                "Hello HAMS Kirana Store, my order ID is " +
+                d.orderId +
+                "."
+
+            );
+
+
+        document
+            .getElementById(
+                "successModal"
+            )
+            .classList
+            .add("show");
+
+
+    }catch(err){
+
+        console.error(err);
+
+
+        alert(
+            "Order could not be placed. Please try again."
+        );
+
+    }
+
+
+    finally{
+
+        btn.disabled =
+            false;
+
+
+        btn.textContent =
+            "Place Order";
+
+    }
+
+}
+
+
+/* ============================================================
+   MONEY FORMAT
+============================================================ */
 
 function money(v){
 
-  return(
-    Number(v)||0
-  ).toLocaleString(
-    "en-IN",
-    {
-      maximumFractionDigits:2
-    }
-  );
+    return (
+        Number(v) || 0
+    )
+    .toLocaleString(
+        "en-IN",
+        {
+            maximumFractionDigits:2
+        }
+    );
 
 }
 
+
+/* ============================================================
+   HTML ESCAPE
+============================================================ */
 
 function esc(v){
 
-  return String(v??"")
-  .replaceAll("&","&amp;")
-  .replaceAll("<","&lt;")
-  .replaceAll(">","&gt;")
-  .replaceAll('"',"&quot;")
-  .replaceAll("'","&#039;");
+    return String(
+        v ?? ""
+    )
+    .replaceAll(
+        "&",
+        "&amp;"
+    )
+    .replaceAll(
+        "<",
+        "&lt;"
+    )
+    .replaceAll(
+        ">",
+        "&gt;"
+    )
+    .replaceAll(
+        '"',
+        "&quot;"
+    )
+    .replaceAll(
+        "'",
+        "&#039;"
+    );
 
 }
 
+
+/* ============================================================
+   ATTRIBUTE ESCAPE
+============================================================ */
 
 function attr(v){
 
-  return esc(v);
+    return esc(v);
 
 }
 
+
+/* ============================================================
+   JAVASCRIPT STRING ESCAPE
+============================================================ */
 
 function js(v){
 
-  return String(v??"")
-  .replaceAll("\\","\\\\")
-  .replaceAll("'","\\'");
+    return String(
+        v ?? ""
+    )
+    .replaceAll(
+        "\\",
+        "\\\\"
+    )
+    .replaceAll(
+        "'",
+        "\\'"
+    );
 
 }
 
 
+/* ============================================================
+   PLACEHOLDER PRODUCT IMAGE
+============================================================ */
+
 function placeholder(n){
 
-  return(
-    "https://placehold.co/600x600/f0f4ef/166534?text="+
-    encodeURIComponent(
-      String(n||"Grocery").slice(0,24)
-    )
-  );
+    return (
+        "https://placehold.co/600x600/f0f4ef/166534?text=" +
+        encodeURIComponent(
+            String(
+                n ||
+                "Grocery"
+            )
+            .slice(
+                0,
+                24
+            )
+        )
+    );
 
 }
 
