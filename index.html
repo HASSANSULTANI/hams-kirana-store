@@ -19,6 +19,7 @@ body{
     font-family:Arial,Helvetica,sans-serif;
     background:#f6f8f5;
     color:#172017;
+    overflow-x:hidden;
 }
 
 button,
@@ -426,11 +427,16 @@ main{
     display:grid;
     grid-template-columns:160px minmax(0,1fr);
     gap:8px;
-    align-items:start;
+    align-items:stretch;
+    min-height:0;
 }
 
 .category-sidebar{
     width:100%;
+    min-width:0;
+    position:sticky;
+    top:86px;
+    align-self:start;
 }
 
 .cats{
@@ -439,8 +445,27 @@ main{
     gap:7px;
     width:100%;
     margin:0;
-    padding:0;
-    overflow:visible;
+    padding:0 4px 4px 0;
+    height:calc(100vh - 180px);
+    min-height:280px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+    scrollbar-width:thin;
+    scrollbar-color:#aeb8b0 transparent;
+}
+
+.cats::-webkit-scrollbar{
+    width:7px;
+}
+
+.cats::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.cats::-webkit-scrollbar-thumb{
+    background:#aeb8b0;
+    border-radius:10px;
 }
 
 .cat{
@@ -485,6 +510,40 @@ main{
 
 .products-area{
     min-width:0;
+    min-height:0;
+}
+
+/* Independent product scrolling panel.
+   Scrolling here never moves the category sidebar. */
+.product-scroll{
+    height:calc(100vh - 180px);
+    min-height:420px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:0 8px 30px 0;
+    overscroll-behavior:contain;
+    scrollbar-width:thin;
+    scrollbar-color:#aeb8b0 transparent;
+    scroll-behavior:smooth;
+}
+
+.product-scroll::-webkit-scrollbar{
+    width:9px;
+}
+
+.product-scroll::-webkit-scrollbar-track{
+    background:#eef2ee;
+    border-radius:10px;
+}
+
+.product-scroll::-webkit-scrollbar-thumb{
+    background:#9fa9a1;
+    border-radius:10px;
+    border:2px solid #eef2ee;
+}
+
+.product-scroll::-webkit-scrollbar-thumb:hover{
+    background:#7f8b82;
 }
 
 /* ============================================================
@@ -1114,6 +1173,15 @@ footer{
         gap:8px;
     }
 
+    .category-sidebar{
+        top:78px;
+    }
+
+    .cats,
+    .product-scroll{
+        height:calc(100vh - 165px);
+    }
+
     .grid{
         grid-template-columns:
             repeat(3,1fr);
@@ -1125,21 +1193,36 @@ footer{
 
     .shop-layout{
         grid-template-columns:1fr;
-        gap:14px;
+        gap:12px;
     }
 
     .category-sidebar{
         width:100%;
+        position:sticky;
+        top:76px;
+        z-index:10;
+        background:#f6f8f5;
+        padding-bottom:4px;
     }
 
     .cats{
+        flex-direction:column;
         gap:7px;
+        height:180px;
+        min-height:180px;
+        padding-right:4px;
+    }
+
+    .product-scroll{
+        height:calc(100vh - 310px);
+        min-height:420px;
     }
 
     .cat{
         min-height:42px;
         padding:10px 12px;
         font-size:12px;
+        flex:0 0 auto;
     }
 
     .head{
@@ -1337,13 +1420,17 @@ footer{
         </div>
 
 
-        <div
-            id="products"
-            class="grid"
-        >
+        <div class="product-scroll" id="productScroll">
 
-            <div class="empty">
-                Loading products...
+            <div
+                id="products"
+                class="grid"
+            >
+
+                <div class="empty">
+                    Loading products...
+                </div>
+
             </div>
 
         </div>
