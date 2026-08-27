@@ -155,7 +155,7 @@ function add(id){
   let p=products.find(x=>String(x.productId)===String(id));if(!p)return;
   let x=cart.find(x=>String(x.productId)===String(id));
   x?x.quantity++:cart.push({productId:p.productId,productName:p.productName,price:Number(p.price)||0,quantity:1});
-  save();openCart();
+  save();
 }
 function change(id,n){let x=cart.find(x=>String(x.productId)===String(id));if(!x)return;x.quantity+=n;if(x.quantity<=0)cart=cart.filter(y=>String(y.productId)!==String(id));save()}
 function removeItem(id){cart=cart.filter(x=>String(x.productId)!==String(id));save()}
