@@ -916,6 +916,111 @@ footer{
     text-decoration:none;
 }
 
+
+/* ============================================================
+   CHECKOUT ADDRESS + LOCATION
+============================================================ */
+
+.checkout-note{
+    background:#f0fdf4;
+    border:1px solid #bbf7d0;
+    color:#166534;
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:12px;
+    margin-bottom:14px;
+    line-height:1.45;
+}
+
+.address-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0 12px;
+}
+
+.location-box{
+    border:1px solid #dce3dd;
+    border-radius:12px;
+    padding:12px;
+    margin:4px 0 14px;
+    background:#fafcf9;
+}
+
+.location-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-bottom:10px;
+}
+
+.location-btn{
+    border:1px solid #15803d;
+    background:#fff;
+    color:#166534;
+    border-radius:9px;
+    padding:10px;
+    cursor:pointer;
+    font-weight:700;
+    font-size:13px;
+}
+
+.location-btn.primary{
+    background:#15803d;
+    color:#fff;
+}
+
+.location-btn:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+}
+
+.location-status{
+    font-size:12px;
+    color:#68736a;
+    line-height:1.4;
+    min-height:18px;
+}
+
+.map-link-input{
+    margin-top:8px;
+}
+
+.order-preview{
+    border:1px solid #e5e9e5;
+    border-radius:12px;
+    padding:12px;
+    background:#fafcf9;
+    margin:8px 0 14px;
+}
+
+.order-preview h3{
+    font-size:14px;
+    margin-bottom:8px;
+}
+
+.preview-item{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    font-size:12px;
+    padding:5px 0;
+    border-bottom:1px solid #edf0ed;
+}
+
+.preview-item:last-child{
+    border-bottom:0;
+}
+
+@media(max-width:520px){
+    .address-grid{
+        grid-template-columns:1fr;
+    }
+
+    .location-actions{
+        grid-template-columns:1fr;
+    }
+}
+
 /* ============================================================
    RESPONSIVE
 ============================================================ */
@@ -1257,71 +1362,105 @@ footer{
 
     <form id="form">
 
-        <div class="field">
-
-            <label>
-                Full Name *
-            </label>
-
-            <input
-                id="name"
-                required
-            >
-
+        <div class="checkout-note">
+            Please enter your delivery address and choose a map location if possible.
+            This helps us deliver your order correctly.
         </div>
-
 
         <div class="field">
-
-            <label>
-                Mobile Number *
-            </label>
-
-            <input
-                id="mobile"
-                type="tel"
-                inputmode="numeric"
-                required
-            >
-
+            <label>Full Name *</label>
+            <input id="name" autocomplete="name" required>
         </div>
-
 
         <div class="field">
+            <label>Mobile Number *</label>
+            <input id="mobile" type="tel" inputmode="numeric" autocomplete="tel"
+                   maxlength="10" placeholder="10-digit mobile number" required>
+        </div>
 
-            <label>
-                Delivery Address *
-            </label>
+        <div class="address-grid">
 
-            <textarea
-                id="address"
-                required
-            ></textarea>
+            <div class="field">
+                <label>House / Flat Number *</label>
+                <input id="houseFlat" autocomplete="address-line1" placeholder="e.g. Flat 302" required>
+            </div>
+
+            <div class="field">
+                <label>Building / Apartment Name *</label>
+                <input id="building" autocomplete="organization" placeholder="e.g. HAMS Residency" required>
+            </div>
+
+            <div class="field">
+                <label>Street / Road *</label>
+                <input id="street" autocomplete="street-address" placeholder="e.g. MG Road" required>
+            </div>
+
+            <div class="field">
+                <label>Area / Locality *</label>
+                <input id="area" placeholder="e.g. Andheri East" required>
+            </div>
+
+            <div class="field">
+                <label>City *</label>
+                <input id="city" autocomplete="address-level2" placeholder="e.g. Mumbai" required>
+            </div>
+
+            <div class="field">
+                <label>Pincode *</label>
+                <input id="pincode" inputmode="numeric" autocomplete="postal-code"
+                       maxlength="6" placeholder="6-digit pincode" required>
+            </div>
 
         </div>
 
-
-        <div class="total">
-
-            <span>
-                Order Total
-            </span>
-
-            <span id="checkoutTotal">
-                ₹0
-            </span>
-
+        <div class="field">
+            <label>Landmark / Delivery Instructions</label>
+            <textarea id="landmark" placeholder="e.g. Opposite SBI Bank. Please call when you arrive."></textarea>
         </div>
 
+        <div class="location-box">
+            <strong>📍 Google Maps Location</strong>
+            <div class="muted" style="margin-top:4px;margin-bottom:9px">
+                Use your current location, or open Google Maps and choose a specific location.
+            </div>
 
-        <button
-            id="place"
-            class="place"
-            type="submit"
-        >
+            <div class="location-actions">
+                <button type="button" class="location-btn primary" id="currentLocationBtn"
+                        onclick="useCurrentLocation()">
+                    📍 Use Current Location
+                </button>
 
+                <button type="button" class="location-btn" onclick="chooseGoogleMapsLocation()">
+                    🗺️ Choose on Google Maps
+                </button>
+            </div>
+
+            <div id="locationStatus" class="location-status">
+                No map location selected yet.
+            </div>
+
+            <div class="field map-link-input">
+                <label>Google Maps Link</label>
+                <input id="mapsLink" type="url"
+                       placeholder="Paste Google Maps link here if you chose a location manually">
+            </div>
+
+            <input id="mapAddress" type="hidden">
+            <input id="latitude" type="hidden">
+            <input id="longitude" type="hidden">
+        </div>
+
+        <div class="order-preview">
+            <h3>🛒 Order Summary</h3>
+            <div id="checkoutItems"></div>
+            <div class="total" style="margin-top:8px;margin-bottom:0">
+                <span>Total</span>
+                <span id="checkoutTotal">₹0</span>
+            </div>
+        </div>
+
+        <button id="place" class="place" type="submit">
             Place Order
-
         </button>
 
     </form>
@@ -2716,6 +2855,8 @@ function checkout(){
     closeCart();
 
 
+    renderCheckoutItems();
+
     document
         .getElementById(
             "checkoutModal"
@@ -2763,212 +2904,487 @@ async function placeOrder(e){
 
     e.preventDefault();
 
-
     if(!cart.length){
+        alert("Your basket is empty.");
         return;
     }
 
+    const name =
+        document.getElementById("name").value.trim();
 
-    let name =
-        document
-            .getElementById("name")
-            .value
-            .trim();
+    const mobile =
+        document.getElementById("mobile").value.trim();
 
+    const houseFlat =
+        document.getElementById("houseFlat").value.trim();
 
-    let mobile =
-        document
-            .getElementById("mobile")
-            .value
-            .trim();
+    const building =
+        document.getElementById("building").value.trim();
 
+    const street =
+        document.getElementById("street").value.trim();
 
-    let address =
-        document
-            .getElementById("address")
-            .value
-            .trim();
+    const area =
+        document.getElementById("area").value.trim();
 
+    const city =
+        document.getElementById("city").value.trim();
 
-    if(
-        !name ||
-        !mobile ||
-        !address
-    ){
+    const pincode =
+        document.getElementById("pincode").value.trim();
 
-        alert(
-            "Please fill in all required fields."
-        );
+    const landmark =
+        document.getElementById("landmark").value.trim();
 
+    const mapAddress =
+        document.getElementById("mapAddress").value.trim();
+
+    const mapsLink =
+        document.getElementById("mapsLink").value.trim();
+
+    const latitudeValue =
+        document.getElementById("latitude").value.trim();
+
+    const longitudeValue =
+        document.getElementById("longitude").value.trim();
+
+    if(!name || !mobile || !houseFlat || !building || !street ||
+       !area || !city || !pincode){
+        alert("Please fill in all required customer and address fields.");
         return;
-
     }
 
+    const cleanMobile = mobile.replace(/\D/g, "");
+    if(cleanMobile.length !== 10){
+        alert("Please enter a valid 10-digit mobile number.");
+        return;
+    }
+
+    if(!/^\d{6}$/.test(pincode)){
+        alert("Please enter a valid 6-digit pincode.");
+        return;
+    }
+
+    /*
+       If the customer pasted a Google Maps link, try to extract
+       latitude and longitude from common Google Maps URL formats.
+    */
+    let finalLat = latitudeValue;
+    let finalLng = longitudeValue;
+
+    if((!finalLat || !finalLng) && mapsLink){
+        const coords = extractCoordinates(mapsLink);
+        if(coords){
+            finalLat = String(coords.lat);
+            finalLng = String(coords.lng);
+            document.getElementById("latitude").value = finalLat;
+            document.getElementById("longitude").value = finalLng;
+            document.getElementById("locationStatus").textContent =
+                "✓ Google Maps link detected and coordinates found.";
+        }
+    }
 
     let btn =
-        document
-            .getElementById(
-                "place"
-            );
+        document.getElementById("place");
 
+    btn.disabled = true;
+    btn.textContent = "Placing Order...";
 
-    btn.disabled =
-        true;
+    /* Open a blank tab immediately so popup blockers are less likely
+       to block the WhatsApp tab after the asynchronous Sheet request. */
+    let waWindow = null;
+    try{
+        waWindow = window.open("about:blank", "_blank");
+    }catch(openError){
+        waWindow = null;
+    }
 
+    const payload = {
 
-    btn.textContent =
-        "Placing Order...";
+        name: name,
+        mobile: cleanMobile,
 
+        houseFlat: houseFlat,
+        building: building,
+        street: street,
+        area: area,
+        city: city,
+        pincode: pincode,
+        landmark: landmark,
 
-    let payload = {
+        mapAddress: mapAddress,
+        latitude: finalLat,
+        longitude: finalLng,
+        mapsLink: mapsLink,
 
-        name,
+        paymentMethod: "Cash on Delivery",
 
-        mobile,
-
-        address,
-
-        items:
-
-            cart.map(
-
-                x => ({
-
-                    productId:
-                        x.productId,
-
-                    productName:
-                        x.productName,
-
-                    quantity:
-                        x.quantity,
-
-                    price:
-                        Number(
-                            x.price
-                        ) || 0
-
-                })
-
-            )
-
+        items: cart.map(function(x){
+            return {
+                productId: x.productId,
+                productName: x.productName,
+                quantity: Number(x.quantity) || 0,
+                price: Number(x.price) || 0
+            };
+        })
     };
-
 
     try{
 
-        const r =
-            await fetch(
+        const r = await fetch(
+            API_URL,
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"text/plain;charset=utf-8"
+                },
+                body:JSON.stringify(payload)
+            }
+        );
 
-                API_URL,
-
-                {
-
-                    method:"POST",
-
-                    headers:{
-                        "Content-Type":
-                        "text/plain;charset=utf-8"
-                    },
-
-                    body:
-                        JSON.stringify(
-                            payload
-                        )
-
-                }
-
-            );
-
-
-        const d =
-            await r.json();
-
+        const d = await r.json();
 
         if(!d.success){
-
             throw Error(
-                d.message ||
-                "Order failed"
+                d.message || "Order failed"
             );
-
         }
 
+        /* Build a complete WhatsApp message using the exact
+           order information the customer submitted. */
+        const whatsappMessage = buildWhatsAppMessage(
+            d.orderId,
+            payload,
+            Number(d.total) || 0
+        );
 
-        cart=[];
-
-
-        save();
-
-
-        document
-            .getElementById(
-                "form"
-            )
-            .reset();
-
-
-        closeCheckout();
-
-
-        document
-            .getElementById(
-                "successText"
-            )
-            .textContent =
-
-            `Your order ID is ${d.orderId}. Total: ₹${money(d.total)}.`;
-
-
-        document
-            .getElementById(
-                "wa"
-            )
-            .href =
-
+        const whatsappUrl =
             "https://wa.me/" +
             wa +
             "?text=" +
-            encodeURIComponent(
+            encodeURIComponent(whatsappMessage);
 
-                "Hello HAMS Kirana Store, my order ID is " +
-                d.orderId +
-                "."
+        if(waWindow && !waWindow.closed){
+            waWindow.location.href = whatsappUrl;
+        }
 
-            );
+        cart = [];
+        save();
 
+        document.getElementById("form").reset();
+        document.getElementById("latitude").value = "";
+        document.getElementById("longitude").value = "";
+        document.getElementById("mapAddress").value = "";
+        document.getElementById("locationStatus").textContent =
+            "No map location selected yet.";
 
-        document
-            .getElementById(
-                "successModal"
-            )
-            .classList
-            .add("show");
+        closeCheckout();
 
+        document.getElementById("successText").innerHTML =
+            "Your order has been saved successfully.<br><br>" +
+            "<strong>Order ID: " + esc(d.orderId) + "</strong><br>" +
+            "Total: <strong>₹" + money(d.total) + "</strong>";
+
+        document.getElementById("wa").href = whatsappUrl;
+
+        document.getElementById("successModal")
+            .classList.add("show");
 
     }catch(err){
 
         console.error(err);
 
+        if(waWindow && !waWindow.closed){
+            waWindow.close();
+        }
 
         alert(
-            "Order could not be placed. Please try again."
+            "Order could not be placed. " +
+            (err.message || "Please try again.")
         );
 
-    }
+    }finally{
 
-
-    finally{
-
-        btn.disabled =
-            false;
-
-
-        btn.textContent =
-            "Place Order";
+        btn.disabled = false;
+        btn.textContent = "Place Order";
 
     }
+}
 
+
+/* ============================================================
+   CHECKOUT ORDER PREVIEW
+============================================================ */
+
+function renderCheckoutItems(){
+
+    const box =
+        document.getElementById("checkoutItems");
+
+    if(!box){
+        return;
+    }
+
+    box.innerHTML = cart.length
+        ? cart.map(function(x){
+            return `
+                <div class="preview-item">
+                    <span>${esc(x.productName)} × ${Number(x.quantity) || 0}</span>
+                    <b>₹${money((Number(x.price)||0) * (Number(x.quantity)||0))}</b>
+                </div>
+            `;
+        }).join("")
+        : '<div class="muted">Your basket is empty.</div>';
+}
+
+
+/* ============================================================
+   CURRENT LOCATION
+============================================================ */
+
+function useCurrentLocation(){
+
+    const statusBox =
+        document.getElementById("locationStatus");
+
+    const button =
+        document.getElementById("currentLocationBtn");
+
+    if(!navigator.geolocation){
+        statusBox.textContent =
+            "Your browser does not support location services.";
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = "📍 Finding Location...";
+    statusBox.textContent =
+        "Please allow location access in your browser.";
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(position){
+
+            const lat =
+                position.coords.latitude;
+
+            const lng =
+                position.coords.longitude;
+
+            document.getElementById("latitude").value = lat;
+            document.getElementById("longitude").value = lng;
+
+            const link =
+                "https://www.google.com/maps?q=" +
+                encodeURIComponent(lat + "," + lng);
+
+            document.getElementById("mapsLink").value = link;
+            document.getElementById("mapAddress").value =
+                "Customer current location (GPS)";
+
+            statusBox.innerHTML =
+                "✓ Current location captured.<br>" +
+                "Latitude: " + lat.toFixed(6) +
+                " • Longitude: " + lng.toFixed(6);
+
+            button.disabled = false;
+            button.textContent = "📍 Use Current Location";
+
+        },
+
+        function(error){
+
+            let message =
+                "Could not get your location.";
+
+            if(error.code === 1){
+                message =
+                    "Location permission was denied. Please allow location access and try again.";
+            }else if(error.code === 2){
+                message =
+                    "Your location could not be determined. Please try again.";
+            }else if(error.code === 3){
+                message =
+                    "Location request timed out. Please try again.";
+            }
+
+            statusBox.textContent = message;
+            button.disabled = false;
+            button.textContent = "📍 Use Current Location";
+
+        },
+
+        {
+            enableHighAccuracy:true,
+            timeout:15000,
+            maximumAge:60000
+        }
+    );
+}
+
+
+/* ============================================================
+   CHOOSE SPECIFIC LOCATION ON GOOGLE MAPS
+
+   No Google Maps API key is required for this method.
+   Google Maps opens in a new tab. The customer can choose/search
+   a location there and paste the resulting Maps link back here.
+============================================================ */
+
+function chooseGoogleMapsLocation(){
+
+    const houseFlat =
+        document.getElementById("houseFlat").value.trim();
+
+    const building =
+        document.getElementById("building").value.trim();
+
+    const street =
+        document.getElementById("street").value.trim();
+
+    const area =
+        document.getElementById("area").value.trim();
+
+    const city =
+        document.getElementById("city").value.trim();
+
+    const pincode =
+        document.getElementById("pincode").value.trim();
+
+    const query = [
+        houseFlat,
+        building,
+        street,
+        area,
+        city,
+        pincode
+    ].filter(Boolean).join(", ");
+
+    const mapsUrl =
+        "https://www.google.com/maps/search/?api=1&query=" +
+        encodeURIComponent(
+            query || "delivery location"
+        );
+
+    window.open(
+        mapsUrl,
+        "_blank",
+        "noopener"
+    );
+
+    document.getElementById("locationStatus").textContent =
+        "Google Maps opened in a new tab. Choose the exact location, copy its Maps link, then paste it into the Google Maps Link box.";
+}
+
+
+/* ============================================================
+   EXTRACT LATITUDE/LONGITUDE FROM COMMON MAP LINKS
+============================================================ */
+
+function extractCoordinates(url){
+
+    if(!url){
+        return null;
+    }
+
+    const patterns = [
+        /@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/,
+        /[?&](?:q|query|ll)=(-?\d+(?:\.\d+)?)[,%20]+(-?\d+(?:\.\d+)?)/,
+        /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/
+    ];
+
+    for(const pattern of patterns){
+        const match = url.match(pattern);
+        if(match){
+            return {
+                lat:Number(match[1]),
+                lng:Number(match[2])
+            };
+        }
+    }
+
+    return null;
+}
+
+
+/* ============================================================
+   WHATSAPP ORDER MESSAGE
+============================================================ */
+
+function buildWhatsAppMessage(orderId, payload, total){
+
+    const itemLines =
+        payload.items.map(function(item){
+            const itemTotal =
+                (Number(item.quantity)||0) *
+                (Number(item.price)||0);
+
+            return (
+                "• " +
+                item.productName +
+                " × " +
+                item.quantity +
+                " @ ₹" +
+                money(item.price) +
+                " = ₹" +
+                money(itemTotal)
+            );
+        }).join("\n");
+
+    const address = [
+        payload.houseFlat,
+        payload.building,
+        payload.street,
+        payload.area,
+        payload.city,
+        payload.pincode
+    ].filter(Boolean).join(", ");
+
+    let locationText =
+        "Not provided";
+
+    if(payload.mapsLink){
+        locationText = payload.mapsLink;
+    }
+
+    let coordinates = "Not provided";
+
+    if(payload.latitude && payload.longitude){
+        coordinates =
+            payload.latitude + ", " +
+            payload.longitude;
+    }
+
+    return [
+        "🛒 HAMS KIRANA STORE",
+        "NEW ORDER",
+        "",
+        "Order ID: " + orderId,
+        "",
+        "👤 CUSTOMER DETAILS",
+        "Name: " + payload.name,
+        "Mobile: " + payload.mobile,
+        "",
+        "🏠 DELIVERY ADDRESS",
+        address,
+        payload.landmark
+            ? "Landmark / Instructions: " + payload.landmark
+            : "",
+        "",
+        "📍 GOOGLE MAPS LOCATION",
+        "Coordinates: " + coordinates,
+        "Map: " + locationText,
+        "",
+        "🛍️ ITEMS",
+        itemLines,
+        "",
+        "💰 TOTAL: ₹" + money(total),
+        "Payment: Cash on Delivery",
+        "",
+        "Please confirm this order."
+    ].filter(function(line){
+        return line !== null && line !== undefined;
+    }).join("\n");
 }
 
 
