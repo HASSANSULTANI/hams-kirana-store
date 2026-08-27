@@ -734,6 +734,39 @@ footer{
     padding:16px;
 }
 
+/* ============================================================
+   EMPTY BASKET BUTTON
+============================================================ */
+
+.clear-cart{
+    width:100%;
+    border:1px solid #fecaca;
+    background:#fff;
+    color:#dc2626;
+    border-radius:10px;
+    padding:10px 14px;
+    cursor:pointer;
+    font-weight:700;
+    margin-bottom:10px;
+    transition:
+        background .18s,
+        color .18s,
+        transform .12s;
+}
+
+.clear-cart:hover:not(:disabled){
+    background:#fef2f2;
+}
+
+.clear-cart:active:not(:disabled){
+    transform:scale(.98);
+}
+
+.clear-cart:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+}
+
 .total{
     display:flex;
 
@@ -1164,6 +1197,19 @@ footer{
             </span>
 
         </div>
+
+
+        <button
+            id="clearCart"
+            class="clear-cart"
+            type="button"
+            onclick="clearCart()"
+            disabled
+        >
+
+            🗑 Empty Basket
+
+        </button>
 
 
         <button
@@ -2574,6 +2620,48 @@ function updateCart(){
         .getElementById("checkout")
         .disabled =
         !cart.length;
+
+
+    const clearButton =
+        document.getElementById("clearCart");
+
+    if(clearButton){
+        clearButton.disabled =
+            !cart.length;
+    }
+
+}
+
+
+/* ============================================================
+   EMPTY ENTIRE BASKET
+============================================================ */
+
+function clearCart(){
+
+    if(!cart.length){
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to empty the entire basket?"
+        );
+
+
+    if(!confirmed){
+        return;
+    }
+
+
+    cart = [];
+
+
+    save();
+
+
+    render();
 
 }
 
