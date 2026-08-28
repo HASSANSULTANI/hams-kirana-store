@@ -4,8 +4,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Akbar Rice Bill - Online Grocery Ordering">
-<title>Akbar Rice Bill</title>
+<meta name="description" content="HAMS Kirana Store - Online Grocery Ordering">
+<title>HAMS Kirana Store</title>
 
 <style>
 
@@ -391,6 +391,47 @@ main{
         font-size:14px;
         padding:12px 17px;
     }
+
+    /*
+       Mobile basket:
+       - full available screen height
+       - product list scrolls independently
+       - checkout controls stay visible
+    */
+    .drawer{
+        width:100%;
+        height:100vh;
+        height:100dvh;
+        max-height:100dvh;
+    }
+
+    .dhead{
+        padding:13px 14px;
+        min-height:62px;
+    }
+
+    .items{
+        padding:10px 14px;
+        min-height:0;
+        overflow-y:auto;
+    }
+
+    .dfoot{
+        padding:12px 14px;
+        padding-bottom:max(12px, env(safe-area-inset-bottom));
+    }
+
+    .dfoot .total{
+        margin-bottom:9px;
+    }
+
+    .clear-cart{
+        margin-bottom:8px;
+    }
+
+    .checkout{
+        padding:12px 14px;
+    }
 }
 
 /* ============================================================
@@ -741,15 +782,21 @@ footer{
     position:fixed;
 
     right:0;
-
     top:0;
+    bottom:0;
 
     width:min(
         430px,
         100%
     );
 
+    /*
+       Use the dynamic viewport on modern mobile browsers.
+       Fallback to 100vh for older browsers.
+    */
     height:100vh;
+    height:100dvh;
+    max-height:100dvh;
 
     background:#fff;
 
@@ -761,9 +808,18 @@ footer{
     transition:
         transform .25s;
 
-    display:flex;
+    /*
+       Three fixed layout zones:
+       1. Basket header
+       2. Scrollable basket items
+       3. Fixed total/actions footer
+    */
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr) auto;
 
-    flex-direction:column;
+    overflow:hidden;
+
+    padding-bottom:env(safe-area-inset-bottom);
 }
 
 .drawer.open{
@@ -781,6 +837,12 @@ footer{
 
     justify-content:
         space-between;
+
+    align-items:center;
+
+    flex-shrink:0;
+
+    min-height:68px;
 }
 
 .close{
@@ -798,11 +860,24 @@ footer{
 }
 
 .items{
-    flex:1;
+    /*
+       THIS is the only scrollable part of the basket.
+       min-height:0 is critical inside a flex/grid constrained
+       viewport; without it, long basket content can push the
+       footer below the mobile screen.
+    */
+    min-height:0;
+    height:auto;
 
-    overflow:auto;
+    overflow-y:auto;
+    overflow-x:hidden;
 
     padding:14px;
+
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+
+    scrollbar-width:thin;
 }
 
 .item{
@@ -873,6 +948,19 @@ footer{
         1px solid #e5e9e5;
 
     padding:16px;
+
+    /*
+       Footer never scrolls away. It remains visible while only
+       the product list above it scrolls.
+    */
+    flex-shrink:0;
+    min-height:0;
+    background:#fff;
+    position:relative;
+    z-index:2;
+
+    padding-bottom:
+        max(16px, env(safe-area-inset-bottom));
 }
 
 /* ============================================================
@@ -1017,6 +1105,24 @@ footer{
 .field textarea{
     min-height:85px;
 }
+
+
+/* ORDER CONFIRMATION — added without changing basket layout */
+.confirm-screen{text-align:center;padding:24px 18px 18px}
+.confirm-check{width:76px;height:76px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;background:#dcfce7;color:#15803d;font-size:42px;font-weight:900;box-shadow:0 0 0 8px #f0fdf4;animation:confirmPop .45s ease-out}
+@keyframes confirmPop{0%{transform:scale(.55);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}}
+.confirm-screen h2{margin:0;color:#166534;font-size:26px}
+.confirm-note{margin:8px 0 18px;color:#68736a;font-size:13px;line-height:1.5}
+.confirm-card{text-align:left;border:1px solid #dce8de;border-radius:14px;overflow:hidden;background:#fff}
+.confirm-card-title{padding:11px 13px;background:#f0fdf4;color:#166534;font-size:13px;font-weight:800}
+.confirm-row{display:flex;justify-content:space-between;gap:12px;padding:9px 13px;border-top:1px solid #edf0ed;font-size:12px}
+.confirm-row .label{color:#68736a}.confirm-row .value{text-align:right;font-weight:700;word-break:break-word}
+.confirm-items{padding:4px 13px}
+.confirm-item{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid #edf0ed;font-size:12px}
+.confirm-total{display:flex;justify-content:space-between;padding:12px 13px;background:#f0fdf4;color:#166534;font-size:16px;font-weight:900}
+.confirm-actions{margin-top:15px;display:grid;gap:9px}
+.confirm-wa{display:block;width:100%;box-sizing:border-box;text-align:center;padding:12px 14px;border-radius:10px;background:#25d366;color:#fff !important;font-weight:800;text-decoration:none}
+@media(max-width:600px){.confirm-screen{padding:20px 13px 14px}.confirm-screen h2{font-size:23px}.confirm-row{flex-direction:column;align-items:flex-start;gap:3px}.confirm-row .value{text-align:left}}
 
 .success{
     text-align:center;
@@ -1321,7 +1427,7 @@ footer{
         <div>
 
             <h1>
-                Akbar Rice Bill
+                HAMS Kirana Store
             </h1>
 
             <small>
@@ -1340,4 +1446,2425 @@ footer{
         </span>
 
         <input
-     
+            id="search"
+            placeholder="Search products..."
+            type="search"
+        >
+
+    </div>
+
+
+    <button
+        class="cartbtn"
+        onclick="openCart()"
+    >
+
+        🛒 Basket
+
+        <b
+            id="count"
+            class="cartcount"
+        >
+            0
+        </b>
+
+    </button>
+
+</div>
+
+</header>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main>
+
+<section class="hero">
+
+    <h2>
+        Shop groceries easily.
+    </h2>
+
+    <p>
+        Choose products, add them to your basket,
+        and place your order online.
+    </p>
+
+</section>
+
+
+<div
+    id="status"
+    class="status"
+></div>
+
+
+<div class="shop-layout">
+
+    <aside class="category-sidebar">
+
+        <div
+            id="cats"
+            class="cats"
+        ></div>
+
+    </aside>
+
+
+    <section class="products-area">
+
+        <div class="title">
+
+            <h2>
+                Products
+            </h2>
+
+            <span id="results"></span>
+
+        </div>
+
+
+        <div class="product-scroll" id="productScroll">
+
+            <div
+                id="products"
+                class="grid"
+            >
+
+                <div class="empty">
+                    Loading products...
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+</main>
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer>
+
+    ©
+    <span id="year"></span>
+    HAMS Kirana Store
+
+</footer>
+
+
+<!-- =========================================================
+     CART OVERLAY
+========================================================= -->
+
+<div
+    id="overlay"
+    class="overlay"
+    onclick="closeCart()"
+></div>
+
+
+<!-- =========================================================
+     CART DRAWER
+========================================================= -->
+
+<aside
+    id="drawer"
+    class="drawer"
+>
+
+    <div class="dhead">
+
+        <h2>
+            Your Basket
+        </h2>
+
+        <button
+            class="close"
+            onclick="closeCart()"
+        >
+            ✕
+        </button>
+
+    </div>
+
+
+    <div
+        id="items"
+        class="items"
+    ></div>
+
+
+    <div class="dfoot">
+
+        <div class="total">
+
+            <span>
+                Total
+            </span>
+
+            <span id="total">
+                ₹0
+            </span>
+
+        </div>
+
+
+        <button
+            id="clearCart"
+            class="clear-cart"
+            type="button"
+            onclick="clearCart()"
+            disabled
+        >
+
+            🗑 Empty Basket
+
+        </button>
+
+
+        <button
+            id="checkout"
+            class="checkout"
+            onclick="checkout()"
+            disabled
+        >
+
+            Proceed to Checkout
+
+        </button>
+
+    </div>
+
+</aside>
+
+
+<!-- =========================================================
+     CHECKOUT MODAL
+========================================================= -->
+
+<div
+    id="checkoutModal"
+    class="modal"
+>
+
+<div class="modalbox">
+
+    <div class="mhead">
+
+        <h2>
+            Delivery Details
+        </h2>
+
+        <button
+            class="close"
+            onclick="closeCheckout()"
+        >
+            ✕
+        </button>
+
+    </div>
+
+
+    <form id="form">
+
+        <div class="checkout-note">
+            Please enter your delivery address and choose a map location if possible.
+            This helps us deliver your order correctly.
+        </div>
+
+        <div class="field">
+            <label>Full Name *</label>
+            <input id="name" autocomplete="name" required>
+        </div>
+
+        <div class="field">
+            <label>Mobile Number *</label>
+            <input id="mobile" type="tel" inputmode="numeric" autocomplete="tel"
+                   maxlength="10" placeholder="10-digit mobile number" required>
+        </div>
+
+        <div class="address-grid">
+
+            <div class="field">
+                <label>House / Flat Number *</label>
+                <input id="houseFlat" autocomplete="address-line1" placeholder="e.g. Flat 302" required>
+            </div>
+
+            <div class="field">
+                <label>Building / Apartment Name *</label>
+                <input id="building" autocomplete="organization" placeholder="e.g. HAMS Residency" required>
+            </div>
+
+            <div class="field">
+                <label>Street / Road *</label>
+                <input id="street" autocomplete="street-address" placeholder="e.g. MG Road" required>
+            </div>
+
+            <div class="field">
+                <label>Area / Locality *</label>
+                <input id="area" placeholder="e.g. Andheri East" required>
+            </div>
+
+            <div class="field">
+                <label>City *</label>
+                <input id="city" autocomplete="address-level2" placeholder="e.g. Mumbai" required>
+            </div>
+
+            <div class="field">
+                <label>Pincode *</label>
+                <input id="pincode" inputmode="numeric" autocomplete="postal-code"
+                       maxlength="6" placeholder="6-digit pincode" required>
+            </div>
+
+        </div>
+
+        <div class="field">
+            <label>Landmark / Delivery Instructions</label>
+            <textarea id="landmark" placeholder="e.g. Opposite SBI Bank. Please call when you arrive."></textarea>
+        </div>
+
+        <div class="location-box">
+            <strong>📍 Google Maps Location</strong>
+            <div class="muted" style="margin-top:4px;margin-bottom:9px">
+                Use your current location, or open Google Maps and choose a specific location.
+            </div>
+
+            <div class="location-actions">
+                <button type="button" class="location-btn primary" id="currentLocationBtn"
+                        onclick="useCurrentLocation()">
+                    📍 Use Current Location
+                </button>
+
+                <button type="button" class="location-btn" onclick="chooseGoogleMapsLocation()">
+                    🗺️ Choose on Google Maps
+                </button>
+            </div>
+
+            <div id="locationStatus" class="location-status">
+                No map location selected yet.
+            </div>
+
+            <div class="field map-link-input">
+                <label>Google Maps Link</label>
+                <input id="mapsLink" type="url"
+                       placeholder="Paste Google Maps link here if you chose a location manually">
+            </div>
+
+            <input id="mapAddress" type="hidden">
+            <input id="latitude" type="hidden">
+            <input id="longitude" type="hidden">
+        </div>
+
+        <div class="order-preview">
+            <h3>🛒 Order Summary</h3>
+            <div id="checkoutItems"></div>
+            <div class="total" style="margin-top:8px;margin-bottom:0">
+                <span>Total</span>
+                <span id="checkoutTotal">₹0</span>
+            </div>
+        </div>
+
+        <button id="place" class="place" type="submit">
+            Place Order
+        </button>
+
+    </form>
+
+</div>
+
+</div>
+
+
+<!-- =========================================================
+     SUCCESS MODAL
+========================================================= -->
+
+<div id="successModal" class="modal">
+<div class="modalbox">
+<div class="confirm-screen">
+<div class="confirm-check">✓</div>
+<h2>Order Confirmed!</h2>
+<p class="confirm-note">Thank you for shopping with HAMS Kirana Store.<br>Your order has been placed successfully.</p>
+<div class="confirm-card">
+<div class="confirm-card-title">📋 Order Details</div>
+<div class="confirm-row"><span class="label">Order ID</span><span class="value" id="confirmOrderId">—</span></div>
+<div class="confirm-row"><span class="label">Customer</span><span class="value" id="confirmCustomer">—</span></div>
+<div class="confirm-row"><span class="label">Mobile</span><span class="value" id="confirmMobile">—</span></div>
+<div class="confirm-row"><span class="label">Delivery Address</span><span class="value" id="confirmAddress">—</span></div>
+<div class="confirm-items" id="confirmItems"></div>
+<div class="confirm-total"><span>Total</span><span id="confirmTotal">₹0</span></div>
+</div>
+<div class="confirm-actions">
+<a id="wa" class="confirm-wa" target="_blank" rel="noopener">💬 Open WhatsApp Order</a>
+<button class="place" type="button" onclick="closeSuccess()">Continue Shopping</button>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
+<script>
+
+
+/* ============================================================
+   GOOGLE APPS SCRIPT
+============================================================ */
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycbwnwcBSQG9ACJy-fbZbbuc_8tiiZP1UmKwrbemlMlDEiMpTBDiR6WgAntX6_fOPkxvT/exec";
+
+
+const DEFAULT_WA =
+"919226158611";
+
+
+/* ============================================================
+   GLOBAL VARIABLES
+============================================================ */
+
+let products = [];
+
+let cart = [];
+
+let category = "All";
+
+let wa = DEFAULT_WA;
+
+
+/* ============================================================
+   INITIAL PAGE SETUP
+============================================================ */
+
+document.getElementById("year").textContent =
+    new Date().getFullYear();
+
+
+document
+    .getElementById("search")
+    .addEventListener(
+        "input",
+        render
+    );
+
+
+document
+    .getElementById("form")
+    .addEventListener(
+        "submit",
+        placeOrder
+    );
+
+
+/* ============================================================
+   LOAD SAVED BASKET
+============================================================ */
+
+try{
+
+    cart =
+        JSON.parse(
+            localStorage.getItem(
+                "hamsKiranaCart"
+            ) || "[]"
+        );
+
+    if(!Array.isArray(cart)){
+        cart=[];
+    }
+
+}catch(e){
+
+    cart=[];
+
+}
+
+
+/* ============================================================
+   INITIAL DISPLAY
+============================================================ */
+
+updateCart();
+
+loadProducts();
+
+
+/* ============================================================
+   LOAD PRODUCTS
+============================================================ */
+
+async function loadProducts(){
+
+    status(
+        "Loading products..."
+    );
+
+    try{
+
+        const r =
+            await fetch(
+                API_URL,
+                {
+                    cache:"no-store"
+                }
+            );
+
+
+        if(!r.ok){
+            throw Error(
+                "Connection failed"
+            );
+        }
+
+
+        const d =
+            await r.json();
+
+
+        if(!d.success){
+            throw Error(
+                d.message ||
+                "Server error"
+            );
+        }
+
+
+        products =
+            Array.isArray(
+                d.products
+            )
+            ? d.products
+            : [];
+
+
+        if(d.whatsapp){
+            wa =
+                String(
+                    d.whatsapp
+                );
+        }
+
+
+        document
+            .getElementById("status")
+            .className =
+            "status";
+
+
+        renderCats();
+
+        render();
+
+
+    }catch(e){
+
+        console.error(e);
+
+
+        status(
+            "Products could not be loaded. Please check the Apps Script Web App URL and deployment.",
+            true
+        );
+
+
+        document
+            .getElementById("products")
+            .innerHTML =
+            '<div class="empty">Products could not be loaded right now.</div>';
+
+    }
+
+}
+
+
+/* ============================================================
+   STATUS MESSAGE
+============================================================ */
+
+function status(
+    text,
+    error=false
+){
+
+    const x =
+        document.getElementById(
+            "status"
+        );
+
+
+    x.textContent =
+        text;
+
+
+    x.className =
+        "status show" +
+        (
+            error
+            ? " err"
+            : ""
+        );
+
+}
+
+
+/* ============================================================
+   CATEGORY BUTTONS
+============================================================ */
+
+function renderCats(){
+
+    let a =
+        [
+            "All",
+            ...new Set(
+                products
+                    .map(
+                        p =>
+                        String(
+                            p.category || ""
+                        ).trim()
+                    )
+                    .filter(Boolean)
+            )
+        ];
+
+
+    document
+        .getElementById("cats")
+        .innerHTML =
+
+        a.map(
+
+            c =>
+
+            `<button
+                type="button"
+                class="cat ${c===category?"active":""}"
+                data-category="${attr(c)}"
+            >
+                ${esc(c)}
+            </button>`
+
+        ).join("");
+
+    /* Use real event listeners instead of inline onclick handlers.
+       This makes the category filter reliable on GitHub Pages. */
+    document
+        .querySelectorAll("#cats .cat")
+        .forEach(function(button){
+            button.addEventListener("click", function(){
+                setCategory(button.dataset.category || "All");
+            });
+        });
+
+}
+
+
+/* ============================================================
+   SET CATEGORY
+============================================================ */
+
+function setCategory(c){
+
+    category=c;
+
+    renderCats();
+
+    render();
+
+}
+
+
+/* ============================================================
+   RENDER PRODUCTS
+============================================================ */
+
+function render(){
+
+    let q =
+        document
+            .getElementById("search")
+            .value
+            .trim()
+            .toLowerCase();
+
+
+    let list =
+        products.filter(
+
+            p => {
+
+                let cat =
+                    category==="All" ||
+                    String(
+                        p.category || ""
+                    ) === category;
+
+
+                let text =
+                    `${p.productName||""}
+                     ${p.description||""}
+                     ${p.category||""}`
+                    .toLowerCase();
+
+
+                return (
+                    cat &&
+                    (
+                        !q ||
+                        text.includes(q)
+                    )
+                );
+
+            }
+
+        );
+
+
+    document
+        .getElementById("results")
+        .textContent =
+
+        list.length +
+        " product" +
+        (
+            list.length===1
+            ? ""
+            : "s"
+        );
+
+
+    document
+        .getElementById("products")
+        .innerHTML =
+
+        list.length
+        ? list.map(card).join("")
+        : '<div class="empty">No products found.</div>';
+
+}
+
+
+/* ============================================================
+   PRODUCT CARD
+============================================================ */
+
+function card(p){
+
+    let available =
+        p.available !== false;
+
+
+    let image =
+        p.imageUrl ||
+        placeholder(
+            p.productName
+        );
+
+
+    let cartItem =
+        cart.find(
+            x =>
+            String(
+                x.productId
+            ) ===
+            String(
+                p.productId
+            )
+        );
+
+
+    let quantity =
+        cartItem
+        ? Number(
+            cartItem.quantity
+        ) || 0
+        : 0;
+
+
+    let actionHTML;
+
+
+    /* --------------------------------------------------------
+       IF PRODUCT IS ALREADY IN BASKET
+    -------------------------------------------------------- */
+
+    if(quantity > 0){
+
+        actionHTML =
+
+        `<div class="product-controls">
+
+            <div class="product-qty">
+
+                <button
+                    type="button"
+                    onclick="changeProductQty('${js(p.productId)}',-1)"
+                    aria-label="Decrease quantity"
+                >
+                    −
+                </button>
+
+                <span class="qty-number">
+                    ${quantity}
+                </span>
+
+                <button
+                    type="button"
+                    onclick="changeProductQty('${js(p.productId)}',1)"
+                    aria-label="Increase quantity"
+                >
+                    +
+                </button>
+
+            </div>
+
+            <button
+                type="button"
+                class="product-remove"
+                onclick="removeProduct('${js(p.productId)}')"
+            >
+                Remove
+            </button>
+
+        </div>`;
+
+    }
+
+
+    /* --------------------------------------------------------
+       IF PRODUCT IS NOT IN BASKET
+    -------------------------------------------------------- */
+
+    else{
+
+        actionHTML =
+
+        `<button
+            class="add"
+            ${available ? "" : "disabled"}
+            onclick="add('${js(p.productId)}',event)"
+        >
+            ${available ? "Add" : "Unavailable"}
+        </button>`;
+
+    }
+
+
+    return `
+
+    <article
+        class="card"
+        data-product-id="${attr(p.productId)}"
+    >
+
+        <img
+            class="pic"
+            src="${attr(image)}"
+            alt="${attr(p.productName)}"
+            onerror="this.src='${placeholder(p.productName)}'"
+        >
+
+
+        <div class="info">
+
+            <div class="category">
+                ${esc(
+                    p.category ||
+                    "Grocery"
+                )}
+            </div>
+
+
+            <div class="name">
+                ${esc(
+                    p.productName ||
+                    ""
+                )}
+            </div>
+
+
+            <div class="desc">
+                ${esc(
+                    p.description ||
+                    ""
+                )}
+            </div>
+
+
+            <div class="meta">
+
+                <span>
+                    ${esc(
+                        p.packSize ||
+                        p.unit ||
+                        ""
+                    )}
+                </span>
+
+                <span>
+                    ${
+                        available
+                        ? "Available"
+                        : "Unavailable"
+                    }
+                </span>
+
+            </div>
+
+
+            <div class="bottom">
+
+                <span class="price">
+                    ₹${money(p.price)}
+                </span>
+
+                ${actionHTML}
+
+            </div>
+
+        </div>
+
+    </article>
+
+    `;
+
+}
+
+
+/* ============================================================
+   ADD-TO-BASKET TOAST
+============================================================ */
+
+let basketToastTimer = null;
+
+function showBasketToast(productName){
+
+    const toast =
+        document.getElementById(
+            "basketToast"
+        );
+
+    if(!toast){
+        return;
+    }
+
+    toast.textContent =
+        (productName || "Product") +
+        " added to basket.";
+
+    toast.classList.remove("show");
+
+    void toast.offsetWidth;
+
+    toast.classList.add("show");
+
+    clearTimeout(basketToastTimer);
+
+    basketToastTimer =
+        setTimeout(function(){
+            toast.classList.remove("show");
+        }, 2200);
+}
+
+
+/* ============================================================
+   ADD PRODUCT
+============================================================ */
+
+function add(
+    id,
+    event
+){
+
+    let p =
+        products.find(
+            x =>
+            String(
+                x.productId
+            ) ===
+            String(id)
+        );
+
+
+    if(!p){
+        return;
+    }
+
+
+    let x =
+        cart.find(
+            x =>
+            String(
+                x.productId
+            ) ===
+            String(id)
+        );
+
+
+    if(x){
+
+        x.quantity++;
+
+    }else{
+
+        cart.push({
+
+            productId:
+                p.productId,
+
+            productName:
+                p.productName,
+
+            price:
+                Number(
+                    p.price
+                ) || 0,
+
+            quantity:1
+
+        });
+
+    }
+
+
+    save();
+
+
+    /* IMPORTANT:
+       Do NOT open basket here.
+    */
+
+
+    animateAddToCart(
+        event,
+        p
+    );
+
+
+    /* Show confirmation while the product flies to the basket. */
+    showBasketToast(
+        p.productName
+    );
+
+
+    /*
+       Re-render the card so
+       Add becomes − 1 +
+    */
+
+    render();
+
+}
+
+
+/* ============================================================
+   PRODUCT QUANTITY FROM CARD
+============================================================ */
+
+function changeProductQty(
+    id,
+    amount
+){
+
+    let x =
+        cart.find(
+            x =>
+            String(
+                x.productId
+            ) ===
+            String(id)
+        );
+
+
+    if(!x){
+        return;
+    }
+
+
+    x.quantity += amount;
+
+
+    if(x.quantity <= 0){
+
+        cart =
+            cart.filter(
+                y =>
+                String(
+                    y.productId
+                ) !==
+                String(id)
+            );
+
+    }
+
+
+    save();
+
+    render();
+
+}
+
+
+/* ============================================================
+   REMOVE PRODUCT FROM CARD
+============================================================ */
+
+function removeProduct(id){
+
+    cart =
+        cart.filter(
+            x =>
+            String(
+                x.productId
+            ) !==
+            String(id)
+        );
+
+
+    save();
+
+    render();
+
+}
+
+
+/* ============================================================
+   FLYING PRODUCT ANIMATION
+============================================================ */
+
+function animateAddToCart(
+    event,
+    p
+){
+
+    const button =
+        event &&
+        event.currentTarget
+        ? event.currentTarget
+        : null;
+
+
+    const card =
+        button
+        ? button.closest(".card")
+        : null;
+
+
+    const source =
+        card
+        ? card.querySelector(".pic")
+        : null;
+
+
+    const cartButton =
+        document.querySelector(
+            ".cartbtn"
+        );
+
+
+    if(
+        !source ||
+        !cartButton
+    ){
+        return;
+    }
+
+
+    /* --------------------------------------------------------
+       GET START POSITION
+    -------------------------------------------------------- */
+
+    const start =
+        source.getBoundingClientRect();
+
+
+    /* --------------------------------------------------------
+       GET BASKET POSITION
+    -------------------------------------------------------- */
+
+    const end =
+        cartButton.getBoundingClientRect();
+
+
+    /* --------------------------------------------------------
+       CREATE FLYING IMAGE
+    -------------------------------------------------------- */
+
+    const flyer =
+        document.createElement(
+            "img"
+        );
+
+
+    flyer.className =
+        "fly-item";
+
+
+    flyer.src =
+        source.currentSrc ||
+        source.src;
+
+
+    flyer.alt =
+        p.productName ||
+        "Added product";
+
+
+    const startX =
+        start.left +
+        start.width / 2 -
+        41;
+
+
+    const startY =
+        start.top +
+        start.height / 2 -
+        41;
+
+
+    flyer.style.left =
+        startX + "px";
+
+
+    flyer.style.top =
+        startY + "px";
+
+
+    document
+        .body
+        .appendChild(
+            flyer
+        );
+
+
+    /* --------------------------------------------------------
+       CALCULATE DISTANCE TO BASKET
+    -------------------------------------------------------- */
+
+    const startCenterX =
+        start.left +
+        start.width / 2;
+
+
+    const startCenterY =
+        start.top +
+        start.height / 2;
+
+
+    const endCenterX =
+        end.left +
+        end.width / 2;
+
+
+    const endCenterY =
+        end.top +
+        end.height / 2;
+
+
+    const dx =
+        endCenterX -
+        startCenterX;
+
+
+    const dy =
+        endCenterY -
+        startCenterY;
+
+
+    /* --------------------------------------------------------
+       CREATE SPARKLES
+    -------------------------------------------------------- */
+
+    const sparkle =
+        document.createElement(
+            "div"
+        );
+
+
+    sparkle.className =
+        "fly-sparkle";
+
+
+    sparkle.textContent =
+        "✨";
+
+
+    sparkle.style.left =
+        (
+            startCenterX - 10
+        ) + "px";
+
+
+    sparkle.style.top =
+        (
+            startCenterY - 10
+        ) + "px";
+
+
+    document
+        .body
+        .appendChild(
+            sparkle
+        );
+
+
+    setTimeout(
+        () => sparkle.remove(),
+        1200
+    );
+
+
+    /* --------------------------------------------------------
+       FLYING ANIMATION
+
+       DURATION = 1200ms
+       So the animation lasts
+       more than 1 second.
+    -------------------------------------------------------- */
+
+    const animation =
+        flyer.animate(
+
+            [
+
+                {
+                    transform:
+                        "translate(0,0) scale(1) rotate(0deg)",
+                    opacity:1
+                },
+
+                {
+                    transform:
+                        `translate(${dx * .25}px,${dy * .10}px)
+                         scale(.95)
+                         rotate(8deg)`,
+
+                    opacity:1,
+
+                    offset:.20
+                },
+
+                {
+                    transform:
+                        `translate(${dx * .58}px,${dy * .45}px)
+                         scale(.70)
+                         rotate(-8deg)`,
+
+                    opacity:.95,
+
+                    offset:.55
+                },
+
+                {
+                    transform:
+                        `translate(${dx * .82}px,${dy * .78}px)
+                         scale(.40)
+                         rotate(12deg)`,
+
+                    opacity:.75,
+
+                    offset:.78
+                },
+
+                {
+                    transform:
+                        `translate(${dx}px,${dy}px)
+                         scale(.12)
+                         rotate(0deg)`,
+
+                    opacity:0
+                }
+
+            ],
+
+            {
+
+                /*
+                   1.2 SECONDS
+                */
+
+                duration:1200,
+
+                easing:
+                    "cubic-bezier(.2,.75,.2,1)",
+
+                fill:"forwards"
+
+            }
+
+        );
+
+
+    animation.finished
+
+        .then(
+            () => {
+
+                flyer.remove();
+
+            }
+        )
+
+        .catch(
+            () => {
+
+                flyer.remove();
+
+            }
+        );
+
+
+    /* --------------------------------------------------------
+       BASKET BUMP
+    -------------------------------------------------------- */
+
+    cartButton.classList.remove(
+        "bump"
+    );
+
+
+    void cartButton.offsetWidth;
+
+
+    cartButton.classList.add(
+        "bump"
+    );
+
+
+    setTimeout(
+        () =>
+        cartButton.classList.remove(
+            "bump"
+        ),
+        600
+    );
+
+}
+
+
+/* ============================================================
+   CHANGE QUANTITY INSIDE BASKET
+============================================================ */
+
+function change(
+    id,
+    n
+){
+
+    let x =
+        cart.find(
+            x =>
+            String(
+                x.productId
+            ) ===
+            String(id)
+        );
+
+
+    if(!x){
+        return;
+    }
+
+
+    x.quantity += n;
+
+
+    if(
+        x.quantity <= 0
+    ){
+
+        cart =
+            cart.filter(
+                y =>
+                String(
+                    y.productId
+                ) !==
+                String(id)
+            );
+
+    }
+
+
+    save();
+
+    render();
+
+}
+
+
+/* ============================================================
+   REMOVE FROM BASKET
+============================================================ */
+
+function removeItem(id){
+
+    cart =
+        cart.filter(
+            x =>
+            String(
+                x.productId
+            ) !==
+            String(id)
+        );
+
+
+    save();
+
+    render();
+
+}
+
+
+/* ============================================================
+   SAVE BASKET
+============================================================ */
+
+function save(){
+
+    localStorage.setItem(
+        "hamsKiranaCart",
+        JSON.stringify(cart)
+    );
+
+
+    updateCart();
+
+}
+
+
+/* ============================================================
+   UPDATE BASKET
+============================================================ */
+
+function updateCart(){
+
+    const count =
+        cart.reduce(
+            (a,x) =>
+            a +
+            (
+                Number(
+                    x.quantity
+                ) || 0
+            ),
+            0
+        );
+
+
+    document
+        .getElementById("count")
+        .textContent =
+        count;
+
+
+    let box =
+        document.getElementById(
+            "items"
+        );
+
+
+    box.innerHTML =
+
+        cart.length
+
+        ?
+
+        cart.map(
+
+            x =>
+
+            `
+
+            <div class="item">
+
+                <div>
+
+                    <div class="itemname">
+                        ${esc(
+                            x.productName
+                        )}
+                    </div>
+
+
+                    <div class="muted">
+                        ₹${money(x.price)}
+                        each
+                    </div>
+
+
+                    <div class="qty">
+
+                        <button
+                            onclick="change('${js(x.productId)}',-1)"
+                        >
+                            −
+                        </button>
+
+
+                        <b>
+                            ${x.quantity}
+                        </b>
+
+
+                        <button
+                            onclick="change('${js(x.productId)}',1)"
+                        >
+                            +
+                        </button>
+
+                    </div>
+
+
+                    <button
+                        class="remove"
+                        onclick="removeItem('${js(x.productId)}')"
+                    >
+                        Remove
+                    </button>
+
+                </div>
+
+
+                <b>
+                    ₹${money(
+                        x.price *
+                        x.quantity
+                    )}
+                </b>
+
+            </div>
+
+            `
+
+        ).join("")
+
+        :
+
+        `
+        <div class="empty">
+            Your basket is empty.
+        </div>
+        `;
+
+
+    let t =
+        cart.reduce(
+            (a,x) =>
+            a +
+            (
+                Number(
+                    x.price
+                ) || 0
+            ) *
+            (
+                Number(
+                    x.quantity
+                ) || 0
+            ),
+            0
+        );
+
+
+    document
+        .getElementById("total")
+        .textContent =
+        "₹" +
+        money(t);
+
+
+    document
+        .getElementById("checkoutTotal")
+        .textContent =
+        "₹" +
+        money(t);
+
+
+    document
+        .getElementById("checkout")
+        .disabled =
+        !cart.length;
+
+
+    const clearButton =
+        document.getElementById("clearCart");
+
+    if(clearButton){
+        clearButton.disabled =
+            !cart.length;
+    }
+
+}
+
+
+/* ============================================================
+   EMPTY ENTIRE BASKET
+============================================================ */
+
+function clearCart(){
+
+    if(!cart.length){
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to empty the entire basket?"
+        );
+
+
+    if(!confirmed){
+        return;
+    }
+
+
+    cart = [];
+
+
+    save();
+
+
+    render();
+
+}
+
+
+/* ============================================================
+   OPEN BASKET
+============================================================ */
+
+function openCart(){
+
+    document
+        .getElementById("overlay")
+        .classList.add("show");
+
+
+    document
+        .getElementById("drawer")
+        .classList.add("open");
+
+    /*
+       Lock the page behind the basket. The basket's own .items
+       area remains independently scrollable.
+    */
+    document.body.style.overflow = "hidden";
+
+}
+
+
+/* ============================================================
+   CLOSE BASKET
+============================================================ */
+
+function closeCart(){
+
+    document
+        .getElementById("overlay")
+        .classList.remove("show");
+
+
+    document
+        .getElementById("drawer")
+        .classList.remove("open");
+
+    document.body.style.overflow = "";
+
+}
+
+
+/* ============================================================
+   CHECKOUT
+============================================================ */
+
+function checkout(){
+
+    if(!cart.length){
+        return;
+    }
+
+
+    closeCart();
+
+
+    renderCheckoutItems();
+
+    document
+        .getElementById(
+            "checkoutModal"
+        )
+        .classList.add("show");
+
+}
+
+
+/* ============================================================
+   CLOSE CHECKOUT
+============================================================ */
+
+function closeCheckout(){
+
+    document
+        .getElementById(
+            "checkoutModal"
+        )
+        .classList.remove("show");
+
+}
+
+
+/* ============================================================
+   CLOSE SUCCESS
+============================================================ */
+
+function closeSuccess(){
+
+    document
+        .getElementById(
+            "successModal"
+        )
+        .classList.remove("show");
+
+}
+
+
+/* ============================================================
+   PLACE ORDER
+============================================================ */
+
+async function placeOrder(e){
+
+    e.preventDefault();
+
+    if(!cart.length){
+        alert("Your basket is empty.");
+        return;
+    }
+
+    const name =
+        document.getElementById("name").value.trim();
+
+    const mobile =
+        document.getElementById("mobile").value.trim();
+
+    const houseFlat =
+        document.getElementById("houseFlat").value.trim();
+
+    const building =
+        document.getElementById("building").value.trim();
+
+    const street =
+        document.getElementById("street").value.trim();
+
+    const area =
+        document.getElementById("area").value.trim();
+
+    const city =
+        document.getElementById("city").value.trim();
+
+    const pincode =
+        document.getElementById("pincode").value.trim();
+
+    const landmark =
+        document.getElementById("landmark").value.trim();
+
+    const mapAddress =
+        document.getElementById("mapAddress").value.trim();
+
+    const mapsLink =
+        document.getElementById("mapsLink").value.trim();
+
+    /* The Apps Script backend requires a single `address` field.
+       Keep the detailed fields too, so the Sheet can store each part. */
+    const address = [
+        houseFlat,
+        building,
+        street,
+        area,
+        city,
+        pincode
+    ].filter(Boolean).join(", ");
+
+    const latitudeValue =
+        document.getElementById("latitude").value.trim();
+
+    const longitudeValue =
+        document.getElementById("longitude").value.trim();
+
+    if(!name || !mobile || !houseFlat || !building || !street ||
+       !area || !city || !pincode){
+        alert("Please fill in all required customer and address fields.");
+        return;
+    }
+
+    const cleanMobile = mobile.replace(/\D/g, "");
+    if(cleanMobile.length !== 10){
+        alert("Please enter a valid 10-digit mobile number.");
+        return;
+    }
+
+    if(!/^\d{6}$/.test(pincode)){
+        alert("Please enter a valid 6-digit pincode.");
+        return;
+    }
+
+    /*
+       If the customer pasted a Google Maps link, try to extract
+       latitude and longitude from common Google Maps URL formats.
+    */
+    let finalLat = latitudeValue;
+    let finalLng = longitudeValue;
+
+    if((!finalLat || !finalLng) && mapsLink){
+        const coords = extractCoordinates(mapsLink);
+        if(coords){
+            finalLat = String(coords.lat);
+            finalLng = String(coords.lng);
+            document.getElementById("latitude").value = finalLat;
+            document.getElementById("longitude").value = finalLng;
+            document.getElementById("locationStatus").textContent =
+                "✓ Google Maps link detected and coordinates found.";
+        }
+    }
+
+    let btn =
+        document.getElementById("place");
+
+    btn.disabled = true;
+    btn.textContent = "Placing Order...";
+
+    /* Open a blank tab immediately so popup blockers are less likely
+       to block the WhatsApp tab after the asynchronous Sheet request. */
+    let waWindow = null;
+    try{
+        waWindow = window.open("about:blank", "_blank");
+    }catch(openError){
+        waWindow = null;
+    }
+
+    const payload = {
+
+        name: name,
+        mobile: cleanMobile,
+
+        /* Compatibility field expected by the current Code.gs */
+        address: address,
+        deliveryAddress: address,
+
+        houseFlat: houseFlat,
+        building: building,
+        street: street,
+        area: area,
+        city: city,
+        pincode: pincode,
+        landmark: landmark,
+
+        mapAddress: mapAddress,
+        latitude: finalLat,
+        longitude: finalLng,
+        mapsLink: mapsLink,
+
+        paymentMethod: "Cash on Delivery",
+
+        items: cart.map(function(x){
+            return {
+                productId: x.productId,
+                productName: x.productName,
+                quantity: Number(x.quantity) || 0,
+                price: Number(x.price) || 0
+            };
+        })
+    };
+
+    try{
+
+        const r = await fetch(
+            API_URL,
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"text/plain;charset=utf-8"
+                },
+                body:JSON.stringify(payload)
+            }
+        );
+
+        const d = await r.json();
+
+        if(!d.success){
+            throw Error(
+                d.message || "Order failed"
+            );
+        }
+
+        /* Build a complete WhatsApp message using the exact
+           order information the customer submitted. */
+        const whatsappMessage = buildWhatsAppMessage(
+            d.orderId,
+            payload,
+            Number(d.total) || 0
+        );
+
+        const whatsappUrl =
+            "https://wa.me/" +
+            wa +
+            "?text=" +
+            encodeURIComponent(whatsappMessage);
+
+        if(waWindow && !waWindow.closed){
+            waWindow.location.href = whatsappUrl;
+        }
+
+        cart = [];
+        save();
+
+        document.getElementById("form").reset();
+        document.getElementById("latitude").value = "";
+        document.getElementById("longitude").value = "";
+        document.getElementById("mapAddress").value = "";
+        document.getElementById("locationStatus").textContent =
+            "No map location selected yet.";
+
+        closeCheckout();
+
+        document.getElementById("confirmOrderId").textContent = d.orderId || "—";
+        document.getElementById("confirmCustomer").textContent = name || "—";
+        document.getElementById("confirmMobile").textContent = cleanMobile || "—";
+        document.getElementById("confirmAddress").textContent = address || "—";
+        document.getElementById("confirmTotal").textContent = "₹" + money(d.total);
+
+        document.getElementById("confirmItems").innerHTML =
+            payload.items.map(function(item){
+                const qty = Number(item.quantity) || 0;
+                const price = Number(item.price) || 0;
+                return `<div class="confirm-item"><span>${esc(item.productName)} × ${qty}</span><b>₹${money(price * qty)}</b></div>`;
+            }).join("");
+
+        document.getElementById("wa").href = whatsappUrl;
+
+        document.getElementById("successModal")
+            .classList.add("show");
+
+    }catch(err){
+
+        console.error(err);
+
+        if(waWindow && !waWindow.closed){
+            waWindow.close();
+        }
+
+        alert(
+            "Order could not be placed. " +
+            (err.message || "Please try again.")
+        );
+
+    }finally{
+
+        btn.disabled = false;
+        btn.textContent = "Place Order";
+
+    }
+}
+
+
+/* ============================================================
+   CHECKOUT ORDER PREVIEW
+============================================================ */
+
+function renderCheckoutItems(){
+
+    const box =
+        document.getElementById("checkoutItems");
+
+    if(!box){
+        return;
+    }
+
+    box.innerHTML = cart.length
+        ? cart.map(function(x){
+            return `
+                <div class="preview-item">
+                    <span>${esc(x.productName)} × ${Number(x.quantity) || 0}</span>
+                    <b>₹${money((Number(x.price)||0) * (Number(x.quantity)||0))}</b>
+                </div>
+            `;
+        }).join("")
+        : '<div class="muted">Your basket is empty.</div>';
+}
+
+
+/* ============================================================
+   CURRENT LOCATION
+============================================================ */
+
+function useCurrentLocation(){
+
+    const statusBox =
+        document.getElementById("locationStatus");
+
+    const button =
+        document.getElementById("currentLocationBtn");
+
+    if(!navigator.geolocation){
+        statusBox.textContent =
+            "Your browser does not support location services.";
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = "📍 Finding Location...";
+    statusBox.textContent =
+        "Please allow location access in your browser.";
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(position){
+
+            const lat =
+                position.coords.latitude;
+
+            const lng =
+                position.coords.longitude;
+
+            document.getElementById("latitude").value = lat;
+            document.getElementById("longitude").value = lng;
+
+            const link =
+                "https://www.google.com/maps?q=" +
+                encodeURIComponent(lat + "," + lng);
+
+            document.getElementById("mapsLink").value = link;
+            document.getElementById("mapAddress").value =
+                "Customer current location (GPS)";
+
+            statusBox.innerHTML =
+                "✓ Current location captured.<br>" +
+                "Latitude: " + lat.toFixed(6) +
+                " • Longitude: " + lng.toFixed(6);
+
+            button.disabled = false;
+            button.textContent = "📍 Use Current Location";
+
+        },
+
+        function(error){
+
+            let message =
+                "Could not get your location.";
+
+            if(error.code === 1){
+                message =
+                    "Location permission was denied. Please allow location access and try again.";
+            }else if(error.code === 2){
+                message =
+                    "Your location could not be determined. Please try again.";
+            }else if(error.code === 3){
+                message =
+                    "Location request timed out. Please try again.";
+            }
+
+            statusBox.textContent = message;
+            button.disabled = false;
+            button.textContent = "📍 Use Current Location";
+
+        },
+
+        {
+            enableHighAccuracy:true,
+            timeout:15000,
+            maximumAge:60000
+        }
+    );
+}
+
+
+/* ============================================================
+   CHOOSE SPECIFIC LOCATION ON GOOGLE MAPS
+
+   No Google Maps API key is required for this method.
+   Google Maps opens in a new tab. The customer can choose/search
+   a location there and paste the resulting Maps link back here.
+============================================================ */
+
+function chooseGoogleMapsLocation(){
+
+    const houseFlat =
+        document.getElementById("houseFlat").value.trim();
+
+    const building =
+        document.getElementById("building").value.trim();
+
+    const street =
+        document.getElementById("street").value.trim();
+
+    const area =
+        document.getElementById("area").value.trim();
+
+    const city =
+        document.getElementById("city").value.trim();
+
+    const pincode =
+        document.getElementById("pincode").value.trim();
+
+    const query = [
+        houseFlat,
+        building,
+        street,
+        area,
+        city,
+        pincode
+    ].filter(Boolean).join(", ");
+
+    const mapsUrl =
+        "https://www.google.com/maps/search/?api=1&query=" +
+        encodeURIComponent(
+            query || "delivery location"
+        );
+
+    window.open(
+        mapsUrl,
+        "_blank",
+        "noopener"
+    );
+
+    document.getElementById("locationStatus").textContent =
+        "Google Maps opened in a new tab. Choose the exact location, copy its Maps link, then paste it into the Google Maps Link box.";
+}
+
+
+/* ============================================================
+   EXTRACT LATITUDE/LONGITUDE FROM COMMON MAP LINKS
+============================================================ */
+
+function extractCoordinates(url){
+
+    if(!url){
+        return null;
+    }
+
+    const patterns = [
+        /@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/,
+        /[?&](?:q|query|ll)=(-?\d+(?:\.\d+)?)[,%20]+(-?\d+(?:\.\d+)?)/,
+        /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/
+    ];
+
+    for(const pattern of patterns){
+        const match = url.match(pattern);
+        if(match){
+            return {
+                lat:Number(match[1]),
+                lng:Number(match[2])
+            };
+        }
+    }
+
+    return null;
+}
+
+
+/* ============================================================
+   WHATSAPP ORDER MESSAGE
+============================================================ */
+
+function buildWhatsAppMessage(orderId, payload, total){
+
+    const itemLines =
+        payload.items.map(function(item){
+            const itemTotal =
+                (Number(item.quantity)||0) *
+                (Number(item.price)||0);
+
+            return (
+                "• " +
+                item.productName +
+                " × " +
+                item.quantity +
+                " @ ₹" +
+                money(item.price) +
+                " = ₹" +
+                money(itemTotal)
+            );
+        }).join("\n");
+
+    const address = [
+        payload.houseFlat,
+        payload.building,
+        payload.street,
+        payload.area,
+        payload.city,
+        payload.pincode
+    ].filter(Boolean).join(", ");
+
+    let locationText =
+        "Not provided";
+
+    if(payload.mapsLink){
+        locationText = payload.mapsLink;
+    }
+
+    let coordinates = "Not provided";
+
+    if(payload.latitude && payload.longitude){
+        coordinates =
+            payload.latitude + ", " +
+            payload.longitude;
+    }
+
+    return [
+        "🛒 HAMS KIRANA STORE",
+        "NEW ORDER",
+        "",
+        "Order ID: " + orderId,
+        "",
+        "👤 CUSTOMER DETAILS",
+        "Name: " + payload.name,
+        "Mobile: " + payload.mobile,
+        "",
+        "🏠 DELIVERY ADDRESS",
+        address,
+        payload.landmark
+            ? "Landmark / Instructions: " + payload.landmark
+            : "",
+        "",
+        "📍 GOOGLE MAPS LOCATION",
+        "Coordinates: " + coordinates,
+        "Map: " + locationText,
+        "",
+        "🛍️ ITEMS",
+        itemLines,
+        "",
+        "💰 TOTAL: ₹" + money(total),
+        "Payment: Cash on Delivery",
+        "",
+        "Please confirm this order."
+    ].filter(function(line){
+        return line !== null && line !== undefined;
+    }).join("\n");
+}
+
+
+/* ============================================================
+   MONEY FORMAT
+============================================================ */
+
+function money(v){
+
+    return (
+        Number(v) || 0
+    )
+    .toLocaleString(
+        "en-IN",
+        {
+            maximumFractionDigits:2
+        }
+    );
+
+}
+
+
+/* ============================================================
+   HTML ESCAPE
+============================================================ */
+
+function esc(v){
+
+    return String(
+        v ?? ""
+    )
+    .replaceAll(
+        "&",
+        "&amp;"
+    )
+    .replaceAll(
+        "<",
+        "&lt;"
+    )
+    .replaceAll(
+        ">",
+        "&gt;"
+    )
+    .replaceAll(
+        '"',
+        "&quot;"
+    )
+    .replaceAll(
+        "'",
+        "&#039;"
+    );
+
+}
+
+
+/* ============================================================
+   ATTRIBUTE ESCAPE
+============================================================ */
+
+function attr(v){
+
+    return esc(v);
+
+}
+
+
+/* ============================================================
+   JAVASCRIPT STRING ESCAPE
+============================================================ */
+
+function js(v){
+
+    return String(
+        v ?? ""
+    )
+    .replaceAll(
+        "\\",
+        "\\\\"
+    )
+    .replaceAll(
+        "'",
+        "\\'"
+    );
+
+}
+
+
+/* ============================================================
+   PLACEHOLDER PRODUCT IMAGE
+============================================================ */
+
+function placeholder(n){
+
+    return (
+        "https://placehold.co/600x600/f0f4ef/166534?text=" +
+        encodeURIComponent(
+            String(
+                n ||
+                "Grocery"
+            )
+            .slice(
+                0,
+                24
+            )
+        )
+    );
+
+}
+
+</script>
+
+</body>
+</html>
