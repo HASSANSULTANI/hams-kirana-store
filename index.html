@@ -391,6 +391,47 @@ main{
         font-size:14px;
         padding:12px 17px;
     }
+
+    /*
+       Mobile basket:
+       - full available screen height
+       - product list scrolls independently
+       - checkout controls stay visible
+    */
+    .drawer{
+        width:100%;
+        height:100vh;
+        height:100dvh;
+        max-height:100dvh;
+    }
+
+    .dhead{
+        padding:13px 14px;
+        min-height:62px;
+    }
+
+    .items{
+        padding:10px 14px;
+        min-height:0;
+        overflow-y:auto;
+    }
+
+    .dfoot{
+        padding:12px 14px;
+        padding-bottom:max(12px, env(safe-area-inset-bottom));
+    }
+
+    .dfoot .total{
+        margin-bottom:9px;
+    }
+
+    .clear-cart{
+        margin-bottom:8px;
+    }
+
+    .checkout{
+        padding:12px 14px;
+    }
 }
 
 /* ============================================================
@@ -741,15 +782,21 @@ footer{
     position:fixed;
 
     right:0;
-
     top:0;
+    bottom:0;
 
     width:min(
         430px,
         100%
     );
 
+    /*
+       Use the dynamic viewport on modern mobile browsers.
+       Fallback to 100vh for older browsers.
+    */
     height:100vh;
+    height:100dvh;
+    max-height:100dvh;
 
     background:#fff;
 
@@ -761,9 +808,18 @@ footer{
     transition:
         transform .25s;
 
-    display:flex;
+    /*
+       Three fixed layout zones:
+       1. Basket header
+       2. Scrollable basket items
+       3. Fixed total/actions footer
+    */
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr) auto;
 
-    flex-direction:column;
+    overflow:hidden;
+
+    padding-bottom:env(safe-area-inset-bottom);
 }
 
 .drawer.open{
@@ -781,6 +837,12 @@ footer{
 
     justify-content:
         space-between;
+
+    align-items:center;
+
+    flex-shrink:0;
+
+    min-height:68px;
 }
 
 .close{
@@ -798,11 +860,24 @@ footer{
 }
 
 .items{
-    flex:1;
+    /*
+       THIS is the only scrollable part of the basket.
+       min-height:0 is critical inside a flex/grid constrained
+       viewport; without it, long basket content can push the
+       footer below the mobile screen.
+    */
+    min-height:0;
+    height:auto;
 
-    overflow:auto;
+    overflow-y:auto;
+    overflow-x:hidden;
 
     padding:14px;
+
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+
+    scrollbar-width:thin;
 }
 
 .item{
@@ -873,6 +948,19 @@ footer{
         1px solid #e5e9e5;
 
     padding:16px;
+
+    /*
+       Footer never scrolls away. It remains visible while only
+       the product list above it scrolls.
+    */
+    flex-shrink:0;
+    min-height:0;
+    background:#fff;
+    position:relative;
+    z-index:2;
+
+    padding-bottom:
+        max(16px, env(safe-area-inset-bottom));
 }
 
 /* ============================================================
@@ -1747,7 +1835,8 @@ footer{
    GOOGLE APPS SCRIPT
 ============================================================ */
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwnwcBSQG9ACJy-fbZbbuc_8tiiZP1UmKwrbemlMlDEiMpTBDiR6WgAntX6_fOPkxvT/exec";
+const API_URL =
+"https://script.google.com/macros/s/AKfycbwnwcBSQG9ACJy-fbZbbuc_8tiiZP1UmKwrbemlMlDEiMpTBDiR6WgAntX6_fOPkxvT/exec";
 
 
 const DEFAULT_WA =
@@ -3080,6 +3169,12 @@ function openCart(){
         .getElementById("drawer")
         .classList.add("open");
 
+    /*
+       Lock the page behind the basket. The basket's own .items
+       area remains independently scrollable.
+    */
+    document.body.style.overflow = "hidden";
+
 }
 
 
@@ -3097,6 +3192,8 @@ function closeCart(){
     document
         .getElementById("drawer")
         .classList.remove("open");
+
+    document.body.style.overflow = "";
 
 }
 
@@ -3275,7 +3372,7 @@ async function placeOrder(e){
         name: name,
         mobile: cleanMobile,
 
-        /* Detailed address fields — kept separate for Google Sheets */
+        /* Compatibility field expected by the current Code.gs */
         address: address,
         deliveryAddress: address,
 
@@ -3294,14 +3391,10 @@ async function placeOrder(e){
 
         paymentMethod: "Cash on Delivery",
 
-        /* IMPORTANT:
-           One basket item = one item object.
-           Code.gs saves each item on its own row
-           while keeping the same Order ID. */
         items: cart.map(function(x){
             return {
-                productId: String(x.productId || ""),
-                productName: String(x.productName || "").trim(),
+                productId: x.productId,
+                productName: x.productName,
                 quantity: Number(x.quantity) || 0,
                 price: Number(x.price) || 0
             };
