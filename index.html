@@ -391,47 +391,6 @@ main{
         font-size:14px;
         padding:12px 17px;
     }
-
-    /*
-       Mobile basket:
-       - full available screen height
-       - product list scrolls independently
-       - checkout controls stay visible
-    */
-    .drawer{
-        width:100%;
-        height:100vh;
-        height:100dvh;
-        max-height:100dvh;
-    }
-
-    .dhead{
-        padding:13px 14px;
-        min-height:62px;
-    }
-
-    .items{
-        padding:10px 14px;
-        min-height:0;
-        overflow-y:auto;
-    }
-
-    .dfoot{
-        padding:12px 14px;
-        padding-bottom:max(12px, env(safe-area-inset-bottom));
-    }
-
-    .dfoot .total{
-        margin-bottom:9px;
-    }
-
-    .clear-cart{
-        margin-bottom:8px;
-    }
-
-    .checkout{
-        padding:12px 14px;
-    }
 }
 
 /* ============================================================
@@ -782,21 +741,15 @@ footer{
     position:fixed;
 
     right:0;
+
     top:0;
-    bottom:0;
 
     width:min(
         430px,
         100%
     );
 
-    /*
-       Use the dynamic viewport on modern mobile browsers.
-       Fallback to 100vh for older browsers.
-    */
     height:100vh;
-    height:100dvh;
-    max-height:100dvh;
 
     background:#fff;
 
@@ -808,18 +761,9 @@ footer{
     transition:
         transform .25s;
 
-    /*
-       Three fixed layout zones:
-       1. Basket header
-       2. Scrollable basket items
-       3. Fixed total/actions footer
-    */
-    display:grid;
-    grid-template-rows:auto minmax(0,1fr) auto;
+    display:flex;
 
-    overflow:hidden;
-
-    padding-bottom:env(safe-area-inset-bottom);
+    flex-direction:column;
 }
 
 .drawer.open{
@@ -837,12 +781,6 @@ footer{
 
     justify-content:
         space-between;
-
-    align-items:center;
-
-    flex-shrink:0;
-
-    min-height:68px;
 }
 
 .close{
@@ -860,24 +798,11 @@ footer{
 }
 
 .items{
-    /*
-       THIS is the only scrollable part of the basket.
-       min-height:0 is critical inside a flex/grid constrained
-       viewport; without it, long basket content can push the
-       footer below the mobile screen.
-    */
-    min-height:0;
-    height:auto;
+    flex:1;
 
-    overflow-y:auto;
-    overflow-x:hidden;
+    overflow:auto;
 
     padding:14px;
-
-    overscroll-behavior:contain;
-    -webkit-overflow-scrolling:touch;
-
-    scrollbar-width:thin;
 }
 
 .item{
@@ -948,19 +873,6 @@ footer{
         1px solid #e5e9e5;
 
     padding:16px;
-
-    /*
-       Footer never scrolls away. It remains visible while only
-       the product list above it scrolls.
-    */
-    flex-shrink:0;
-    min-height:0;
-    background:#fff;
-    position:relative;
-    z-index:2;
-
-    padding-bottom:
-        max(16px, env(safe-area-inset-bottom));
 }
 
 /* ============================================================
@@ -1104,6 +1016,184 @@ footer{
 
 .field textarea{
     min-height:85px;
+}
+
+
+/* ============================================================
+   ORDER CONFIRMATION SCREEN
+============================================================ */
+
+.success{
+    text-align:center;
+    padding:24px 20px 20px;
+}
+
+.confirm-icon{
+    width:76px;
+    height:76px;
+    border-radius:50%;
+    background:#dcfce7;
+    color:#166534;
+    display:grid;
+    place-items:center;
+    margin:0 auto 14px;
+    font-size:40px;
+    font-weight:800;
+    box-shadow:0 0 0 8px #f0fdf4;
+    animation:confirmPop .45s ease-out;
+}
+
+@keyframes confirmPop{
+    0%{
+        transform:scale(.55);
+        opacity:0;
+    }
+    70%{
+        transform:scale(1.08);
+        opacity:1;
+    }
+    100%{
+        transform:scale(1);
+        opacity:1;
+    }
+}
+
+.success h2{
+    color:#166534;
+    font-size:26px;
+}
+
+.confirm-subtitle{
+    margin-top:7px;
+    color:#68736a;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.confirm-card{
+    margin-top:18px;
+    text-align:left;
+    border:1px solid #dce8de;
+    border-radius:14px;
+    background:#fafcf9;
+    overflow:hidden;
+}
+
+.confirm-card-head{
+    padding:11px 13px;
+    background:#f0fdf4;
+    border-bottom:1px solid #dce8de;
+    font-size:13px;
+    font-weight:800;
+    color:#166534;
+}
+
+.confirm-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px 13px;
+    border-bottom:1px solid #edf0ed;
+    font-size:12px;
+}
+
+.confirm-row:last-child{
+    border-bottom:0;
+}
+
+.confirm-label{
+    color:#68736a;
+}
+
+.confirm-value{
+    text-align:right;
+    font-weight:700;
+    word-break:break-word;
+}
+
+.confirm-items{
+    padding:4px 13px;
+}
+
+.confirm-item{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding:8px 0;
+    border-bottom:1px solid #edf0ed;
+    font-size:12px;
+}
+
+.confirm-item:last-child{
+    border-bottom:0;
+}
+
+.confirm-total{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding:12px 13px;
+    background:#f0fdf4;
+    color:#166534;
+    font-size:16px;
+    font-weight:800;
+}
+
+.confirm-status{
+    margin-top:14px;
+    display:grid;
+    gap:7px;
+    text-align:left;
+}
+
+.confirm-status div{
+    padding:9px 11px;
+    border-radius:9px;
+    background:#f8faf8;
+    border:1px solid #e5e9e5;
+    font-size:12px;
+}
+
+.confirm-actions{
+    margin-top:17px;
+    display:grid;
+    gap:9px;
+}
+
+.confirm-actions .place{
+    margin-top:0 !important;
+}
+
+.confirm-wa{
+    display:block;
+    width:100%;
+    text-align:center;
+    padding:11px 14px;
+    border-radius:10px;
+    background:#25d366;
+    color:#fff !important;
+    font-weight:800;
+    text-decoration:none;
+}
+
+@media(max-width:520px){
+    .success{
+        padding:20px 14px 16px;
+    }
+
+    .success h2{
+        font-size:23px;
+    }
+
+    .confirm-row{
+        align-items:flex-start;
+        flex-direction:column;
+        gap:3px;
+    }
+
+    .confirm-value{
+        text-align:left;
+    }
 }
 
 .success{
@@ -1774,53 +1864,94 @@ footer{
     id="successModal"
     class="modal"
 >
-
 <div class="modalbox">
 
     <div class="success">
 
-        <div class="check">
+        <div class="confirm-icon">
             ✓
         </div>
 
         <h2>
-            Order Placed!
+            Order Confirmed!
         </h2>
 
-        <p
-            id="successText"
-            class="muted"
-            style="margin-top:8px"
-        ></p>
+        <p class="confirm-subtitle">
+            Thank you for shopping with HAMS Kirana Store.<br>
+            Your order has been placed successfully.
+        </p>
 
+        <div class="confirm-card">
 
-        <button
-            class="place"
-            style="margin-top:18px"
-            onclick="closeSuccess()"
-        >
+            <div class="confirm-card-head">
+                📋 Order Details
+            </div>
 
-            Continue Shopping
+            <div class="confirm-row">
+                <span class="confirm-label">Order ID</span>
+                <span class="confirm-value" id="confirmOrderId">—</span>
+            </div>
 
-        </button>
+            <div class="confirm-row">
+                <span class="confirm-label">Customer</span>
+                <span class="confirm-value" id="confirmCustomer">—</span>
+            </div>
 
+            <div class="confirm-row">
+                <span class="confirm-label">Mobile</span>
+                <span class="confirm-value" id="confirmMobile">—</span>
+            </div>
 
-        <a
-            id="wa"
-            class="wa"
-            target="_blank"
-            rel="noopener"
-        >
+            <div class="confirm-row">
+                <span class="confirm-label">Delivery Address</span>
+                <span class="confirm-value" id="confirmAddress">—</span>
+            </div>
 
-            💬 Contact HAMS Kirana Store
-            on WhatsApp
+            <div class="confirm-items" id="confirmItems"></div>
 
-        </a>
+            <div class="confirm-total">
+                <span>Total</span>
+                <span id="confirmTotal">₹0</span>
+            </div>
+
+        </div>
+
+        <div class="confirm-status">
+
+            <div>
+                ✅ <strong>Order recorded successfully</strong>
+            </div>
+
+            <div>
+                📱 <strong>WhatsApp order message prepared</strong>
+            </div>
+
+        </div>
+
+        <div class="confirm-actions">
+
+            <a
+                id="wa"
+                class="confirm-wa"
+                target="_blank"
+                rel="noopener"
+            >
+                💬 Open WhatsApp Order
+            </a>
+
+            <button
+                class="place"
+                type="button"
+                onclick="closeSuccess()"
+            >
+                Continue Shopping
+            </button>
+
+        </div>
 
     </div>
 
 </div>
-
 </div>
 
 
@@ -3169,12 +3300,6 @@ function openCart(){
         .getElementById("drawer")
         .classList.add("open");
 
-    /*
-       Lock the page behind the basket. The basket's own .items
-       area remains independently scrollable.
-    */
-    document.body.style.overflow = "hidden";
-
 }
 
 
@@ -3192,8 +3317,6 @@ function closeCart(){
     document
         .getElementById("drawer")
         .classList.remove("open");
-
-    document.body.style.overflow = "";
 
 }
 
@@ -3249,6 +3372,18 @@ function closeSuccess(){
             "successModal"
         )
         .classList.remove("show");
+
+    /* Keep the customer at the top of the product area after
+       returning to shopping, without changing the basket state. */
+    const productScroll =
+        document.getElementById("productScroll");
+
+    if(productScroll){
+        productScroll.scrollTo({
+            top:0,
+            behavior:"smooth"
+        });
+    }
 
 }
 
@@ -3452,10 +3587,32 @@ async function placeOrder(e){
 
         closeCheckout();
 
-        document.getElementById("successText").innerHTML =
-            "Your order has been saved successfully.<br><br>" +
-            "<strong>Order ID: " + esc(d.orderId) + "</strong><br>" +
-            "Total: <strong>₹" + money(d.total) + "</strong>";
+        document.getElementById("confirmOrderId").textContent =
+            d.orderId || "—";
+
+        document.getElementById("confirmCustomer").textContent =
+            name || "—";
+
+        document.getElementById("confirmMobile").textContent =
+            cleanMobile || "—";
+
+        document.getElementById("confirmAddress").textContent =
+            address || "—";
+
+        document.getElementById("confirmTotal").textContent =
+            "₹" + money(d.total);
+
+        document.getElementById("confirmItems").innerHTML =
+            payload.items.map(function(item){
+                const qty = Number(item.quantity) || 0;
+                const price = Number(item.price) || 0;
+                return `
+                    <div class="confirm-item">
+                        <span>${esc(item.productName)} × ${qty}</span>
+                        <b>₹${money(price * qty)}</b>
+                    </div>
+                `;
+            }).join("");
 
         document.getElementById("wa").href = whatsappUrl;
 
