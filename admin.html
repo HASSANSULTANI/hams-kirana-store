@@ -1026,6 +1026,47 @@ function setStatusFilter(status){
 }
 
 
+function renderStatusFlow(order){
+
+    const flow = [
+        "NEW",
+        "CONFIRMED",
+        "PACKING",
+        "OUT FOR DELIVERY",
+        "DELIVERED"
+    ];
+
+    const currentIndex = flow.indexOf(order.status);
+
+    const steps = flow.map(function(status, index){
+        const done = currentIndex >= 0 && index < currentIndex;
+        const current = status === order.status;
+
+        return `
+            <div class="status-step ${done ? "done" : ""} ${current ? "current" : ""}">
+                <span class="status-dot">${done ? "✓" : (index + 1)}</span>
+                <span>${esc(status)}</span>
+            </div>
+            ${index < flow.length - 1 ? `<span class="status-line ${currentIndex >= 0 && index < currentIndex ? "done" : ""}"></span>` : ""}
+        `;
+    }).join("");
+
+    const quick = order.status === "CANCELLED"
+        ? `<button onclick="quickStatus('${js(order.orderId)}','NEW')">Reopen → NEW</button>`
+        : flow
+            .filter(function(status){ return status !== order.status; })
+            .map(function(status){
+                return `<button onclick="quickStatus('${js(order.orderId)}','${js(status)}')">→ ${esc(status)}</button>`;
+            }).join("");
+
+    return `
+        <div style="padding:10px 16px 0;background:#fff">
+            <div class="status-flow">${steps}</div>
+            ${order.status === "CANCELLED" ? `<div class="quick-status"><button onclick="quickStatus('${js(order.orderId)}','NEW')">↩ Reopen Order</button></div>` : `<div class="quick-status">${quick}</div>`}
+        </div>
+    `;
+}
+
 function renderOrder(order){
 
     const items =
