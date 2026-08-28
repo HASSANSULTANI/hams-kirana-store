@@ -193,6 +193,29 @@ header{
     border-color:#15803d;
 }
 
+/* ORDER SORTING */
+.sorting{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-4px 0 18px}
+.sort-title{font-size:11px;font-weight:800;color:#68736a;text-transform:uppercase;letter-spacing:.04em;margin-right:2px}
+.sort-row{display:flex;gap:7px;overflow:auto;padding:2px 0 4px;max-width:100%}
+.sort-btn{flex:0 0 auto;border:1px solid #dce4dc;background:#fff;color:#315338;border-radius:9px;padding:8px 11px;cursor:pointer;font-weight:700;font-size:11px;white-space:nowrap}
+.sort-btn:hover{border-color:#15803d}
+.sort-btn.active{background:#effaf2;color:#166534;border-color:#15803d}
+
+/* COLLAPSED / EXPANDED ORDER */
+.order-summary{padding:12px 16px 14px;background:#fff;border-bottom:1px solid #e7ece7}
+.summary-grid{display:grid;grid-template-columns:minmax(150px,1.05fr) minmax(150px,1.25fr) minmax(180px,2fr) minmax(120px,.75fr);gap:10px 18px;align-items:start}
+.summary-field{min-width:0}
+.summary-label{display:block;color:#68736a;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.035em;margin-bottom:4px}
+.summary-value{color:#172017;font-size:12px;font-weight:700;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.summary-total{color:#166534;font-size:14px}
+.order-controls{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.expand-btn{width:34px;height:34px;border:1px solid #15803d;border-radius:9px;background:#fff;color:#166534;cursor:pointer;font-size:19px;font-weight:700;line-height:1;display:grid;place-items:center}
+.expand-btn:hover{background:#f0fdf4}
+.order-details{display:none}
+.order.expanded .order-details{display:block}
+.order.expanded .expand-btn{background:#15803d;color:#fff}
+@media(max-width:1000px){.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
 .orders{
     display:grid;
     gap:14px;
@@ -472,6 +495,37 @@ header{
     .action{
         text-align:center;
     }
+
+    .order-head{
+        flex-direction:row;
+        align-items:center;
+    }
+
+    .order-controls{
+        min-width:0;
+    }
+
+    .order-controls > div{
+        min-width:0;
+    }
+
+    .summary-grid{
+        grid-template-columns:1fr 1fr;
+        gap:10px 12px;
+    }
+
+    .summary-value{
+        font-size:11px;
+    }
+
+    .status{
+        min-width:125px;
+        max-width:46vw;
+    }
+
+    .sort-title{
+        width:100%;
+    }
 }
 </style>
 </head>
@@ -534,6 +588,8 @@ header{
     <div id="stats" class="stats"></div>
 
     <div id="filters" class="filters"></div>
+
+    <div id="sorting" class="sorting"></div>
 
     <div id="orders" class="orders">
         <div class="loading">Loading orders...</div>
@@ -666,6 +722,11 @@ let orders = [];
 
 let activeGroup = "ALL";
 let activeStatusFilter = "ALL";
+
+/* UI-only sorting and expansion state. */
+let activeSort = "DATE";
+let sortDirection = "DESC";
+const expandedOrders = new Set();
 
 const FILTER_GROUPS = {
     ALL: {
@@ -862,7 +923,9 @@ function render(){
 
         });
 
-    if(!filtered.length){
+    const sorted = filtered.slice().sort(compareOrders);
+
+    if(!sorted.length){
 
         document.getElementById("orders").innerHTML =
             '<div class="empty">No matching orders found.</div>';
@@ -872,7 +935,7 @@ function render(){
     }
 
     document.getElementById("orders").innerHTML =
-        filtered
+        sorted
             .map(renderOrder)
             .join("");
 
@@ -989,8 +1052,103 @@ function renderFilters(){
         </div>
     `;
 
+    renderSorting();
 }
 
+
+function renderSorting(){
+    const options = [
+        ["ID", "Order ID"],
+        ["DATE", "Order Date & Time"],
+        ["STATUS", "Order Status"],
+        ["TOTAL", "Total Amount"],
+        ["NAME", "Customer Name"]
+    ];
+
+    const html = options.map(function(pair){
+        const key = pair[0];
+        const label = pair[1];
+        const active = activeSort === key;
+        const arrow = active ? (sortDirection === "ASC" ? " ↑" : " ↓") : "";
+        return `<button class="sort-btn ${active ? "active" : ""}" onclick="setSort('${js(key)}')" title="Sort by ${esc(label)}">${esc(label)}${arrow}</button>`;
+    }).join("");
+
+    document.getElementById("sorting").innerHTML = `
+        <span class="sort-title">Sort By</span>
+        <div class="sort-row">${html}</div>
+    `;
+}
+
+function setSort(key){
+    const allowed = ["ID", "DATE", "STATUS", "TOTAL", "NAME"];
+    if(!allowed.includes(key)) return;
+
+    if(activeSort === key){
+        sortDirection = sortDirection === "ASC" ? "DESC" : "ASC";
+    }else{
+        activeSort = key;
+        sortDirection = (key === "DATE" || key === "ID" || key === "TOTAL") ? "DESC" : "ASC";
+    }
+
+    renderSorting();
+    render();
+}
+
+function compareOrders(a,b){
+    let av, bv;
+
+    if(activeSort === "ID"){
+        av = orderIdSortValue(a.orderId);
+        bv = orderIdSortValue(b.orderId);
+    }else if(activeSort === "DATE"){
+        av = dateSortValue(a.timestamp);
+        bv = dateSortValue(b.timestamp);
+    }else if(activeSort === "STATUS"){
+        av = statusSortValue(a.status);
+        bv = statusSortValue(b.status);
+    }else if(activeSort === "TOTAL"){
+        av = Number(a.total) || 0;
+        bv = Number(b.total) || 0;
+    }else{
+        av = String(a.name || "").toLowerCase();
+        bv = String(b.name || "").toLowerCase();
+    }
+
+    let result;
+    if(typeof av === "number" && typeof bv === "number"){
+        result = av - bv;
+    }else{
+        result = String(av).localeCompare(String(bv), undefined, {numeric:true,sensitivity:"base"});
+    }
+
+    if(result === 0){
+        result = dateSortValue(b.timestamp) - dateSortValue(a.timestamp);
+    }
+
+    return sortDirection === "ASC" ? result : -result;
+}
+
+function orderIdSortValue(value){
+    const match = String(value || "").match(/(\d+)\s*$/);
+    return match ? Number(match[1]) : String(value || "").toLowerCase();
+}
+
+function dateSortValue(value){
+    const raw = String(value || "").trim();
+    const parsed = Date.parse(raw.replace(/-/g,"/"));
+    return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function statusSortValue(value){
+    const order = {"NEW":1,"CONFIRMED":2,"PACKING":3,"OUT FOR DELIVERY":4,"DELIVERED":5,"CANCELLED":6};
+    return order[String(value || "").toUpperCase()] || 99;
+}
+
+function toggleOrder(orderId){
+    if(expandedOrders.has(orderId)) expandedOrders.delete(orderId);
+    else expandedOrders.add(orderId);
+    render();
+}
 
 function setGroup(group){
 
@@ -1069,98 +1227,58 @@ function renderStatusFlow(order){
 
 function renderOrder(order){
 
-    const items =
-        Array.isArray(order.items)
-            ? order.items
-            : [];
+    const items = Array.isArray(order.items) ? order.items : [];
 
-    const itemRows =
-        items.length
-            ? items.map(function(item){
-
-                return `
-                    <tr>
-                        <td>${esc(item.product)}</td>
-                        <td>${item.quantity}</td>
-                        <td>₹${money(item.price)}</td>
-                        <td>₹${money(item.total)}</td>
-                    </tr>
-                `;
-
-            }).join("")
-            : `
+    const itemRows = items.length
+        ? items.map(function(item){
+            return `
                 <tr>
-                    <td colspan="4">No item details available.</td>
+                    <td>${esc(item.product)}</td>
+                    <td>${item.quantity}</td>
+                    <td>₹${money(item.price)}</td>
+                    <td>₹${money(item.total)}</td>
                 </tr>
             `;
+        }).join("")
+        : `<tr><td colspan="4">No item details available.</td></tr>`;
 
     const address = [
-        order.houseFlat,
-        order.building,
-        order.street,
-        order.area,
-        order.city,
-        order.pincode
+        order.houseFlat, order.building, order.street,
+        order.area, order.city, order.pincode
     ].filter(Boolean).join(", ");
 
-    const mapButton =
-        order.mapsLink
-            ? `
-                <a
-                    class="action"
-                    href="${attr(order.mapsLink)}"
-                    target="_blank"
-                    rel="noopener"
-                >
-                    📍 Open Google Maps
-                </a>
-            `
-            : "";
+    const mapButton = order.mapsLink ? `
+        <a class="action" href="${attr(order.mapsLink)}" target="_blank" rel="noopener">📍 Open Google Maps</a>
+    ` : "";
 
-    const callButton =
-        order.mobile
-            ? `
-                <a
-                    class="action"
-                    href="tel:${attr(order.mobile)}"
-                >
-                    📞 Call Customer
-                </a>
-            `
-            : "";
+    const callButton = order.mobile ? `
+        <a class="action" href="tel:${attr(order.mobile)}">📞 Call Customer</a>
+    ` : "";
 
-    const whatsappButton =
-        order.mobile
-            ? `
-                <a
-                    class="action whatsapp"
-                    href="#"
-                    onclick="openWhatsAppOrder('${js(order.orderId)}'); return false;"
-                >
-                    💬 WhatsApp Order
-                </a>
-                <a
-                    class="action status-wa"
-                    href="#"
-                    onclick="openWhatsAppStatus('${js(order.orderId)}'); return false;"
-                >
-                    📲 Send Status
-                </a>
-            `
-            : "";
+    const whatsappButton = order.mobile ? `
+        <a class="action whatsapp" href="#" onclick="openWhatsAppOrder('${js(order.orderId)}'); return false;">💬 WhatsApp Order</a>
+        <a class="action status-wa" href="#" onclick="openWhatsAppStatus('${js(order.orderId)}'); return false;">📲 Send Status</a>
+    ` : "";
+
+    const isExpanded = expandedOrders.has(order.orderId);
+    const safeStatus = String(order.status || "NEW");
 
     return `
-        <article class="order">
+        <article class="order ${isExpanded ? "expanded" : ""}">
 
             <div class="order-head">
+                <div class="order-controls">
+                    <button
+                        class="expand-btn"
+                        type="button"
+                        onclick="toggleOrder('${js(order.orderId)}')"
+                        aria-label="${isExpanded ? "Collapse" : "Expand"} order ${esc(order.orderId)}"
+                        title="${isExpanded ? "Collapse order" : "Expand order"}"
+                    >${isExpanded ? "−" : "+"}</button>
 
-                <div>
-                    <div class="order-id">
-                        ${esc(order.orderId)}
-                    </div>
-
-                    <div class="time">
-                        ${esc(order.timestamp)}
+                    <div>
+                        <div class="order-id">${esc(order.orderId)}</div>
+                        <div class="time">${esc(order.timestamp)}</div>
                     </div>
                 </div>
 
@@ -1170,129 +1288,79 @@ function renderOrder(order){
                     onchange="changeStatus('${js(order.orderId)}', this.value)"
                 >
                     ${STATUSES.map(function(status){
-                        return `
-                            <option
-                                value="${attr(status)}"
-                                ${status === order.status ? "selected" : ""}
-                            >
-                                ${esc(status)}
-                            </option>
-                        `;
+                        return `<option value="${attr(status)}" ${status === safeStatus ? "selected" : ""}>${esc(status)}</option>`;
                     }).join("")}
                 </select>
+            </div>
 
+            <div class="order-summary">
+                <div class="summary-grid">
+                    <div class="summary-field">
+                        <span class="summary-label">Order Number</span>
+                        <span class="summary-value">${esc(order.orderId)}</span>
+                    </div>
+                    <div class="summary-field">
+                        <span class="summary-label">Date &amp; Time</span>
+                        <span class="summary-value">${esc(order.timestamp)}</span>
+                    </div>
+                    <div class="summary-field">
+                        <span class="summary-label">Customer Name</span>
+                        <span class="summary-value" title="${attr(order.name || "—")}">${esc(order.name || "—")}</span>
+                    </div>
+                    <div class="summary-field">
+                        <span class="summary-label">Total Amount</span>
+                        <span class="summary-value summary-total">₹${money(order.total)}</span>
+                    </div>
+                </div>
             </div>
 
             ${renderStatusFlow(order)}
 
-            <div class="order-body">
-
-                <section class="section">
-
-                    <div class="section-title">
-                        👤 Customer
-                    </div>
-
-                    <div class="section-body customer">
-
-                        <b>${esc(order.name || "—")}</b>
-
-                        <div>
-                            📱 ${esc(order.mobile || "—")}
+            <div class="order-details">
+                <div class="order-body">
+                    <section class="section">
+                        <div class="section-title">👤 Customer</div>
+                        <div class="section-body customer">
+                            <b>${esc(order.name || "—")}</b>
+                            <div>📱 ${esc(order.mobile || "—")}</div>
+                            <div>💳 ${esc(order.paymentMethod || "Cash on Delivery")}</div>
                         </div>
+                    </section>
 
-                        <div>
-                            💳 ${esc(order.paymentMethod || "Cash on Delivery")}
+                    <section class="section">
+                        <div class="section-title">🏠 Delivery Address</div>
+                        <div class="section-body">
+                            ${esc(address || "—")}
+                            ${order.landmark ? `<br><strong>Landmark:</strong> ${esc(order.landmark)}` : ""}
+                            ${order.mapAddress ? `<br><strong>Map Address:</strong> ${esc(order.mapAddress)}` : ""}
+                            ${order.latitude !== "" && order.longitude !== "" ? `<br><strong>Coordinates:</strong> ${esc(order.latitude)}, ${esc(order.longitude)}` : ""}
                         </div>
+                    </section>
 
-                    </div>
-
-                </section>
-
-                <section class="section">
-
-                    <div class="section-title">
-                        🏠 Delivery Address
-                    </div>
-
-                    <div class="section-body">
-
-                        ${esc(address || "—")}
-
-                        ${
-                            order.landmark
-                                ? `<br><strong>Landmark:</strong> ${esc(order.landmark)}`
-                                : ""
-                        }
-
-                        ${
-                            order.mapAddress
-                                ? `<br><strong>Map Address:</strong> ${esc(order.mapAddress)}`
-                                : ""
-                        }
-
-                        ${
-                            order.latitude !== "" &&
-                            order.longitude !== ""
-                                ? `<br><strong>Coordinates:</strong> ${esc(order.latitude)}, ${esc(order.longitude)}`
-                                : ""
-                        }
-
-                    </div>
-
-                </section>
-
-                <section class="section" style="grid-column:1/-1">
-
-                    <div class="section-title">
-                        🛍️ Items
-                    </div>
-
-                    <div class="section-body">
-
-                        <table class="items">
-
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Qty</th>
-                                    <th>Price</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                ${itemRows}
-                            </tbody>
-
-                        </table>
-
-                        <div class="total">
-                            <span>
-                                ${order.totalQuantity || 0} item(s)
-                            </span>
-                            <span>
-                                ₹${money(order.total)}
-                            </span>
+                    <section class="section" style="grid-column:1/-1">
+                        <div class="section-title">🛍️ Items</div>
+                        <div class="section-body">
+                            <table class="items">
+                                <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
+                                <tbody>${itemRows}</tbody>
+                            </table>
+                            <div class="total">
+                                <span>${order.totalQuantity || 0} item(s)</span>
+                                <span>₹${money(order.total)}</span>
+                            </div>
                         </div>
+                    </section>
+                </div>
 
-                    </div>
-
-                </section>
-
-            </div>
-
-            <div class="actions">
-
-                ${mapButton}
-                ${callButton}
-                ${whatsappButton}
-
+                <div class="actions">
+                    ${mapButton}
+                    ${callButton}
+                    ${whatsappButton}
+                </div>
             </div>
 
         </article>
     `;
-
 }
 
 async function changeStatus(orderId, newStatus){
