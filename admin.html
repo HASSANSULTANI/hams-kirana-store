@@ -261,7 +261,10 @@ header{
     flex-wrap:wrap;
 }
 
+.action.whatsapp{background:#25D366;color:#fff;border-color:#25D366}
+.action.status-wa{background:#128C7E;color:#fff;border-color:#128C7E}
 .action{
+
     text-decoration:none;
     border:1px solid #15803d;
     background:#fff;
@@ -679,14 +682,18 @@ function renderOrder(order){
         order.mobile
             ? `
                 <a
-                    class="action"
-                    target="_blank"
-                    rel="noopener"
-                    href="https://wa.me/${encodeURIComponent(
-                        normalizeWhatsApp(order.mobile)
-                    )}"
+                    class="action whatsapp"
+                    href="#"
+                    onclick="openWhatsAppOrder('${js(order.orderId)}'); return false;"
                 >
-                    💬 WhatsApp Customer
+                    💬 WhatsApp Order
+                </a>
+                <a
+                    class="action status-wa"
+                    href="#"
+                    onclick="openWhatsAppStatus('${js(order.orderId)}'); return false;"
+                >
+                    📲 Send Status
                 </a>
             `
             : "";
@@ -922,6 +929,137 @@ async function changeStatus(orderId, newStatus){
     }
 
 }
+
+
+function getOrderById(orderId){
+    return orders.find(function(item){
+        return item.orderId === orderId;
+    }) || null;
+}
+
+function buildAdminWhatsAppOrderMessage(order){
+    const address = [
+        order.houseFlat,
+        order.building,
+        order.street,
+        order.area,
+        order.city,
+        order.pincode
+    ].filter(Boolean).join(", ");
+
+    const itemLines = (order.items || []).map(function(item){
+        return "• " +
+            item.product +
+            " × " +
+            item.quantity +
+            " @ ₹" +
+            money(item.price) +
+            " = ₹" +
+            money(item.total);
+    }).join("\n");
+
+    return [
+        "🛒 HAMS KIRANA STORE",
+        "ORDER DETAILS",
+        "",
+        "Order ID: " + order.orderId,
+        "",
+        "👤 CUSTOMER",
+        "Name: " + (order.name || "—"),
+        "Mobile: " + (order.mobile || "—"),
+        "",
+        "🏠 DELIVERY ADDRESS",
+        address || "—",
+        order.landmark ? "Landmark / Instructions: " + order.landmark : "",
+        "",
+        "📍 GOOGLE MAPS",
+        order.mapsLink || "Location link not provided",
+        "",
+        "🛍️ ITEMS",
+        itemLines || "No items",
+        "",
+        "💰 TOTAL: ₹" + money(order.total),
+        "Payment: " + (order.paymentMethod || "Cash on Delivery"),
+        "",
+        "Status: " + (order.status || "NEW"),
+        "",
+        "Thank you for ordering from HAMS Kirana Store."
+    ].filter(function(line){
+        return line !== null && line !== undefined;
+    }).join("\n");
+}
+
+function openWhatsAppOrder(orderId){
+    const order = getOrderById(orderId);
+
+    if(!order || !order.mobile){
+        alert("Customer mobile number is not available.");
+        return;
+    }
+
+    const phone = normalizeWhatsApp(order.mobile);
+    const message = buildAdminWhatsAppOrderMessage(order);
+
+    const url =
+        "https://wa.me/" +
+        phone +
+        "?text=" +
+        encodeURIComponent(message);
+
+    window.open(url, "_blank", "noopener");
+}
+
+function buildStatusWhatsAppMessage(order){
+    const messages = {
+        "NEW":
+            "We have received your order and it is currently being reviewed.",
+        "CONFIRMED":
+            "Good news! Your order has been confirmed and will be prepared shortly.",
+        "PACKING":
+            "Your order is now being packed. We will update you when it is out for delivery.",
+        "OUT FOR DELIVERY":
+            "Your order is out for delivery and will reach you soon.",
+        "DELIVERED":
+            "Your order has been delivered successfully. Thank you for shopping with HAMS Kirana Store!",
+        "CANCELLED":
+            "Your order has been cancelled. Please contact HAMS Kirana Store if you need any assistance."
+    };
+
+    return [
+        "🛒 HAMS KIRANA STORE",
+        "",
+        "Order ID: " + order.orderId,
+        "Hello " + (order.name || "Customer") + ",",
+        "",
+        "📦 ORDER STATUS: " + order.status,
+        "",
+        messages[order.status] || "Your order status has been updated.",
+        "",
+        "Thank you,",
+        "HAMS Kirana Store"
+    ].join("\n");
+}
+
+function openWhatsAppStatus(orderId){
+    const order = getOrderById(orderId);
+
+    if(!order || !order.mobile){
+        alert("Customer mobile number is not available.");
+        return;
+    }
+
+    const phone = normalizeWhatsApp(order.mobile);
+    const message = buildStatusWhatsAppMessage(order);
+
+    const url =
+        "https://wa.me/" +
+        phone +
+        "?text=" +
+        encodeURIComponent(message);
+
+    window.open(url, "_blank", "noopener");
+}
+
 
 function normalizeWhatsApp(number){
 
