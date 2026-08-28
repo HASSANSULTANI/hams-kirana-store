@@ -94,6 +94,30 @@ header{
     padding:11px 15px;
     cursor:pointer;
     font-weight:700;
+    white-space:nowrap;
+}
+
+.auto-refresh-select{
+    border:1px solid #dfe7df;
+    border-radius:10px;
+    background:#fff;
+    color:#172017;
+    padding:10px 34px 10px 11px;
+    cursor:pointer;
+    font-weight:700;
+    min-width:145px;
+    outline:none;
+}
+
+.auto-refresh-select:focus{
+    border-color:#15803d;
+    box-shadow:0 0 0 2px rgba(21,128,61,.12);
+}
+
+.refresh-info{
+    color:#68736a;
+    font-size:12px;
+    white-space:nowrap;
 }
 
 .stats{
@@ -324,10 +348,20 @@ header{
 
     .toolbar{
         align-items:stretch;
+        flex-wrap:wrap;
     }
 
     .refresh{
         padding:10px 11px;
+    }
+
+    .auto-refresh-select{
+        flex:1;
+        min-width:130px;
+    }
+
+    .refresh-info{
+        width:100%;
     }
 
     .stats{
@@ -386,6 +420,26 @@ header{
         <button class="refresh" onclick="manualRefresh()">
             ↻ Refresh
         </button>
+
+        <select
+            id="autoRefreshInterval"
+            class="auto-refresh-select"
+            aria-label="Auto refresh interval"
+            onchange="changeAutoRefreshInterval()"
+        >
+            <option value="1">Auto Refresh: 1 Minute</option>
+            <option value="2">Auto Refresh: 2 Minutes</option>
+            <option value="3">Auto Refresh: 3 Minutes</option>
+            <option value="4">Auto Refresh: 4 Minutes</option>
+            <option value="5">Auto Refresh: 5 Minutes</option>
+            <option value="10">Auto Refresh: 10 Minutes</option>
+            <option value="15">Auto Refresh: 15 Minutes</option>
+            <option value="20">Auto Refresh: 20 Minutes</option>
+            <option value="30">Auto Refresh: 30 Minutes</option>
+            <option value="60">Auto Refresh: 1 Hour</option>
+        </select>
+
+        <span id="refreshInfo" class="refresh-info" aria-live="polite"></span>
     </div>
 
     <div id="notice" class="notice"></div>
@@ -409,14 +463,100 @@ const ADMIN_KEY = "03ce2a7c1c657acf55ac0c4bc220f91a";
 
 /*
  * AUTO REFRESH
- * The page refreshes its order data every 60 seconds.
- * If the admin manually clicks Refresh, the 60-second countdown
- * starts again from that manual refresh. This prevents an automatic
- * refresh from happening within 59 seconds of a manual refresh.
+ * The admin can choose the refresh interval from the dropdown.
+ * A manual Refresh always resets the countdown, so the page will not
+ * automatically refresh again until the selected interval has passed.
+ * The selected interval is remembered in this browser.
  */
-const AUTO_REFRESH_MS = 60 * 1000;
-let lastManualRefreshAt = Date.now();
+const AUTO_REFRESH_OPTIONS = [
+    1, 2, 3, 4, 5, 10, 15, 20, 30, 60
+];
+const AUTO_REFRESH_STORAGE_KEY = "hamsKiranaAdminAutoRefreshMinutes";
+let autoRefreshMinutes = 1;
+let lastRefreshAt = Date.now();
 let autoRefreshTimer = null;
+
+function getSavedAutoRefreshMinutes(){
+    try{
+        const saved = Number(
+            localStorage.getItem(AUTO_REFRESH_STORAGE_KEY)
+        );
+
+        if(AUTO_REFRESH_OPTIONS.includes(saved)){
+            return saved;
+        }
+    }catch(error){
+        console.warn("Could not read auto-refresh preference.", error);
+    }
+
+    return 1;
+}
+
+function saveAutoRefreshMinutes(){
+    try{
+        localStorage.setItem(
+            AUTO_REFRESH_STORAGE_KEY,
+            String(autoRefreshMinutes)
+        );
+    }catch(error){
+        console.warn("Could not save auto-refresh preference.", error);
+    }
+}
+
+function formatRefreshInterval(minutes){
+    if(minutes === 60){
+        return "1 hour";
+    }
+
+    return minutes + " min";
+}
+
+function updateRefreshInfo(){
+    const info = document.getElementById("refreshInfo");
+
+    if(!info){
+        return;
+    }
+
+    const intervalMs = autoRefreshMinutes * 60 * 1000;
+    const elapsed = Date.now() - lastRefreshAt;
+    const remainingMs = Math.max(0, intervalMs - elapsed);
+    const remainingSeconds = Math.ceil(remainingMs / 1000);
+
+    if(remainingSeconds <= 0){
+        info.textContent = "Refreshing...";
+        return;
+    }
+
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+
+    if(minutes > 0){
+        info.textContent =
+            "Next auto-refresh in " +
+            minutes + "m " +
+            String(seconds).padStart(2, "0") + "s";
+    }else{
+        info.textContent =
+            "Next auto-refresh in " +
+            seconds + "s";
+    }
+}
+
+function changeAutoRefreshInterval(){
+    const select = document.getElementById("autoRefreshInterval");
+    const selected = Number(select.value);
+
+    if(!AUTO_REFRESH_OPTIONS.includes(selected)){
+        return;
+    }
+
+    autoRefreshMinutes = selected;
+    lastRefreshAt = Date.now();
+    saveAutoRefreshMinutes();
+    updateRefreshInfo();
+    startAutoRefresh();
+}
 
 const STATUSES = [
     "NEW",
@@ -434,11 +574,19 @@ document
     .getElementById("search")
     .addEventListener("input", render);
 
+autoRefreshMinutes = getSavedAutoRefreshMinutes();
+
+document.getElementById("autoRefreshInterval").value =
+    String(autoRefreshMinutes);
+
 loadOrders(false);
 startAutoRefresh();
+updateRefreshInfo();
 
 function manualRefresh(){
-    lastManualRefreshAt = Date.now();
+    // Manual refresh resets the countdown using the currently selected interval.
+    lastRefreshAt = Date.now();
+    updateRefreshInfo();
     loadOrders(true);
 }
 
@@ -448,12 +596,15 @@ function startAutoRefresh(){
     }
 
     autoRefreshTimer = setInterval(function(){
-        const elapsed = Date.now() - lastManualRefreshAt;
+        const intervalMs = autoRefreshMinutes * 60 * 1000;
+        const elapsed = Date.now() - lastRefreshAt;
 
-        // Do not auto-refresh until at least 60 seconds have passed
-        // since the last manual Refresh click.
-        if(elapsed >= AUTO_REFRESH_MS){
+        if(elapsed >= intervalMs){
+            lastRefreshAt = Date.now();
+            updateRefreshInfo();
             loadOrders(false);
+        }else{
+            updateRefreshInfo();
         }
     }, 1000);
 }
