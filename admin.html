@@ -277,6 +277,71 @@ header{
     color:#166534;
 }
 
+
+.status-flow{
+    display:flex;
+    align-items:center;
+    gap:0;
+    margin-top:10px;
+    overflow:auto;
+    padding:2px 0 5px;
+}
+.status-step{
+    display:flex;
+    align-items:center;
+    flex:0 0 auto;
+    color:#94a09a;
+    font-size:10px;
+    font-weight:700;
+}
+.status-dot{
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    border:2px solid #d7e0d8;
+    background:#fff;
+    display:grid;
+    place-items:center;
+    margin-right:4px;
+}
+.status-step.done{color:#166534}
+.status-step.done .status-dot{
+    border-color:#15803d;
+    background:#15803d;
+    color:#fff;
+}
+.status-step.current{color:#166534}
+.status-step.current .status-dot{
+    border-color:#166534;
+    box-shadow:0 0 0 3px rgba(21,128,61,.12);
+}
+.status-line{
+    width:28px;
+    height:2px;
+    background:#d7e0d8;
+    margin:0 5px;
+}
+.status-line.done{background:#15803d}
+.quick-status{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    margin-top:10px;
+}
+.quick-status button{
+    border:1px solid #d8e2d9;
+    background:#fff;
+    color:#315338;
+    border-radius:7px;
+    padding:6px 8px;
+    cursor:pointer;
+    font-size:10px;
+    font-weight:700;
+}
+.quick-status button:hover{
+    border-color:#15803d;
+    color:#166534;
+}
 .actions{
     padding:12px 16px;
     border-top:1px solid #e7ece7;
@@ -599,7 +664,15 @@ function startAutoRefresh(){
         const intervalMs = autoRefreshMinutes * 60 * 1000;
         const elapsed = Date.now() - lastRefreshAt;
 
-        if(elapsed >= intervalMs){
+        const active = document.activeElement;
+        const userIsEditing =
+            active &&
+            (active.tagName === "SELECT" ||
+             active.tagName === "INPUT" ||
+             active.tagName === "TEXTAREA" ||
+             active.isContentEditable);
+
+        if(elapsed >= intervalMs && !userIsEditing){
             lastRefreshAt = Date.now();
             updateRefreshInfo();
             loadOrders(false);
@@ -800,6 +873,61 @@ function setFilter(filter){
 
 }
 
+function renderStatusFlow(order){
+
+    const flow = [
+        "NEW",
+        "CONFIRMED",
+        "PACKING",
+        "OUT FOR DELIVERY",
+        "DELIVERED"
+    ];
+
+    const currentIndex = flow.indexOf(order.status);
+
+    const steps = flow.map(function(status, index){
+        const done = currentIndex >= 0 && index < currentIndex;
+        const current = status === order.status;
+
+        return `
+            <div class="status-step ${done ? "done" : ""} ${current ? "current" : ""}">
+                <span class="status-dot">${done ? "✓" : (index + 1)}</span>
+                <span>${esc(status)}</span>
+            </div>
+            ${index < flow.length - 1 ? `<span class="status-line ${currentIndex >= 0 && index < currentIndex ? "done" : ""}"></span>` : ""}
+        `;
+    }).join("");
+
+    const quick = order.status === "CANCELLED"
+        ? `<button onclick="quickStatus('${js(order.orderId)}','NEW')">Reopen → NEW</button>`
+        : flow
+            .filter(function(status){ return status !== order.status; })
+            .map(function(status){
+                return `<button onclick="quickStatus('${js(order.orderId)}','${js(status)}')">→ ${esc(status)}</button>`;
+            }).join("");
+
+    return `
+        <div style="padding:10px 16px 0;background:#fff">
+            <div class="status-flow">${steps}</div>
+            ${order.status === "CANCELLED" ? `<div class="quick-status"><button onclick="quickStatus('${js(order.orderId)}','NEW')">↩ Reopen Order</button></div>` : `<div class="quick-status">${quick}</div>`}
+        </div>
+    `;
+}
+
+function quickStatus(orderId, newStatus){
+    const order = getOrderById(orderId);
+    if(!order || order.status === newStatus){
+        return;
+    }
+
+    const select = document.getElementById("status-" + orderId);
+    if(select){
+        select.value = newStatus;
+    }
+
+    changeStatus(orderId, newStatus);
+}
+
 function renderOrder(order){
 
     const items =
@@ -915,6 +1043,8 @@ function renderOrder(order){
                 </select>
 
             </div>
+
+            ${renderStatusFlow(order)}
 
             <div class="order-body">
 
