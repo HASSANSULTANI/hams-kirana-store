@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="HAMS Kirana Store - Admin Order Management">
-<title>HAMS Kirana Store — Admin Orders</title>
+<meta name="description" content="Akbar Rice Bill - Admin Order Management">
+<title>Akbar Rice Bill — Admin Orders</title>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -533,15 +533,15 @@ header{
 <body>
 
 <div class="top">
-    HAMS Kirana Store • Admin Order Management
+    Akbar Rice Bill • Admin Order Management
 </div>
 
 <header>
     <div class="head">
         <div class="logo">
-            <div class="logoicon">H</div>
+            <div class="logoicon">A</div>
             <div>
-                <h1>HAMS Kirana Store</h1>
+                <h1>Akbar Rice Bill</h1>
                 <small>Order Management</small>
             </div>
         </div>
@@ -603,6 +603,10 @@ const API_URL =
 
 /* This value must match ADMIN_KEY in Code.gs. */
 const ADMIN_KEY = "03ce2a7c1c657acf55ac0c4bc220f91a";
+
+/* Store identity used by the admin UI and WhatsApp messages. Customer mobile numbers remain unchanged. */
+const STORE_NAME = "Akbar Rice Bill";
+const STORE_MOBILE = "917507821537";
 
 /*
  * AUTO REFRESH
@@ -1480,7 +1484,7 @@ function buildAdminWhatsAppOrderMessage(order){
     }).join("\n");
 
     return [
-        "🛒 HAMS KIRANA STORE",
+        "🛒 AKBAR RICE BILL",
         "ORDER DETAILS",
         "",
         "Order ID: " + order.orderId,
@@ -1504,7 +1508,9 @@ function buildAdminWhatsAppOrderMessage(order){
         "",
         "Status: " + (order.status || "NEW"),
         "",
-        "Thank you for ordering from HAMS Kirana Store."
+        "Store: " + STORE_NAME,
+        "Contact: +" + STORE_MOBILE,
+        "Thank you for ordering from " + STORE_NAME + "."
     ].filter(function(line){
         return line !== null && line !== undefined;
     }).join("\n");
@@ -1541,13 +1547,13 @@ function buildStatusWhatsAppMessage(order){
         "OUT FOR DELIVERY":
             "Your order is out for delivery and will reach you soon.",
         "DELIVERED":
-            "Your order has been delivered successfully. Thank you for shopping with HAMS Kirana Store!",
+            "Your order has been delivered successfully. Thank you for shopping with " + STORE_NAME + "!",
         "CANCELLED":
-            "Your order has been cancelled. Please contact HAMS Kirana Store if you need any assistance."
+            "Your order has been cancelled. Please contact " + STORE_NAME + " at +" + STORE_MOBILE + " if you need any assistance."
     };
 
     return [
-        "🛒 HAMS KIRANA STORE",
+        "🛒 AKBAR RICE BILL",
         "",
         "Order ID: " + order.orderId,
         "Hello " + (order.name || "Customer") + ",",
@@ -1557,7 +1563,8 @@ function buildStatusWhatsAppMessage(order){
         messages[order.status] || "Your order status has been updated.",
         "",
         "Thank you,",
-        "HAMS Kirana Store"
+        STORE_NAME,
+        "Contact: +" + STORE_MOBILE
     ].join("\n");
 }
 
