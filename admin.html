@@ -145,10 +145,32 @@ header{
     font-size:11px;
 }
 
-.filters{
+.filter-group-title{
+    width:100%;
+    font-size:11px;
+    font-weight:800;
+    color:#68736a;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    margin:2px 0 4px;
+}
+
+.filter-row{
     display:flex;
     gap:8px;
     overflow:auto;
+    padding-bottom:3px;
+    width:100%;
+}
+
+.status-title{
+    margin-top:6px;
+}
+
+.filters{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
     padding-bottom:4px;
     margin-bottom:18px;
 }
@@ -633,7 +655,50 @@ const STATUSES = [
 ];
 
 let orders = [];
-let activeFilter = "ALL";
+
+/* =========================================================
+   TWO-LEVEL ORDER FILTER
+   ALL    → New, Confirmed, Packing, Out for Delivery,
+            Delivered, Cancelled
+   OPEN   → New, Confirmed, Packing, Out for Delivery
+   CLOSED → Delivered, Cancelled
+========================================================= */
+
+let activeGroup = "ALL";
+let activeStatusFilter = "ALL";
+
+const FILTER_GROUPS = {
+    ALL: {
+        label: "All",
+        statuses: [
+            "ALL",
+            "NEW",
+            "CONFIRMED",
+            "PACKING",
+            "OUT FOR DELIVERY",
+            "DELIVERED",
+            "CANCELLED"
+        ]
+    },
+    OPEN: {
+        label: "Open",
+        statuses: [
+            "ALL",
+            "NEW",
+            "CONFIRMED",
+            "PACKING",
+            "OUT FOR DELIVERY"
+        ]
+    },
+    CLOSED: {
+        label: "Closed",
+        statuses: [
+            "ALL",
+            "DELIVERED",
+            "CANCELLED"
+        ]
+    }
+};
 
 document
     .getElementById("search")
@@ -749,17 +814,39 @@ function render(){
             .trim()
             .toLowerCase();
 
+    const openStatuses = [
+        "NEW",
+        "CONFIRMED",
+        "PACKING",
+        "OUT FOR DELIVERY"
+    ];
+
+    const closedStatuses = [
+        "DELIVERED",
+        "CANCELLED"
+    ];
+
     const filtered =
         orders.filter(function(order){
 
-            const matchesFilter =
-                activeFilter === "ALL" ||
-                order.status === activeFilter;
-
-            if(!matchesFilter){
+            /* Primary group filter */
+            if(activeGroup === "OPEN" &&
+               !openStatuses.includes(order.status)){
                 return false;
             }
 
+            if(activeGroup === "CLOSED" &&
+               !closedStatuses.includes(order.status)){
+                return false;
+            }
+
+            /* Secondary status filter */
+            if(activeStatusFilter !== "ALL" &&
+               order.status !== activeStatusFilter){
+                return false;
+            }
+
+            /* Search */
             const haystack = [
                 order.orderId,
                 order.name,
@@ -790,6 +877,7 @@ function render(){
             .join("");
 
 }
+
 
 function renderStats(){
 
@@ -822,6 +910,7 @@ function renderStats(){
 
 }
 
+
 function statCard(label, value){
 
     return `
@@ -833,28 +922,29 @@ function statCard(label, value){
 
 }
 
+
+/* =========================================================
+   PRIMARY FILTERS
+========================================================= */
+
 function renderFilters(){
 
-    const labels = [
-        ["ALL","All"],
-        ["NEW","New"],
-        ["CONFIRMED","Confirmed"],
-        ["PACKING","Packing"],
-        ["OUT FOR DELIVERY","Out for Delivery"],
-        ["DELIVERED","Delivered"],
-        ["CANCELLED","Cancelled"]
+    const groups = [
+        ["ALL", "All"],
+        ["OPEN", "Open"],
+        ["CLOSED", "Closed"]
     ];
 
-    document.getElementById("filters").innerHTML =
-        labels.map(function(pair){
+    const groupHtml =
+        groups.map(function(pair){
 
             const key = pair[0];
             const label = pair[1];
 
             return `
                 <button
-                    class="filter ${activeFilter === key ? "active" : ""}"
-                    onclick="setFilter('${js(key)}')"
+                    class="filter ${activeGroup === key ? "active" : ""}"
+                    onclick="setGroup('${js(key)}')"
                 >
                     ${esc(label)}
                 </button>
@@ -862,71 +952,79 @@ function renderFilters(){
 
         }).join("");
 
+    const statusHtml =
+        FILTER_GROUPS[activeGroup].statuses.map(function(status){
+
+            const label =
+                status === "ALL"
+                    ? "All"
+                    : status;
+
+            return `
+                <button
+                    class="filter ${activeStatusFilter === status ? "active" : ""}"
+                    onclick="setStatusFilter('${js(status)}')"
+                >
+                    ${esc(label)}
+                </button>
+            `;
+
+        }).join("");
+
+    document.getElementById("filters").innerHTML = `
+        <div class="filter-group-title">
+            Order Group
+        </div>
+
+        <div class="filter-row">
+            ${groupHtml}
+        </div>
+
+        <div class="filter-group-title status-title">
+            Status
+        </div>
+
+        <div class="filter-row">
+            ${statusHtml}
+        </div>
+    `;
+
 }
 
-function setFilter(filter){
 
-    activeFilter = filter;
+function setGroup(group){
+
+    if(!FILTER_GROUPS[group]){
+        return;
+    }
+
+    activeGroup = group;
+
+    /* Reset secondary status whenever group changes. */
+    activeStatusFilter = "ALL";
 
     renderFilters();
     render();
 
 }
 
-function renderStatusFlow(order){
 
-    const flow = [
-        "NEW",
-        "CONFIRMED",
-        "PACKING",
-        "OUT FOR DELIVERY",
-        "DELIVERED"
-    ];
+function setStatusFilter(status){
 
-    const currentIndex = flow.indexOf(order.status);
+    const allowed =
+        FILTER_GROUPS[activeGroup].statuses;
 
-    const steps = flow.map(function(status, index){
-        const done = currentIndex >= 0 && index < currentIndex;
-        const current = status === order.status;
-
-        return `
-            <div class="status-step ${done ? "done" : ""} ${current ? "current" : ""}">
-                <span class="status-dot">${done ? "✓" : (index + 1)}</span>
-                <span>${esc(status)}</span>
-            </div>
-            ${index < flow.length - 1 ? `<span class="status-line ${currentIndex >= 0 && index < currentIndex ? "done" : ""}"></span>` : ""}
-        `;
-    }).join("");
-
-    const quick = order.status === "CANCELLED"
-        ? `<button onclick="quickStatus('${js(order.orderId)}','NEW')">Reopen → NEW</button>`
-        : flow
-            .filter(function(status){ return status !== order.status; })
-            .map(function(status){
-                return `<button onclick="quickStatus('${js(order.orderId)}','${js(status)}')">→ ${esc(status)}</button>`;
-            }).join("");
-
-    return `
-        <div style="padding:10px 16px 0;background:#fff">
-            <div class="status-flow">${steps}</div>
-            ${order.status === "CANCELLED" ? `<div class="quick-status"><button onclick="quickStatus('${js(order.orderId)}','NEW')">↩ Reopen Order</button></div>` : `<div class="quick-status">${quick}</div>`}
-        </div>
-    `;
-}
-
-function quickStatus(orderId, newStatus){
-    const order = getOrderById(orderId);
-    if(!order || order.status === newStatus){
+    if(!allowed.includes(status)){
         return;
     }
 
-    const select = document.getElementById("status-" + orderId);
-    if(select){
-        select.value = newStatus;
-    }
+    activeStatusFilter = status;
 
-    changeStatus(orderId, newStatus);
+    renderFilters();
+    render();
+
 }
+
 
 function renderOrder(order){
 
