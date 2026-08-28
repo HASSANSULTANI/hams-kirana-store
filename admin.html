@@ -383,7 +383,7 @@ header{
             placeholder="Search Order ID, customer, mobile..."
             autocomplete="off"
         >
-        <button class="refresh" onclick="loadOrders()">
+        <button class="refresh" onclick="manualRefresh()">
             ↻ Refresh
         </button>
     </div>
@@ -407,6 +407,17 @@ const API_URL =
 /* This value must match ADMIN_KEY in Code.gs. */
 const ADMIN_KEY = "03ce2a7c1c657acf55ac0c4bc220f91a";
 
+/*
+ * AUTO REFRESH
+ * The page refreshes its order data every 60 seconds.
+ * If the admin manually clicks Refresh, the 60-second countdown
+ * starts again from that manual refresh. This prevents an automatic
+ * refresh from happening within 59 seconds of a manual refresh.
+ */
+const AUTO_REFRESH_MS = 60 * 1000;
+let lastManualRefreshAt = Date.now();
+let autoRefreshTimer = null;
+
 const STATUSES = [
     "NEW",
     "CONFIRMED",
@@ -423,9 +434,31 @@ document
     .getElementById("search")
     .addEventListener("input", render);
 
-loadOrders();
+loadOrders(false);
+startAutoRefresh();
 
-async function loadOrders(){
+function manualRefresh(){
+    lastManualRefreshAt = Date.now();
+    loadOrders(true);
+}
+
+function startAutoRefresh(){
+    if(autoRefreshTimer){
+        clearInterval(autoRefreshTimer);
+    }
+
+    autoRefreshTimer = setInterval(function(){
+        const elapsed = Date.now() - lastManualRefreshAt;
+
+        // Do not auto-refresh until at least 60 seconds have passed
+        // since the last manual Refresh click.
+        if(elapsed >= AUTO_REFRESH_MS){
+            loadOrders(false);
+        }
+    }, 1000);
+}
+
+async function loadOrders(isManualRefresh){
 
     showNotice("");
 
