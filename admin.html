@@ -346,6 +346,72 @@ header{
     text-align:right;
 }
 
+/* INDIVIDUAL PRODUCT STATUS */
+.product-status-select{
+    width:100%;
+    min-width:112px;
+    border:1px solid #d7e0d8;
+    border-radius:7px;
+    background:#fff;
+    color:#315338;
+    padding:6px 7px;
+    font-size:10px;
+    font-weight:700;
+    cursor:pointer;
+}
+.product-status-select:focus{
+    outline:none;
+    border-color:#15803d;
+    box-shadow:0 0 0 2px rgba(21,128,61,.10);
+}
+.items .cancelled-product{
+    background:#f3f3f3;
+    color:#858585;
+}
+.items .cancelled-product td{
+    color:#858585;
+    text-decoration-line:line-through;
+    text-decoration-color:#ef4444;
+    text-decoration-thickness:1.5px;
+}
+.items .cancelled-product .product-status-select{
+    color:#858585;
+    text-decoration:none;
+    background:#e9e9e9;
+    border-color:#d5d5d5;
+}
+.cancelled-divider td{
+    padding:7px 5px 6px;
+    border-bottom:0;
+}
+.cancelled-divider-line{
+    height:3px;
+    width:100%;
+    background:#ef4444;
+    border-radius:2px;
+}
+.cancelled-label{
+    display:block;
+    margin-top:5px;
+    color:#dc2626;
+    font-size:9px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+}
+@media(max-width:700px){
+    .items{
+        min-width:680px;
+    }
+    .items-wrap{
+        overflow-x:auto;
+        -webkit-overflow-scrolling:touch;
+    }
+    .product-status-select{
+        min-width:105px;
+    }
+}
+
 .total{
     display:flex;
     justify-content:space-between;
@@ -1389,18 +1455,77 @@ function renderOrder(order){
 
     const items = Array.isArray(order.items) ? order.items : [];
 
-    const itemRows = items.length
-        ? items.map(function(item){
-            return `
-                <tr>
-                    <td>${esc(item.product)}</td>
-                    <td>${item.quantity}</td>
-                    <td>₹${money(item.price)}</td>
-                    <td>₹${money(item.total)}</td>
-                </tr>
-            `;
-        }).join("")
-        : `<tr><td colspan="4">No item details available.</td></tr>`;
+    const activeItems = items.filter(function(item){
+        return String(item.productStatus || "PENDING").toUpperCase() !== "CANCELLED";
+    });
+
+    const cancelledItems = items.filter(function(item){
+        return String(item.productStatus || "PENDING").toUpperCase() === "CANCELLED";
+    });
+
+    const calculatedTotal = activeItems.reduce(function(sum, item){
+        return sum + (Number(item.total) || ((Number(item.quantity) || 0) * (Number(item.price) || 0)));
+    }, 0);
+
+    const calculatedQuantity = activeItems.reduce(function(sum, item){
+        return sum + (Number(item.quantity) || 0);
+    }, 0);
+
+    function productStatusSelect(item){
+        const productStatus = String(item.productStatus || "PENDING").toUpperCase();
+        return `
+            <select
+                class="product-status-select"
+                onchange="changeProductStatus('${js(order.orderId)}', ${Number(item.rowNumber) || 0}, this.value)"
+                onclick="event.stopPropagation()"
+                aria-label="Product status for ${attr(item.product)}"
+            >
+                <option value="PENDING" ${productStatus === "PENDING" ? "selected" : ""}>PENDING</option>
+                <option value="PREPARED" ${productStatus === "PREPARED" ? "selected" : ""}>PREPARED</option>
+                <option value="CANCELLED" ${productStatus === "CANCELLED" ? "selected" : ""}>CANCELLED</option>
+            </select>
+        `;
+    }
+
+    function productRow(item, cancelled){
+        const itemTotal = Number(item.total) || ((Number(item.quantity) || 0) * (Number(item.price) || 0));
+        return `
+            <tr class="${cancelled ? "cancelled-product" : ""}">
+                <td>${esc(item.product)}</td>
+                <td>${Number(item.quantity) || 0}</td>
+                <td>₹${money(item.price)}</td>
+                <td>₹${money(itemTotal)}</td>
+                <td>${productStatusSelect(item)}</td>
+            </tr>
+        `;
+    }
+
+    let itemRows = "";
+
+    if(activeItems.length){
+        itemRows += activeItems.map(function(item){
+            return productRow(item, false);
+        }).join("");
+    }
+
+    if(cancelledItems.length){
+        itemRows += `
+            <tr class="cancelled-divider">
+                <td colspan="5">
+                    <div class="cancelled-divider-line"></div>
+                    <span class="cancelled-label">Cancelled Products</span>
+                </td>
+            </tr>
+        `;
+
+        itemRows += cancelledItems.map(function(item){
+            return productRow(item, true);
+        }).join("");
+    }
+
+    if(!itemRows){
+        itemRows = `<tr><td colspan="5">No item details available.</td></tr>`;
+    }
 
     const address = [
         order.houseFlat, order.building, order.street,
@@ -1500,13 +1625,15 @@ function renderOrder(order){
                     <section class="section" style="grid-column:1/-1">
                         <div class="section-title">🛍️ Items</div>
                         <div class="section-body">
-                            <table class="items">
-                                <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
-                                <tbody>${itemRows}</tbody>
-                            </table>
+                            <div class="items-wrap">
+                                <table class="items">
+                                    <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th><th>Product Status</th></tr></thead>
+                                    <tbody>${itemRows}</tbody>
+                                </table>
+                            </div>
                             <div class="total">
-                                <span>${order.totalQuantity || 0} item(s)</span>
-                                <span class="transfer-target" data-transfer-target="total">₹${money(order.total)}</span>
+                                <span>${calculatedQuantity} item(s)</span>
+                                <span class="transfer-target" data-transfer-target="total">₹${money(calculatedTotal)}</span>
                             </div>
                         </div>
                     </section>
@@ -1611,6 +1738,107 @@ async function changeStatus(orderId, newStatus){
 
 }
 
+
+async function changeProductStatus(orderId, rowNumber, newProductStatus){
+
+    const order = getOrderById(orderId);
+
+    if(!order){
+        return;
+    }
+
+    const item = (order.items || []).find(function(product){
+        return Number(product.rowNumber) === Number(rowNumber);
+    });
+
+    if(!item){
+        alert("Product row could not be found.");
+        render();
+        return;
+    }
+
+    const oldStatus = String(item.productStatus || "PENDING").toUpperCase();
+    const nextStatus = String(newProductStatus || "PENDING").toUpperCase();
+
+    if(oldStatus === nextStatus){
+        return;
+    }
+
+    if(!["PENDING","PREPARED","CANCELLED"].includes(nextStatus)){
+        render();
+        return;
+    }
+
+    if(!confirm(
+        "Change product status for \"" +
+        (item.product || "Product") +
+        "\" from \"" +
+        oldStatus +
+        "\" to \"" +
+        nextStatus +
+        "\"?"
+    )){
+        render();
+        return;
+    }
+
+    try{
+        showNotice("");
+
+        const url =
+            API_URL +
+            "?action=updateProductStatus" +
+            "&key=" + encodeURIComponent(ADMIN_KEY) +
+            "&orderId=" + encodeURIComponent(orderId) +
+            "&rowNumber=" + encodeURIComponent(rowNumber) +
+            "&productStatus=" + encodeURIComponent(nextStatus) +
+            "&t=" + Date.now();
+
+        const response = await fetch(url, {cache:"no-store"});
+
+        if(!response.ok){
+            throw new Error("Product status update failed.");
+        }
+
+        const data = await response.json();
+
+        if(!data.success){
+            throw new Error(data.message || "Product status update failed.");
+        }
+
+        item.productStatus = nextStatus;
+
+        /* Recalculate the order total immediately in the browser. */
+        recalculateOrderTotal(order);
+
+        renderStats();
+        renderFilters();
+        render();
+
+    }catch(error){
+        console.error(error);
+        showNotice(error.message || "Could not update product status.");
+        render();
+    }
+}
+
+function recalculateOrderTotal(order){
+    let total = 0;
+    let quantity = 0;
+
+    (order.items || []).forEach(function(item){
+        const status = String(item.productStatus || "PENDING").toUpperCase();
+        const itemTotal = Number(item.total) || ((Number(item.quantity) || 0) * (Number(item.price) || 0));
+
+        if(status !== "CANCELLED"){
+            total += itemTotal;
+            quantity += Number(item.quantity) || 0;
+        }
+    });
+
+    order.total = total;
+    order.totalQuantity = quantity;
+}
 
 function getOrderById(orderId){
     return orders.find(function(item){
