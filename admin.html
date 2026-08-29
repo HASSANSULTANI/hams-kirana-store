@@ -203,18 +203,21 @@ header{
 
 /* COLLAPSED / EXPANDED ORDER */
 .order-summary{padding:12px 16px 14px;background:#fff;border-bottom:1px solid #e7ece7}
-.summary-grid{display:grid;grid-template-columns:minmax(150px,1.05fr) minmax(150px,1.25fr) minmax(180px,2fr) minmax(120px,.75fr);gap:10px 18px;align-items:start}
-.summary-field{min-width:0}
+.summary-grid{display:grid;grid-template-columns:minmax(150px,1.05fr) minmax(150px,1.25fr) minmax(180px,2fr) minmax(120px,.75fr);gap:10px 18px;align-items:start;transition:grid-template-columns .5s ease}
+.summary-field{min-width:0;transition:opacity .3s ease,transform .45s ease}
 .summary-label{display:block;color:#68736a;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.035em;margin-bottom:4px}
 .summary-value{color:#172017;font-size:12px;font-weight:700;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .summary-total{color:#166534;font-size:14px}
 .order-controls{display:flex;align-items:center;gap:8px;flex:0 0 auto}
-.expand-btn{width:34px;height:34px;border:1px solid #15803d;border-radius:9px;background:#fff;color:#166534;cursor:pointer;font-size:19px;font-weight:700;line-height:1;display:grid;place-items:center}
+.expand-btn{width:34px;height:34px;border:1px solid #15803d;border-radius:9px;background:#fff;color:#166534;cursor:pointer;font-size:19px;font-weight:700;line-height:1;display:grid;place-items:center;transition:background .3s ease,color .3s ease,transform .3s ease}
 .expand-btn:hover{background:#f0fdf4}
-.order-details{display:none}
-.order.expanded .order-details{display:block}
-.order.expanded .expand-btn{background:#15803d;color:#fff}
-@media(max-width:1000px){.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.order-details{display:block;max-height:0;opacity:0;overflow:hidden;transition:max-height .55s cubic-bezier(.22,1,.36,1),opacity .28s ease}
+.order.expanded .order-details{max-height:2200px;opacity:1}
+.order.expanded .summary-customer,.order.expanded .summary-total-field{opacity:0;transform:translateY(4px) scale(.98);pointer-events:none}
+.order.expanded .summary-grid{grid-template-columns:minmax(150px,1fr) minmax(150px,1fr) 0 0}
+.order.expanded .expand-btn{background:#15803d;color:#fff;transform:rotate(0deg)}
+.customer-name-detail,.expanded-total-value{display:inline-block}
+@media(max-width:1000px){.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.order.expanded .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.order.expanded .summary-customer,.order.expanded .summary-total-field{display:none}}
 
 .orders{
     display:grid;
@@ -1145,9 +1148,160 @@ function statusSortValue(value){
 }
 
 function toggleOrder(orderId){
-    if(expandedOrders.has(orderId)) expandedOrders.delete(orderId);
-    else expandedOrders.add(orderId);
-    render();
+
+    const article = Array.from(
+        document.querySelectorAll(".order")
+    ).find(function(item){
+        const button = item.querySelector(".expand-btn");
+        return button && button.getAttribute("onclick") === "toggleOrder('" + js(orderId) + "')";
+    });
+
+    if(!article){
+        if(expandedOrders.has(orderId)) expandedOrders.delete(orderId);
+        else expandedOrders.add(orderId);
+        render();
+        return;
+    }
+
+    const willExpand = !expandedOrders.has(orderId);
+    const order = getOrderById(orderId);
+
+    if(willExpand){
+        expandedOrders.add(orderId);
+    }else{
+        expandedOrders.delete(orderId);
+    }
+
+    const button = article.querySelector(".expand-btn");
+    if(button){
+        button.textContent = willExpand ? "−" : "+";
+        button.setAttribute("aria-label", (willExpand ? "Collapse" : "Expand") + " order " + orderId);
+        button.setAttribute("title", willExpand ? "Collapse order" : "Expand order");
+    }
+
+    if(willExpand){
+        animateSummaryToDetails(article, order);
+        article.classList.add("expanded");
+    }else{
+        animateDetailsToSummary(article, order);
+        article.classList.remove("expanded");
+    }
+}
+
+function createFlyingElement(text, rect, targetRect, className){
+    if(!rect || !targetRect) return null;
+
+    const el = document.createElement("div");
+    el.className = "flying-summary-value " + (className || "");
+    el.textContent = text;
+    Object.assign(el.style,{
+        position:"fixed",
+        left:rect.left + "px",
+        top:rect.top + "px",
+        width:rect.width + "px",
+        height:rect.height + "px",
+        margin:"0",
+        zIndex:"9999",
+        pointerEvents:"none",
+        color:"#166534",
+        fontWeight:"700",
+        fontSize:Math.max(11, Math.min(14, rect.height * .65)) + "px",
+        lineHeight:rect.height + "px",
+        whiteSpace:"nowrap",
+        overflow:"hidden",
+        textOverflow:"ellipsis",
+        background:"transparent",
+        transition:"left .55s cubic-bezier(.22,1,.36,1), top .55s cubic-bezier(.22,1,.36,1), width .55s cubic-bezier(.22,1,.36,1), font-size .55s cubic-bezier(.22,1,.36,1), opacity .55s ease"
+    });
+
+    document.body.appendChild(el);
+
+    requestAnimationFrame(function(){
+        el.style.left = targetRect.left + "px";
+        el.style.top = targetRect.top + "px";
+        el.style.width = Math.max(targetRect.width, 80) + "px";
+        el.style.fontSize = Math.max(11, Math.min(14, targetRect.height * .65)) + "px";
+    });
+
+    setTimeout(function(){
+        el.style.opacity = "0";
+    }, 430);
+
+    setTimeout(function(){
+        el.remove();
+    }, 650);
+}
+
+function animateSummaryToDetails(article, order){
+    if(!order) return;
+
+    // Capture the starting positions BEFORE the collapsed summary is hidden.
+    const nameSource = article.querySelector(".summary-customer .summary-value");
+    const totalSource = article.querySelector(".summary-total-field .summary-value");
+    const nameRect = nameSource ? nameSource.getBoundingClientRect() : null;
+    const totalRect = totalSource ? totalSource.getBoundingClientRect() : null;
+
+    // Reveal the expanded content so the browser can calculate its destination.
+    article.classList.add("expanded");
+
+    requestAnimationFrame(function(){
+        const nameTarget = article.querySelector(".customer-name-detail");
+        const totalTarget = article.querySelector(".expanded-total-value");
+
+        if(nameRect && nameTarget){
+            createFlyingElement(
+                order.name || "—",
+                nameRect,
+                nameTarget.getBoundingClientRect(),
+                "fly-name"
+            );
+        }
+
+        if(totalRect && totalTarget){
+            createFlyingElement(
+                "₹" + money(order.total),
+                totalRect,
+                totalTarget.getBoundingClientRect(),
+                "fly-total"
+            );
+        }
+    });
+}
+
+function animateDetailsToSummary(article, order){
+    if(!order) return;
+
+    const nameTarget = article.querySelector(".customer-name-detail");
+    const totalTarget = article.querySelector(".expanded-total-value");
+
+    const nameRect = nameTarget ? nameTarget.getBoundingClientRect() : null;
+    const totalRect = totalTarget ? totalTarget.getBoundingClientRect() : null;
+
+    // Make the collapsed destination available before starting the reverse animation.
+    article.classList.remove("expanded");
+
+    requestAnimationFrame(function(){
+        const nameSource = article.querySelector(".summary-customer .summary-value");
+        const totalSource = article.querySelector(".summary-total-field .summary-value");
+
+        if(nameSource && nameRect){
+            createFlyingElement(
+                order.name || "—",
+                nameRect,
+                nameSource.getBoundingClientRect(),
+                "fly-name"
+            );
+        }
+
+        if(totalSource && totalRect){
+            createFlyingElement(
+                "₹" + money(order.total),
+                totalRect,
+                totalSource.getBoundingClientRect(),
+                "fly-total"
+            );
+        }
+    });
 }
 
 function setGroup(group){
@@ -1303,11 +1457,11 @@ function renderOrder(order){
                         <span class="summary-label">Date &amp; Time</span>
                         <span class="summary-value">${esc(order.timestamp)}</span>
                     </div>
-                    <div class="summary-field">
+                    <div class="summary-field summary-customer">
                         <span class="summary-label">Customer Name</span>
                         <span class="summary-value" title="${attr(order.name || "—")}">${esc(order.name || "—")}</span>
                     </div>
-                    <div class="summary-field">
+                    <div class="summary-field summary-total-field">
                         <span class="summary-label">Total Amount</span>
                         <span class="summary-value summary-total">₹${money(order.total)}</span>
                     </div>
@@ -1321,7 +1475,7 @@ function renderOrder(order){
                     <section class="section">
                         <div class="section-title">👤 Customer</div>
                         <div class="section-body customer">
-                            <b>${esc(order.name || "—")}</b>
+                            <b class="customer-name-detail">${esc(order.name || "—")}</b>
                             <div>📱 ${esc(order.mobile || "—")}</div>
                             <div>💳 ${esc(order.paymentMethod || "Cash on Delivery")}</div>
                         </div>
@@ -1346,7 +1500,7 @@ function renderOrder(order){
                             </table>
                             <div class="total">
                                 <span>${order.totalQuantity || 0} item(s)</span>
-                                <span>₹${money(order.total)}</span>
+                                <span class="expanded-total-value">₹${money(order.total)}</span>
                             </div>
                         </div>
                     </section>
