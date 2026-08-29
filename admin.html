@@ -305,9 +305,8 @@ header{
 
 /* COLLAPSED / EXPANDED ORDER */
 .order-summary{padding:12px 16px 14px;background:#fff;border-bottom:1px solid #e7ece7}
-.summary-grid{display:grid;grid-template-columns:minmax(90px,.7fr) minmax(120px,1fr);gap:10px 18px;align-items:start}
+.summary-grid{display:grid;grid-template-columns:minmax(120px,.8fr) minmax(90px,.65fr) minmax(150px,1.05fr) minmax(180px,2fr) minmax(120px,.75fr);gap:10px 18px;align-items:start}
 .summary-field{min-width:0}
-.summary-field.summary-customer{grid-column:1 / -1}
 .summary-hidden-when-expanded{display:none}
 .summary-label{display:block;color:#68736a;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.035em;margin-bottom:4px}
 .summary-value{color:#172017;font-size:12px;font-weight:700;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -2224,6 +2223,22 @@ async function submitAddProduct(){
         return;
     }
 
+    const targetOrder = getOrderById(addProductOrderId);
+
+    if(targetOrder){
+        const targetStatus = String(targetOrder.status || "NEW").toUpperCase();
+
+        if(targetStatus === "DELIVERED"){
+            alert("Delivered orders cannot have products added.");
+            return;
+        }
+
+        if(targetStatus === "CANCELLED"){
+            alert("Cancelled orders cannot have products added. Reopen the order first.");
+            return;
+        }
+    }
+
     const submit = document.getElementById("addProductSubmit");
     if(submit){
         submit.disabled = true;
@@ -2257,6 +2272,14 @@ async function submitAddProduct(){
         const orderId = addProductOrderId;
         closeAddProductModal();
         expandedOrders.add(orderId);
+
+        /* A newly added product always starts as PENDING.
+           If the order was already OUT FOR DELIVERY, it must return
+           to PACKING because there is now unfinished work again. */
+        const orderBeforeReload = getOrderById(orderId);
+        if(orderBeforeReload && orderBeforeReload.status === "OUT FOR DELIVERY"){
+            await updateOrderStatusWithoutConfirmation(orderBeforeReload, "PACKING");
+        }
 
         showNotice(
             (data.product && data.product.product) || selectedAddProduct.productName +
@@ -2423,17 +2446,25 @@ function renderOrder(order){
 
             <div class="order-summary">
                 <div class="summary-grid">
+                    <div class="summary-field">
+                        <span class="summary-label">Order Number</span>
+                        <span class="summary-value">${esc(order.orderId)}</span>
+                    </div>
                     <div class="summary-field ${isExpanded ? "summary-hidden-when-expanded" : ""}">
                         <span class="summary-label">Items</span>
                         <span class="summary-value">${isExpanded ? "" : calculatedProductCount}</span>
                     </div>
-                    <div class="summary-field ${isExpanded ? "summary-hidden-when-expanded" : ""}">
-                        <span class="summary-label">Total Amount</span>
-                        <span class="summary-value summary-total" data-transfer-source="total">${isExpanded ? "" : "₹" + money(order.total)}</span>
+                    <div class="summary-field">
+                        <span class="summary-label">Date &amp; Time</span>
+                        <span class="summary-value">${esc(order.timestamp)}</span>
                     </div>
-                    <div class="summary-field summary-customer">
+                    <div class="summary-field">
                         <span class="summary-label">Customer Name</span>
                         <span class="summary-value" data-transfer-source="name" title="${attr(order.name || "—")}">${isExpanded ? "" : esc(order.name || "—")}</span>
+                    </div>
+                    <div class="summary-field">
+                        <span class="summary-label">Total Amount</span>
+                        <span class="summary-value summary-total" data-transfer-source="total">${isExpanded ? "" : "₹" + money(order.total)}</span>
                     </div>
                 </div>
             </div>
@@ -2513,19 +2544,60 @@ function renderOrder(order){
 
 async function changeStatus(orderId, newStatus){
 
-    const order =
-        orders.find(function(item){
-            return item.orderId === orderId;
-        });
+    const order = orders.find(function(item){
+        return item.orderId === orderId;
+    });
 
     if(!order){
         return;
     }
 
-    const oldStatus = order.status;
+    const oldStatus = String(order.status || "NEW").toUpperCase();
+    const nextStatus = String(newStatus || "").toUpperCase();
 
-    if(oldStatus === newStatus){
+    if(oldStatus === nextStatus){
         return;
+    }
+
+    const pendingCount = (order.items || []).filter(function(item){
+        return String(item.productStatus || "PENDING").toUpperCase() === "PENDING";
+    }).length;
+
+    /* Safety warning when manually sending an order to OUT FOR DELIVERY
+       while unfinished PENDING products still exist. */
+    if(nextStatus === "OUT FOR DELIVERY" && pendingCount > 0){
+        const proceed = confirm(
+            "This order still has " +
+            pendingCount +
+            " pending product" +
+            (pendingCount === 1 ? "" : "s") +
+            ".\n\nAre you sure you want to change the order status to OUT FOR DELIVERY?"
+        );
+
+        if(!proceed){
+            render();
+            return;
+        }
+    }
+
+    /* Safety warning when manually moving an OUT FOR DELIVERY order
+       backwards to CONFIRMED or PACKING. */
+    if(
+        oldStatus === "OUT FOR DELIVERY" &&
+        (nextStatus === "CONFIRMED" || nextStatus === "PACKING")
+    ){
+        const proceed = confirm(
+            "This order is already OUT FOR DELIVERY.\n\n" +
+            "Changing it back to " +
+            nextStatus +
+            " moves the order backwards in the workflow.\n\n" +
+            "Do you want to continue?"
+        );
+
+        if(!proceed){
+            render();
+            return;
+        }
     }
 
     if(!confirm(
@@ -2534,7 +2606,7 @@ async function changeStatus(orderId, newStatus){
         " from \"" +
         oldStatus +
         "\" to \"" +
-        newStatus +
+        nextStatus +
         "\"?"
     )){
         render();
@@ -2553,7 +2625,7 @@ async function changeStatus(orderId, newStatus){
             "&orderId=" +
             encodeURIComponent(orderId) +
             "&status=" +
-            encodeURIComponent(newStatus) +
+            encodeURIComponent(nextStatus) +
             "&t=" +
             Date.now();
 
@@ -2578,7 +2650,7 @@ async function changeStatus(orderId, newStatus){
             );
         }
 
-        order.status = newStatus;
+        order.status = nextStatus;
 
         renderStats();
         renderFilters();
@@ -2599,14 +2671,10 @@ async function changeStatus(orderId, newStatus){
 
 }
 
-
 async function changeProductStatus(orderId, rowNumber, newProductStatus){
 
     const order = getOrderById(orderId);
-
-    if(!order){
-        return;
-    }
+    if(!order){ return; }
 
     const item = (order.items || []).find(function(product){
         return Number(product.rowNumber) === Number(rowNumber);
@@ -2621,24 +2689,37 @@ async function changeProductStatus(orderId, rowNumber, newProductStatus){
     const oldStatus = String(item.productStatus || "PENDING").toUpperCase();
     const nextStatus = String(newProductStatus || "PENDING").toUpperCase();
 
-    if(oldStatus === nextStatus){
-        return;
-    }
+    if(oldStatus === nextStatus){ return; }
 
     if(!["PENDING","PREPARED","CANCELLED"].includes(nextStatus)){
         render();
         return;
     }
 
-    /* Only CANCELLED requires confirmation.
-       PENDING and PREPARED changes happen immediately. */
-    if(nextStatus === "CANCELLED" && !confirm(
-        "Cancel product \"" +
-        (item.product || "Product") +
-        "\"?\n\nIts amount will be removed from the order total."
-    )){
-        render();
-        return;
+    if(nextStatus === "CANCELLED"){
+        const activeItems = (order.items || []).filter(function(product){
+            return String(product.productStatus || "PENDING").toUpperCase() !== "CANCELLED";
+        });
+
+        if(activeItems.length === 1){
+            const cancelOrder = confirm(
+                "This is the last active product in " + orderId + ".\n\n" +
+                "If you cancel this product, there will be no active products left.\n\n" +
+                "OK = Cancel the product AND change the order to CANCELLED.\n" +
+                "Cancel = Keep the product active and open Add Product so you can add another item."
+            );
+
+            if(!cancelOrder){
+                openAddProductModal(orderId);
+                return;
+            }
+        }else if(!confirm(
+            "Cancel product \"" + (item.product || "Product") +
+            "\"?\n\nIts amount will be removed from the order total."
+        )){
+            render();
+            return;
+        }
     }
 
     try{
@@ -2653,31 +2734,41 @@ async function changeProductStatus(orderId, rowNumber, newProductStatus){
             "&productStatus=" + encodeURIComponent(nextStatus) +
             "&t=" + Date.now();
 
-        const response = await fetch(url, {cache:"no-store"});
-
+        const response = await fetch(url,{cache:"no-store"});
         if(!response.ok){
             throw new Error("Product status update failed.");
         }
 
         const data = await response.json();
-
         if(!data.success){
             throw new Error(data.message || "Product status update failed.");
         }
 
         item.productStatus = nextStatus;
-
-        /* Recalculate the order total immediately in the browser. */
         recalculateOrderTotal(order);
 
-        /* If no product is still PENDING, automatically move the
-           order to OUT FOR DELIVERY (unless it is already closed). */
         const hasPendingProducts = (order.items || []).some(function(product){
             return String(product.productStatus || "PENDING").toUpperCase() === "PENDING";
         });
 
-        if(!hasPendingProducts && order.status !== "OUT FOR DELIVERY" && order.status !== "DELIVERED" && order.status !== "CANCELLED"){
-            await updateOrderStatusWithoutConfirmation(order, "OUT FOR DELIVERY");
+        const activeProductCount = (order.items || []).filter(function(product){
+            return String(product.productStatus || "PENDING").toUpperCase() !== "CANCELLED";
+        }).length;
+
+        if(nextStatus === "CANCELLED" && activeProductCount === 0){
+            if(order.status !== "CANCELLED" && order.status !== "DELIVERED"){
+                await updateOrderStatusWithoutConfirmation(order,"CANCELLED");
+            }
+        }else if(hasPendingProducts){
+            if(order.status === "OUT FOR DELIVERY"){
+                await updateOrderStatusWithoutConfirmation(order,"PACKING");
+            }
+        }else if(
+            order.status !== "OUT FOR DELIVERY" &&
+            order.status !== "DELIVERED" &&
+            order.status !== "CANCELLED"
+        ){
+            await updateOrderStatusWithoutConfirmation(order,"OUT FOR DELIVERY");
         }
 
         renderStats();
