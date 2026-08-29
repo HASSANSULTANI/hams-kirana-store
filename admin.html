@@ -781,6 +781,89 @@ header{
         width:100%;
     }
 }
+
+
+/* ADD PRODUCT TO EXISTING ORDER */
+.add-product-btn{
+    border:1px solid #15803d;
+    background:#f0fdf4;
+    color:#166534;
+    border-radius:8px;
+    padding:7px 10px;
+    cursor:pointer;
+    font-size:10px;
+    font-weight:800;
+    white-space:nowrap;
+}
+.add-product-btn:hover{background:#dcfce7}
+.add-product-modal{
+    position:fixed;
+    inset:0;
+    z-index:100000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    background:rgba(15,23,15,.48);
+}
+.add-product-modal.open{display:flex}
+.add-product-dialog{
+    width:min(620px,100%);
+    max-height:min(82vh,760px);
+    overflow:hidden;
+    background:#fff;
+    border-radius:16px;
+    box-shadow:0 20px 60px rgba(0,0,0,.22);
+    display:flex;
+    flex-direction:column;
+}
+.add-product-dialog-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:14px 16px;
+    border-bottom:1px solid #e7ece7;
+    background:#f0fdf4;
+}
+.add-product-dialog-head h3{margin:0;color:#166534;font-size:15px}
+.add-product-close{
+    width:32px;height:32px;border:0;border-radius:8px;background:#fff;color:#315338;
+    cursor:pointer;font-size:20px;line-height:1
+}
+.add-product-dialog-body{padding:15px 16px;overflow:auto}
+.add-product-search{
+    width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #dfe7df;border-radius:10px;
+    outline:none;margin-bottom:10px;font-size:12px
+}
+.add-product-list{display:grid;gap:7px;max-height:330px;overflow:auto}
+.add-product-option{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;
+    border:1px solid #e2e9e2;border-radius:10px;background:#fff;cursor:pointer;text-align:left
+}
+.add-product-option:hover,.add-product-option.selected{border-color:#15803d;background:#f0fdf4}
+.add-product-option-info{min-width:0}
+.add-product-option-name{font-weight:800;color:#172017;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.add-product-option-meta{color:#68736a;font-size:10px;margin-top:3px}
+.add-product-option-price{font-weight:800;color:#166534;font-size:12px;white-space:nowrap}
+.add-product-empty{padding:18px;text-align:center;color:#68736a;font-size:11px}
+.add-product-form{margin-top:13px;padding-top:13px;border-top:1px solid #e7ece7;display:grid;grid-template-columns:1fr 140px;gap:10px;align-items:end}
+.add-product-selected{min-width:0}
+.add-product-selected-label,.add-product-qty-label{display:block;color:#68736a;font-size:10px;font-weight:800;text-transform:uppercase;margin-bottom:5px}
+.add-product-selected-value{border:1px solid #dfe7df;border-radius:9px;padding:10px;font-size:12px;font-weight:800;min-height:18px}
+.add-product-qty{width:100%;box-sizing:border-box;border:1px solid #dfe7df;border-radius:9px;padding:10px;font-size:12px;outline:none}
+.add-product-footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid #e7ece7;background:#fafcf9}
+.add-product-cancel,.add-product-submit{border-radius:9px;padding:9px 13px;font-size:11px;font-weight:800;cursor:pointer}
+.add-product-cancel{border:1px solid #d8e2d9;background:#fff;color:#315338}
+.add-product-submit{border:1px solid #15803d;background:#15803d;color:#fff}
+.add-product-submit:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:600px){
+    .add-product-modal{padding:8px}
+    .add-product-dialog{max-height:90vh}
+    .add-product-form{grid-template-columns:1fr}
+    .add-product-list{max-height:280px}
+}
+
 </style>
 </head>
 
@@ -850,6 +933,35 @@ header{
     </div>
 
 </main>
+
+
+
+<div id="addProductModal" class="add-product-modal" aria-hidden="true">
+    <div class="add-product-dialog" role="dialog" aria-modal="true" aria-labelledby="addProductTitle">
+        <div class="add-product-dialog-head">
+            <h3 id="addProductTitle">Add Product to Order</h3>
+            <button type="button" class="add-product-close" onclick="closeAddProductModal()" aria-label="Close">×</button>
+        </div>
+        <div class="add-product-dialog-body">
+            <input id="addProductSearch" class="add-product-search" type="search" placeholder="Search products..." autocomplete="off">
+            <div id="addProductList" class="add-product-list"></div>
+            <div class="add-product-form">
+                <div class="add-product-selected">
+                    <span class="add-product-selected-label">Selected Product</span>
+                    <div id="addProductSelected" class="add-product-selected-value">Select a product above</div>
+                </div>
+                <div>
+                    <label class="add-product-qty-label" for="addProductQuantity">Quantity</label>
+                    <input id="addProductQuantity" class="add-product-qty" type="number" min="0.01" step="any" value="1">
+                </div>
+            </div>
+        </div>
+        <div class="add-product-footer">
+            <button type="button" class="add-product-cancel" onclick="closeAddProductModal()">Cancel</button>
+            <button type="button" id="addProductSubmit" class="add-product-submit" onclick="submitAddProduct()" disabled>Add to Order</button>
+        </div>
+    </div>
+</div>
 
 <script>
 const API_URL =
@@ -965,6 +1077,10 @@ const STATUSES = [
 ];
 
 let orders = [];
+let productCatalog = [];
+let addProductOrderId = "";
+let selectedAddProduct = null;
+let addProductModalOpen = false;
 
 /* =========================================================
    TWO-LEVEL ORDER FILTER
@@ -1047,6 +1163,8 @@ document.getElementById("autoRefreshInterval").value =
     String(autoRefreshMinutes);
 
 loadOrders(false);
+loadProductCatalog();
+setupAddProductModalEvents();
 startAutoRefresh();
 updateRefreshInfo();
 
@@ -1074,7 +1192,7 @@ function startAutoRefresh(){
              active.tagName === "TEXTAREA" ||
              active.isContentEditable);
 
-        if(elapsed >= intervalMs && !userIsEditing){
+        if(elapsed >= intervalMs && !userIsEditing && !addProductModalOpen){
             lastRefreshAt = Date.now();
             updateRefreshInfo();
             loadOrders(false);
@@ -1936,16 +2054,268 @@ function renderStatusFlow(order){
     `;
 }
 
+
+async function loadProductCatalog(){
+    try{
+        const response = await fetch(
+            API_URL + "?t=" + Date.now(),
+            {cache:"no-store"}
+        );
+
+        if(!response.ok){
+            throw new Error("Could not load products.");
+        }
+
+        const data = await response.json();
+
+        if(!data.success){
+            throw new Error(data.message || "Could not load products.");
+        }
+
+        productCatalog = Array.isArray(data.products)
+            ? data.products.filter(function(product){
+                return product && product.productName && product.available !== false;
+            })
+            : [];
+
+    }catch(error){
+        console.error("Product catalogue load failed:", error);
+        productCatalog = [];
+    }
+}
+
+function openAddProductModal(orderId){
+    addProductOrderId = orderId;
+    selectedAddProduct = null;
+    addProductModalOpen = true;
+
+    const modal = document.getElementById("addProductModal");
+    const search = document.getElementById("addProductSearch");
+    const quantity = document.getElementById("addProductQuantity");
+
+    if(!modal){ return; }
+
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+
+    if(quantity){ quantity.value = "1"; }
+
+    renderAddProductList();
+    updateAddProductSelectionUI();
+
+    setTimeout(function(){
+        if(search){ search.focus(); }
+    }, 50);
+}
+
+function closeAddProductModal(){
+    const modal = document.getElementById("addProductModal");
+    addProductModalOpen = false;
+    addProductOrderId = "";
+    selectedAddProduct = null;
+
+    if(modal){
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden", "true");
+    }
+
+    const search = document.getElementById("addProductSearch");
+    if(search){ search.value = ""; }
+
+    updateAddProductSelectionUI();
+}
+
+function renderAddProductList(){
+    const list = document.getElementById("addProductList");
+    const search = document.getElementById("addProductSearch");
+
+    if(!list){ return; }
+
+    const query = search
+        ? search.value.trim().toLowerCase()
+        : "";
+
+    const filtered = productCatalog.filter(function(product){
+        const text = [
+            product.productName,
+            product.category,
+            product.description,
+            product.unit,
+            product.packSize
+        ].join(" ").toLowerCase();
+
+        return !query || text.includes(query);
+    });
+
+    if(!filtered.length){
+        list.innerHTML = '<div class="add-product-empty">No available products found.</div>';
+        return;
+    }
+
+    list.innerHTML = filtered.map(function(product){
+        const selected = selectedAddProduct &&
+            String(selectedAddProduct.productId) === String(product.productId);
+
+        const meta = [
+            product.category,
+            product.packSize,
+            product.unit
+        ].filter(Boolean).join(" • ");
+
+        return `
+            <button type="button"
+                class="add-product-option ${selected ? "selected" : ""}"
+                onclick="selectAddProduct('${js(product.productId)}')">
+                <span class="add-product-option-info">
+                    <span class="add-product-option-name">${esc(product.productName)}</span>
+                    <span class="add-product-option-meta">${esc(meta || "Available")}</span>
+                </span>
+                <span class="add-product-option-price">₹${money(product.price)}</span>
+            </button>
+        `;
+    }).join("");
+}
+
+function selectAddProduct(productId){
+    selectedAddProduct = productCatalog.find(function(product){
+        return String(product.productId) === String(productId);
+    }) || null;
+
+    renderAddProductList();
+    updateAddProductSelectionUI();
+}
+
+function updateAddProductSelectionUI(){
+    const selectedBox = document.getElementById("addProductSelected");
+    const submit = document.getElementById("addProductSubmit");
+
+    if(selectedBox){
+        if(selectedAddProduct){
+            const meta = [
+                selectedAddProduct.packSize,
+                selectedAddProduct.unit
+            ].filter(Boolean).join(" • ");
+
+            selectedBox.innerHTML =
+                esc(selectedAddProduct.productName) +
+                (meta ? ' <span style="font-weight:600;color:#68736a">(' + esc(meta) + ')</span>' : '') +
+                ' — ₹' + money(selectedAddProduct.price);
+        }else{
+            selectedBox.textContent = "Select a product above";
+        }
+    }
+
+    if(submit){
+        submit.disabled = !selectedAddProduct || !addProductOrderId;
+    }
+}
+
+async function submitAddProduct(){
+    if(!selectedAddProduct || !addProductOrderId){
+        return;
+    }
+
+    const quantityInput = document.getElementById("addProductQuantity");
+    const quantity = Number(quantityInput ? quantityInput.value : 0);
+
+    if(!Number.isFinite(quantity) || quantity <= 0){
+        alert("Please enter a valid quantity greater than zero.");
+        return;
+    }
+
+    const submit = document.getElementById("addProductSubmit");
+    if(submit){
+        submit.disabled = true;
+        submit.textContent = "Adding...";
+    }
+
+    try{
+        showNotice("");
+
+        const url =
+            API_URL +
+            "?action=addProduct" +
+            "&key=" + encodeURIComponent(ADMIN_KEY) +
+            "&orderId=" + encodeURIComponent(addProductOrderId) +
+            "&productId=" + encodeURIComponent(selectedAddProduct.productId) +
+            "&quantity=" + encodeURIComponent(quantity) +
+            "&t=" + Date.now();
+
+        const response = await fetch(url, {cache:"no-store"});
+
+        if(!response.ok){
+            throw new Error("Could not add product to the order.");
+        }
+
+        const data = await response.json();
+
+        if(!data.success){
+            throw new Error(data.message || "Could not add product to the order.");
+        }
+
+        const orderId = addProductOrderId;
+        closeAddProductModal();
+        expandedOrders.add(orderId);
+
+        showNotice(
+            (data.product && data.product.product) || selectedAddProduct.productName +
+            " added to " + orderId + "."
+        );
+
+        await loadOrders(false);
+
+        setTimeout(function(){
+            showNotice("");
+        }, 2500);
+
+    }catch(error){
+        console.error(error);
+        showNotice(error.message || "Could not add product to the order.");
+
+        if(submit){
+            submit.disabled = false;
+            submit.textContent = "Add to Order";
+        }
+    }
+}
+
+function setupAddProductModalEvents(){
+    const search = document.getElementById("addProductSearch");
+    const modal = document.getElementById("addProductModal");
+
+    if(search){
+        search.addEventListener("input", renderAddProductList);
+    }
+
+    if(modal){
+        modal.addEventListener("click", function(event){
+            if(event.target === modal){
+                closeAddProductModal();
+            }
+        });
+    }
+
+    document.addEventListener("keydown", function(event){
+        if(event.key === "Escape" && addProductModalOpen){
+            closeAddProductModal();
+        }
+    });
+}
+
 function renderOrder(order){
 
     const items = Array.isArray(order.items) ? order.items : [];
 
     const activeItems = items.filter(function(item){
         return String(item.productStatus || "PENDING").toUpperCase() !== "CANCELLED";
+    }).slice().sort(function(a, b){
+        return (Number(b.quantity) || 0) - (Number(a.quantity) || 0);
     });
 
     const cancelledItems = items.filter(function(item){
         return String(item.productStatus || "PENDING").toUpperCase() === "CANCELLED";
+    }).slice().sort(function(a, b){
+        return (Number(b.quantity) || 0) - (Number(a.quantity) || 0);
     });
 
     const calculatedTotal = activeItems.reduce(function(sum, item){
@@ -2101,7 +2471,10 @@ function renderOrder(order){
                     <section class="section" style="grid-column:1/-1">
                         <div class="section-title items-heading">
                             <span>🛍️ Items</span>
-                            <span class="item-count-badge">${calculatedProductCount} item(s)</span>
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <span class="item-count-badge">${calculatedProductCount} item(s)</span>
+                                <button type="button" class="add-product-btn" onclick="openAddProductModal('${js(order.orderId)}'); event.stopPropagation();">＋ Add Product</button>
+                            </div>
                         </div>
                         <div class="section-body">
                             <div class="items-wrap">
