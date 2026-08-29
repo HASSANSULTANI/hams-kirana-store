@@ -248,11 +248,22 @@ header{
     color:#166534;
     font-weight:700;
 }
-@media(max-width:1000px){.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1200px){
+    .orders{grid-template-columns:repeat(3,minmax(0,1fr));}
+}
+@media(max-width:900px){
+    .orders{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 
 .orders{
     display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
     gap:14px;
+    align-items:start;
+}
+.order.expanded{
+    grid-column:1 / -1;
 }
 
 .order{
@@ -347,22 +358,42 @@ header{
 }
 
 /* INDIVIDUAL PRODUCT STATUS */
-.product-status-select{
-    width:100%;
-    min-width:112px;
-    border:1px solid #d7e0d8;
-    border-radius:7px;
+.product-status-buttons{
+    display:flex;
+    gap:5px;
+    flex-wrap:nowrap;
+    align-items:center;
+    justify-content:flex-start;
+}
+.product-status-btn{
+    border:1px solid #d8e2d9;
     background:#fff;
     color:#315338;
-    padding:6px 7px;
+    border-radius:7px;
+    padding:6px 8px;
+    cursor:pointer;
     font-size:10px;
     font-weight:700;
-    cursor:pointer;
+    white-space:nowrap;
 }
-.product-status-select:focus{
-    outline:none;
+.product-status-btn:hover{
     border-color:#15803d;
-    box-shadow:0 0 0 2px rgba(21,128,61,.10);
+    color:#166534;
+}
+.product-status-btn.active{
+    background:#15803d;
+    color:#fff;
+    border-color:#15803d;
+}
+.product-status-btn.pending.active{
+    background:#fff;
+    color:#166534;
+    border-color:#15803d;
+}
+.product-status-btn.cancelled.active{
+    background:#fee2e2;
+    color:#b91c1c;
+    border-color:#ef4444;
 }
 .items .cancelled-product{
     background:#f3f3f3;
@@ -374,11 +405,19 @@ header{
     text-decoration-color:#ef4444;
     text-decoration-thickness:1.5px;
 }
-.items .cancelled-product .product-status-select{
+.items .cancelled-product .product-status-buttons{
+    opacity:.85;
+}
+.items .cancelled-product .product-status-btn{
     color:#858585;
     text-decoration:none;
     background:#e9e9e9;
     border-color:#d5d5d5;
+}
+.items .cancelled-product .product-status-btn.cancelled.active{
+    color:#b91c1c;
+    background:#f3dada;
+    border-color:#ef9a9a;
 }
 .cancelled-divider td{
     padding:7px 5px 6px;
@@ -407,8 +446,13 @@ header{
         overflow-x:auto;
         -webkit-overflow-scrolling:touch;
     }
-    .product-status-select{
-        min-width:105px;
+    .product-status-buttons{
+        min-width:0;
+        overflow-x:auto;
+    }
+    .product-status-btn{
+        padding:6px 7px;
+        font-size:9px;
     }
 }
 
@@ -546,6 +590,7 @@ header{
 }
 
 @media(max-width:600px){
+    .orders{grid-template-columns:1fr;}
     .head{
         padding:11px 13px;
     }
@@ -1467,23 +1512,18 @@ function renderOrder(order){
         return sum + (Number(item.total) || ((Number(item.quantity) || 0) * (Number(item.price) || 0)));
     }, 0);
 
-    const calculatedQuantity = activeItems.reduce(function(sum, item){
-        return sum + (Number(item.quantity) || 0);
-    }, 0);
+    const calculatedProductCount = activeItems.length;
 
-    function productStatusSelect(item){
+    function productStatusButtons(item){
         const productStatus = String(item.productStatus || "PENDING").toUpperCase();
+        const row = Number(item.rowNumber) || 0;
+        const oid = js(order.orderId);
         return `
-            <select
-                class="product-status-select"
-                onchange="changeProductStatus('${js(order.orderId)}', ${Number(item.rowNumber) || 0}, this.value)"
-                onclick="event.stopPropagation()"
-                aria-label="Product status for ${attr(item.product)}"
-            >
-                <option value="PENDING" ${productStatus === "PENDING" ? "selected" : ""}>PENDING</option>
-                <option value="PREPARED" ${productStatus === "PREPARED" ? "selected" : ""}>PREPARED</option>
-                <option value="CANCELLED" ${productStatus === "CANCELLED" ? "selected" : ""}>CANCELLED</option>
-            </select>
+            <div class="product-status-buttons" role="group" aria-label="Product status for ${attr(item.product)}">
+                <button type="button" class="product-status-btn pending ${productStatus === "PENDING" ? "active" : ""}" onclick="changeProductStatus('${oid}', ${row}, 'PENDING'); event.stopPropagation();">PENDING</button>
+                <button type="button" class="product-status-btn prepared ${productStatus === "PREPARED" ? "active" : ""}" onclick="changeProductStatus('${oid}', ${row}, 'PREPARED'); event.stopPropagation();">PREPARED</button>
+                <button type="button" class="product-status-btn cancelled ${productStatus === "CANCELLED" ? "active" : ""}" onclick="changeProductStatus('${oid}', ${row}, 'CANCELLED'); event.stopPropagation();">CANCELLED</button>
+            </div>
         `;
     }
 
@@ -1495,7 +1535,7 @@ function renderOrder(order){
                 <td>${Number(item.quantity) || 0}</td>
                 <td>₹${money(item.price)}</td>
                 <td>₹${money(itemTotal)}</td>
-                <td>${productStatusSelect(item)}</td>
+                <td>${productStatusButtons(item)}</td>
             </tr>
         `;
     }
@@ -1632,7 +1672,7 @@ function renderOrder(order){
                                 </table>
                             </div>
                             <div class="total">
-                                <span>${calculatedQuantity} item(s)</span>
+                                <span>${calculatedProductCount} item(s)</span>
                                 <span class="transfer-target" data-transfer-target="total">₹${money(calculatedTotal)}</span>
                             </div>
                         </div>
@@ -1769,14 +1809,12 @@ async function changeProductStatus(orderId, rowNumber, newProductStatus){
         return;
     }
 
-    if(!confirm(
-        "Change product status for \"" +
+    /* Only CANCELLED requires confirmation.
+       PENDING and PREPARED changes happen immediately. */
+    if(nextStatus === "CANCELLED" && !confirm(
+        "Cancel product \"" +
         (item.product || "Product") +
-        "\" from \"" +
-        oldStatus +
-        "\" to \"" +
-        nextStatus +
-        "\"?"
+        "\"?\n\nIts amount will be removed from the order total."
     )){
         render();
         return;
@@ -1811,6 +1849,16 @@ async function changeProductStatus(orderId, rowNumber, newProductStatus){
         /* Recalculate the order total immediately in the browser. */
         recalculateOrderTotal(order);
 
+        /* If no product is still PENDING, automatically move the
+           order to OUT FOR DELIVERY (unless it is already closed). */
+        const hasPendingProducts = (order.items || []).some(function(product){
+            return String(product.productStatus || "PENDING").toUpperCase() === "PENDING";
+        });
+
+        if(!hasPendingProducts && order.status !== "OUT FOR DELIVERY" && order.status !== "DELIVERED" && order.status !== "CANCELLED"){
+            await updateOrderStatusWithoutConfirmation(order, "OUT FOR DELIVERY");
+        }
+
         renderStats();
         renderFilters();
         render();
@@ -1820,6 +1868,33 @@ async function changeProductStatus(orderId, rowNumber, newProductStatus){
         showNotice(error.message || "Could not update product status.");
         render();
     }
+}
+
+async function updateOrderStatusWithoutConfirmation(order, newStatus){
+    const oldStatus = order.status;
+    if(!order || oldStatus === newStatus){
+        return;
+    }
+
+    const url =
+        API_URL +
+        "?action=updateStatus" +
+        "&key=" + encodeURIComponent(ADMIN_KEY) +
+        "&orderId=" + encodeURIComponent(order.orderId) +
+        "&status=" + encodeURIComponent(newStatus) +
+        "&t=" + Date.now();
+
+    const response = await fetch(url, {cache:"no-store"});
+    if(!response.ok){
+        throw new Error("Automatic order status update failed.");
+    }
+
+    const data = await response.json();
+    if(!data.success){
+        throw new Error(data.message || "Automatic order status update failed.");
+    }
+
+    order.status = newStatus;
 }
 
 function recalculateOrderTotal(order){
