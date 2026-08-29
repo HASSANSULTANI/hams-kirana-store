@@ -167,6 +167,89 @@ header{
     margin-top:6px;
 }
 
+.date-filter{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-bottom:10px;
+}
+.date-filter-controls{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+}
+.date-filter-select{
+    border:1px solid #dce4dc;
+    background:#fff;
+    color:#315338;
+    border-radius:9px;
+    padding:8px 34px 8px 12px;
+    cursor:pointer;
+    font-weight:700;
+    font-size:12px;
+    outline:none;
+    min-width:150px;
+}
+.date-filter-select:focus{
+    border-color:#15803d;
+    box-shadow:0 0 0 2px rgba(21,128,61,.12);
+}
+.date-sub-row{
+    display:flex;
+    gap:8px;
+    overflow:auto;
+    padding-bottom:3px;
+    width:100%;
+}
+.date-input{
+    border:1px solid #dce4dc;
+    background:#fff;
+    color:#315338;
+    border-radius:9px;
+    padding:8px 10px;
+    font-size:12px;
+    font-weight:700;
+    outline:none;
+}
+.date-input:focus{
+    border-color:#15803d;
+    box-shadow:0 0 0 2px rgba(21,128,61,.12);
+}
+.date-range-controls{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+}
+.date-apply-btn{
+    border:1px solid #15803d;
+    background:#15803d;
+    color:#fff;
+    border-radius:9px;
+    padding:8px 12px;
+    cursor:pointer;
+    font-size:12px;
+    font-weight:700;
+}
+.date-filter-error{
+    color:#b91c1c;
+    font-size:11px;
+    font-weight:700;
+}
+.items-heading{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+}
+.item-count-badge{
+    color:#166534;
+    font-size:11px;
+    font-weight:800;
+    white-space:nowrap;
+}
+
 .filters{
     display:flex;
     flex-direction:column;
@@ -203,8 +286,9 @@ header{
 
 /* COLLAPSED / EXPANDED ORDER */
 .order-summary{padding:12px 16px 14px;background:#fff;border-bottom:1px solid #e7ece7}
-.summary-grid{display:grid;grid-template-columns:minmax(150px,1.05fr) minmax(150px,1.25fr) minmax(180px,2fr) minmax(120px,.75fr);gap:10px 18px;align-items:start}
+.summary-grid{display:grid;grid-template-columns:minmax(120px,.8fr) minmax(90px,.65fr) minmax(150px,1.05fr) minmax(180px,2fr) minmax(120px,.75fr);gap:10px 18px;align-items:start}
 .summary-field{min-width:0}
+.summary-hidden-when-expanded{display:none}
 .summary-label{display:block;color:#68736a;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.035em;margin-bottom:4px}
 .summary-value{color:#172017;font-size:12px;font-weight:700;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .summary-total{color:#166534;font-size:14px}
@@ -874,6 +958,12 @@ let orders = [];
 let activeGroup = "ALL";
 let activeStatusFilter = "ALL";
 
+/* DATE FILTER */
+let activeDateFilterMode = "ALL";
+let activeDateFilterValue = "ALL";
+let activeFromDate = "";
+let activeToDate = "";
+
 /* UI-only sorting and expansion state. */
 let activeSort = "DATE";
 let sortDirection = "DESC";
@@ -1041,6 +1131,9 @@ function render(){
     const filtered =
         orders.filter(function(order){
 
+            /* Date filter */
+            if(!matchesDateFilter(order)) return false;
+
             /* Primary group filter */
             if(activeGroup === "OPEN" &&
                !openStatuses.includes(order.status)){
@@ -1185,7 +1278,73 @@ function renderFilters(){
 
         }).join("");
 
+    const dateModes = [
+        ["ALL", "All Time"],
+        ["YEARLY", "Yearly"],
+        ["QUARTERLY", "Quarterly"],
+        ["MONTHLY", "Monthly"],
+        ["WEEKLY", "Weekly"],
+        ["CALENDAR", "Calendar"],
+        ["RANGE", "From & To"]
+    ];
+
+    const dateModeHtml = dateModes.map(function(pair){
+        return `<option value="${attr(pair[0])}" ${activeDateFilterMode === pair[0] ? "selected" : ""}>${esc(pair[1])}</option>`;
+    }).join("");
+
+    let dateSubHtml = "";
+
+    if(activeDateFilterMode === "YEARLY"){
+        const years = getAvailableYears();
+        dateSubHtml = years.length
+            ? years.map(function(year){
+                return `<button class="filter ${String(activeDateFilterValue) === String(year) ? "active" : ""}" onclick="setDateFilterValue('${js(String(year))}')">${esc(year)}</button>`;
+            }).join("")
+            : `<span class="date-filter-error">No years available.</span>`;
+    }else if(activeDateFilterMode === "QUARTERLY"){
+        dateSubHtml = [1,2,3,4].map(function(q){
+            const value = String(q);
+            return `<button class="filter ${activeDateFilterValue === value ? "active" : ""}" onclick="setDateFilterValue('${value}')">Quarter ${q}</button>`;
+        }).join("");
+    }else if(activeDateFilterMode === "MONTHLY"){
+        dateSubHtml = getMonthNames().map(function(month, index){
+            const value = String(index + 1);
+            return `<button class="filter ${activeDateFilterValue === value ? "active" : ""}" onclick="setDateFilterValue('${value}')">${esc(month)}</button>`;
+        }).join("");
+    }else if(activeDateFilterMode === "WEEKLY"){
+        dateSubHtml = [1,2,3,4,5].map(function(week){
+            const value = String(week);
+            return `<button class="filter ${activeDateFilterValue === value ? "active" : ""}" onclick="setDateFilterValue('${value}')">Week ${week}</button>`;
+        }).join("");
+    }else if(activeDateFilterMode === "CALENDAR"){
+        dateSubHtml = `
+            <input class="date-input" type="date" value="${attr(activeDateFilterValue === "ALL" ? "" : activeDateFilterValue)}" onchange="setCalendarDate(this.value)" aria-label="Select specific date">
+        `;
+    }else if(activeDateFilterMode === "RANGE"){
+        dateSubHtml = `
+            <div class="date-range-controls">
+                <label>From <input id="fromDateFilter" class="date-input" type="date" value="${attr(activeFromDate)}"></label>
+                <label>To <input id="toDateFilter" class="date-input" type="date" value="${attr(activeToDate)}"></label>
+                <button class="date-apply-btn" type="button" onclick="applyDateRange()">Apply</button>
+                ${(activeFromDate || activeToDate) ? `<button class="filter" type="button" onclick="clearDateRange()">Clear</button>` : ""}
+            </div>
+        `;
+    }
+
     document.getElementById("filters").innerHTML = `
+        <div class="filter-group-title">
+            Date
+        </div>
+
+        <div class="date-filter">
+            <div class="date-filter-controls">
+                <select class="date-filter-select" aria-label="Date filter type" onchange="setDateFilterMode(this.value)">
+                    ${dateModeHtml}
+                </select>
+            </div>
+            ${dateSubHtml ? `<div class="date-sub-row">${dateSubHtml}</div>` : ""}
+        </div>
+
         <div class="filter-group-title">
             Order Group
         </div>
@@ -1206,6 +1365,145 @@ function renderFilters(){
     renderSorting();
 }
 
+function getAvailableYears(){
+    const years = new Set();
+    orders.forEach(function(order){
+        const d = parseOrderDate(order.timestamp);
+        if(d) years.add(d.getFullYear());
+    });
+    return Array.from(years).sort(function(a,b){ return b-a; });
+}
+
+function getMonthNames(){
+    return ["January","February","March","April","May","June","July","August","September","October","November","December"];
+}
+
+function parseOrderDate(value){
+    const raw = String(value || "").trim();
+    if(!raw) return null;
+
+    const match = raw.match(/^(\d{4})[-\/]([01]?\d)[-\/]([0-3]?\d)(?:[ T](\d{1,2}):([0-5]?\d)(?::([0-5]?\d))?)?/);
+    if(match){
+        const year = Number(match[1]);
+        const month = Number(match[2]);
+        const day = Number(match[3]);
+        const hour = Number(match[4] || 0);
+        const minute = Number(match[5] || 0);
+        const second = Number(match[6] || 0);
+        const d = new Date(year, month - 1, day, hour, minute, second);
+        if(!Number.isNaN(d.getTime())) return d;
+    }
+
+    const parsed = new Date(raw);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function weekOfMonth(date){
+    return Math.min(5, Math.floor((date.getDate() - 1) / 7) + 1);
+}
+
+function matchesDateFilter(order){
+    if(activeDateFilterMode === "ALL") return true;
+
+    const d = parseOrderDate(order.timestamp);
+    if(!d) return false;
+
+    if(activeDateFilterMode === "YEARLY"){
+        return Number(activeDateFilterValue) === d.getFullYear();
+    }
+
+    if(activeDateFilterMode === "QUARTERLY"){
+        return Number(activeDateFilterValue) === Math.floor(d.getMonth() / 3) + 1;
+    }
+
+    if(activeDateFilterMode === "MONTHLY"){
+        return Number(activeDateFilterValue) === d.getMonth() + 1;
+    }
+
+    if(activeDateFilterMode === "WEEKLY"){
+        return Number(activeDateFilterValue) === weekOfMonth(d);
+    }
+
+    if(activeDateFilterMode === "CALENDAR"){
+        if(!activeDateFilterValue || activeDateFilterValue === "ALL") return true;
+        return formatDateInput(d) === activeDateFilterValue;
+    }
+
+    if(activeDateFilterMode === "RANGE"){
+        const current = formatDateInput(d);
+        if(activeFromDate && current < activeFromDate) return false;
+        if(activeToDate && current > activeToDate) return false;
+        return true;
+    }
+
+    return true;
+}
+
+function formatDateInput(date){
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+
+function setDateFilterMode(mode){
+    const allowed = ["ALL","YEARLY","QUARTERLY","MONTHLY","WEEKLY","CALENDAR","RANGE"];
+    if(!allowed.includes(mode)) return;
+
+    activeDateFilterMode = mode;
+
+    if(mode === "ALL"){
+        activeDateFilterValue = "ALL";
+    }else if(mode === "YEARLY"){
+        const years = getAvailableYears();
+        activeDateFilterValue = years.length ? String(years[0]) : "ALL";
+    }else if(["QUARTERLY","MONTHLY","WEEKLY"].includes(mode)){
+        activeDateFilterValue = "1";
+    }else if(mode === "CALENDAR"){
+        activeDateFilterValue = "";
+    }else if(mode === "RANGE"){
+        activeDateFilterValue = "ALL";
+    }
+
+    renderFilters();
+    render();
+}
+
+function setDateFilterValue(value){
+    activeDateFilterValue = String(value);
+    renderFilters();
+    render();
+}
+
+function setCalendarDate(value){
+    activeDateFilterValue = value || "ALL";
+    renderFilters();
+    render();
+}
+
+function applyDateRange(){
+    const from = document.getElementById("fromDateFilter");
+    const to = document.getElementById("toDateFilter");
+    activeFromDate = from ? from.value : "";
+    activeToDate = to ? to.value : "";
+
+    if(activeFromDate && activeToDate && activeFromDate > activeToDate){
+        showNotice("From date cannot be after To date.");
+        return;
+    }
+
+    showNotice("");
+    renderFilters();
+    render();
+}
+
+function clearDateRange(){
+    activeFromDate = "";
+    activeToDate = "";
+    showNotice("");
+    renderFilters();
+    render();
+}
 
 function renderSorting(){
     const options = [
@@ -1285,9 +1583,8 @@ function orderIdSortValue(value){
 }
 
 function dateSortValue(value){
-    const raw = String(value || "").trim();
-    const parsed = Date.parse(raw.replace(/-/g,"/"));
-    return Number.isNaN(parsed) ? 0 : parsed;
+    const parsed = parseOrderDate(value);
+    return parsed ? parsed.getTime() : 0;
 }
 
 function statusSortValue(value){
@@ -1622,6 +1919,10 @@ function renderOrder(order){
                         <span class="summary-label">Order Number</span>
                         <span class="summary-value">${esc(order.orderId)}</span>
                     </div>
+                    <div class="summary-field ${isExpanded ? "summary-hidden-when-expanded" : ""}">
+                        <span class="summary-label">Items</span>
+                        <span class="summary-value">${isExpanded ? "" : calculatedProductCount}</span>
+                    </div>
                     <div class="summary-field">
                         <span class="summary-label">Date &amp; Time</span>
                         <span class="summary-value">${esc(order.timestamp)}</span>
@@ -1661,7 +1962,10 @@ function renderOrder(order){
                     </section>
 
                     <section class="section" style="grid-column:1/-1">
-                        <div class="section-title">🛍️ Items</div>
+                        <div class="section-title items-heading">
+                            <span>🛍️ Items</span>
+                            <span class="item-count-badge">${calculatedProductCount} item(s)</span>
+                        </div>
                         <div class="section-body">
                             <div class="items-wrap">
                                 <table class="items">
@@ -1672,7 +1976,7 @@ function renderOrder(order){
 
                             <!-- Keep the active order total ABOVE the cancelled-products section. -->
                             <div class="total">
-                                <span>${calculatedProductCount} item(s)</span>
+                                <span>Total</span>
                                 <span class="transfer-target" data-transfer-target="total">₹${money(calculatedTotal)}</span>
                             </div>
 
