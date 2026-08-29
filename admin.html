@@ -419,6 +419,12 @@ header{
     background:#f3dada;
     border-color:#ef9a9a;
 }
+.cancelled-products-wrap{
+    margin-top:8px;
+}
+.cancelled-items-wrap{
+    margin-top:0;
+}
 .cancelled-divider td{
     padding:7px 5px 6px;
     border-bottom:0;
@@ -1540,31 +1546,23 @@ function renderOrder(order){
         `;
     }
 
-    let itemRows = "";
+    let activeItemRows = "";
+    let cancelledItemRows = "";
 
     if(activeItems.length){
-        itemRows += activeItems.map(function(item){
+        activeItemRows = activeItems.map(function(item){
             return productRow(item, false);
         }).join("");
     }
 
     if(cancelledItems.length){
-        itemRows += `
-            <tr class="cancelled-divider">
-                <td colspan="5">
-                    <div class="cancelled-divider-line"></div>
-                    <span class="cancelled-label">Cancelled Products</span>
-                </td>
-            </tr>
-        `;
-
-        itemRows += cancelledItems.map(function(item){
+        cancelledItemRows = cancelledItems.map(function(item){
             return productRow(item, true);
         }).join("");
     }
 
-    if(!itemRows){
-        itemRows = `<tr><td colspan="5">No item details available.</td></tr>`;
+    if(!activeItemRows){
+        activeItemRows = `<tr><td colspan="5">No active item details available.</td></tr>`;
     }
 
     const address = [
@@ -1668,13 +1666,29 @@ function renderOrder(order){
                             <div class="items-wrap">
                                 <table class="items">
                                     <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th><th>Product Status</th></tr></thead>
-                                    <tbody>${itemRows}</tbody>
+                                    <tbody>${activeItemRows}</tbody>
                                 </table>
                             </div>
+
+                            <!-- Keep the active order total ABOVE the cancelled-products section. -->
                             <div class="total">
                                 <span>${calculatedProductCount} item(s)</span>
                                 <span class="transfer-target" data-transfer-target="total">₹${money(calculatedTotal)}</span>
                             </div>
+
+                            ${cancelledItemRows ? `
+                                <div class="cancelled-products-wrap">
+                                    <div class="cancelled-divider">
+                                        <div class="cancelled-divider-line"></div>
+                                        <span class="cancelled-label">Cancelled Products</span>
+                                    </div>
+                                    <div class="items-wrap cancelled-items-wrap">
+                                        <table class="items">
+                                            <tbody>${cancelledItemRows}</tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            ` : ""}
                         </div>
                     </section>
                 </div>
