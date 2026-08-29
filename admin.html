@@ -2458,11 +2458,11 @@ function renderOrder(order){
                         <span class="summary-label">Date &amp; Time</span>
                         <span class="summary-value">${esc(order.timestamp)}</span>
                     </div>
-                    <div class="summary-field">
+                    <div class="summary-field ${isExpanded ? "summary-hidden-when-expanded" : ""}">
                         <span class="summary-label">Customer Name</span>
                         <span class="summary-value" data-transfer-source="name" title="${attr(order.name || "—")}">${isExpanded ? "" : esc(order.name || "—")}</span>
                     </div>
-                    <div class="summary-field">
+                    <div class="summary-field ${isExpanded ? "summary-hidden-when-expanded" : ""}">
                         <span class="summary-label">Total Amount</span>
                         <span class="summary-value summary-total" data-transfer-source="total">${isExpanded ? "" : "₹" + money(order.total)}</span>
                     </div>
