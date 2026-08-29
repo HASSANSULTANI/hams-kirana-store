@@ -202,6 +202,25 @@ header{
     padding-bottom:3px;
     width:100%;
 }
+.date-sub-container{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    width:100%;
+}
+.date-hierarchy-block{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    width:100%;
+}
+.date-hierarchy-title{
+    color:#68736a;
+    font-size:10px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+}
 .date-input{
     border:1px solid #dce4dc;
     background:#fff;
@@ -959,8 +978,24 @@ let activeGroup = "ALL";
 let activeStatusFilter = "ALL";
 
 /* DATE FILTER */
-let activeDateFilterMode = "ALL";
-let activeDateFilterValue = "ALL";
+/*
+ * Date filter hierarchy:
+ * ALL TIME   -> no subordinate filter
+ * YEARLY     -> Year
+ * QUARTERLY  -> Year -> Quarter
+ * MONTHLY    -> Year -> Month
+ * WEEKLY     -> Year -> Month -> Week
+ * CALENDAR   -> Specific date
+ * RANGE      -> From date -> To date
+ *
+ * Calendar is the default and starts on today's date.
+ */
+let activeDateFilterMode = "CALENDAR";
+let activeDateFilterYear = String(new Date().getFullYear());
+let activeDateFilterQuarter = "1";
+let activeDateFilterMonth = String(new Date().getMonth() + 1);
+let activeDateFilterWeek = String(Math.min(5, Math.floor((new Date().getDate() - 1) / 7) + 1));
+let activeCalendarDate = formatDateInput(new Date());
 let activeFromDate = "";
 let activeToDate = "";
 
@@ -1295,31 +1330,65 @@ function renderFilters(){
     let dateSubHtml = "";
 
     if(activeDateFilterMode === "YEARLY"){
-        const years = getAvailableYears();
-        dateSubHtml = years.length
-            ? years.map(function(year){
-                return `<button class="filter ${String(activeDateFilterValue) === String(year) ? "active" : ""}" onclick="setDateFilterValue('${js(String(year))}')">${esc(year)}</button>`;
-            }).join("")
-            : `<span class="date-filter-error">No years available.</span>`;
+        dateSubHtml = renderDateYearButtons();
+
     }else if(activeDateFilterMode === "QUARTERLY"){
-        dateSubHtml = [1,2,3,4].map(function(q){
-            const value = String(q);
-            return `<button class="filter ${activeDateFilterValue === value ? "active" : ""}" onclick="setDateFilterValue('${value}')">Quarter ${q}</button>`;
-        }).join("");
+        dateSubHtml = `
+            <div class="date-hierarchy-block">
+                <div class="date-hierarchy-title">Year</div>
+                <div class="date-sub-row">${renderDateYearButtons()}</div>
+            </div>
+            <div class="date-hierarchy-block">
+                <div class="date-hierarchy-title">Quarter</div>
+                <div class="date-sub-row">${[1,2,3,4].map(function(q){
+                    const value = String(q);
+                    return `<button class="filter ${activeDateFilterQuarter === value ? "active" : ""}" onclick="setDateQuarter('${value}')">Quarter ${q}</button>`;
+                }).join("")}</div>
+            </div>
+        `;
+
     }else if(activeDateFilterMode === "MONTHLY"){
-        dateSubHtml = getMonthNames().map(function(month, index){
-            const value = String(index + 1);
-            return `<button class="filter ${activeDateFilterValue === value ? "active" : ""}" onclick="setDateFilterValue('${value}')">${esc(month)}</button>`;
-        }).join("");
+        dateSubHtml = `
+            <div class="date-hierarchy-block">
+                <div class="date-hierarchy-title">Year</div>
+                <div class="date-sub-row">${renderDateYearButtons()}</div>
+            </div>
+            <div class="date-hierarchy-block">
+                <div class="date-hierarchy-title">Month</div>
+                <div class="date-sub-row">${renderDateMonthButtons()}</div>
+            </div>
+        `;
+
     }else if(activeDateFilterMode === "WEEKLY"){
-        dateSubHtml = [1,2,3,4,5].map(function(week){
-            const value = String(week);
-            return `<button class="filter ${activeDateFilterValue === value ? "active" : ""}" onclick="setDateFilterValue('${value}')">Week ${week}</button>`;
-        }).join("");
+        dateSubHtml = `
+            <div class="date-hierarchy-block">
+                <div class="date-hierarchy-title">Year</div>
+                <div class="date-sub-row">${renderDateYearButtons()}</div>
+            </div>
+            <div class="date-hierarchy-block">
+                <div class="date-hierarchy-title">Month</div>
+                <div class="date-sub-row">${renderDateMonthButtons()}</div>
+            </div>
+            <div class="date-hierarchy-block">
+                <div class="date-hierarchy-title">Week</div>
+                <div class="date-sub-row">${[1,2,3,4,5].map(function(week){
+                    const value = String(week);
+                    return `<button class="filter ${activeDateFilterWeek === value ? "active" : ""}" onclick="setDateWeek('${value}')">Week ${week}</button>`;
+                }).join("")}</div>
+            </div>
+        `;
+
     }else if(activeDateFilterMode === "CALENDAR"){
         dateSubHtml = `
-            <input class="date-input" type="date" value="${attr(activeDateFilterValue === "ALL" ? "" : activeDateFilterValue)}" onchange="setCalendarDate(this.value)" aria-label="Select specific date">
+            <input
+                class="date-input"
+                type="date"
+                value="${attr(activeCalendarDate)}"
+                onchange="setCalendarDate(this.value)"
+                aria-label="Select specific date"
+            >
         `;
+
     }else if(activeDateFilterMode === "RANGE"){
         dateSubHtml = `
             <div class="date-range-controls">
@@ -1342,7 +1411,7 @@ function renderFilters(){
                     ${dateModeHtml}
                 </select>
             </div>
-            ${dateSubHtml ? `<div class="date-sub-row">${dateSubHtml}</div>` : ""}
+            ${dateSubHtml ? `<div class="date-sub-container">${dateSubHtml}</div>` : ""}
         </div>
 
         <div class="filter-group-title">
@@ -1365,12 +1434,37 @@ function renderFilters(){
     renderSorting();
 }
 
+function renderDateYearButtons(){
+    const years = getAvailableYears();
+
+    if(!years.length){
+        return `<span class="date-filter-error">No years available.</span>`;
+    }
+
+    return years.map(function(year){
+        const active = String(activeDateFilterYear) === String(year);
+        return `<button class="filter ${active ? "active" : ""}" onclick="setDateYear('${js(String(year))}')">${esc(year)}</button>`;
+    }).join("");
+}
+
+function renderDateMonthButtons(){
+    return getMonthNames().map(function(month, index){
+        const value = String(index + 1);
+        const active = activeDateFilterMonth === value;
+        return `<button class="filter ${active ? "active" : ""}" onclick="setDateMonth('${value}')">${esc(month)}</button>`;
+    }).join("");
+}
+
 function getAvailableYears(){
     const years = new Set();
     orders.forEach(function(order){
         const d = parseOrderDate(order.timestamp);
         if(d) years.add(d.getFullYear());
     });
+
+    /* Always include the current calendar year so the hierarchy remains usable. */
+    years.add(new Date().getFullYear());
+
     return Array.from(years).sort(function(a,b){ return b-a; });
 }
 
@@ -1409,24 +1503,28 @@ function matchesDateFilter(order){
     if(!d) return false;
 
     if(activeDateFilterMode === "YEARLY"){
-        return Number(activeDateFilterValue) === d.getFullYear();
+        return d.getFullYear() === Number(activeDateFilterYear);
     }
 
     if(activeDateFilterMode === "QUARTERLY"){
-        return Number(activeDateFilterValue) === Math.floor(d.getMonth() / 3) + 1;
+        return d.getFullYear() === Number(activeDateFilterYear) &&
+               (Math.floor(d.getMonth() / 3) + 1) === Number(activeDateFilterQuarter);
     }
 
     if(activeDateFilterMode === "MONTHLY"){
-        return Number(activeDateFilterValue) === d.getMonth() + 1;
+        return d.getFullYear() === Number(activeDateFilterYear) &&
+               (d.getMonth() + 1) === Number(activeDateFilterMonth);
     }
 
     if(activeDateFilterMode === "WEEKLY"){
-        return Number(activeDateFilterValue) === weekOfMonth(d);
+        return d.getFullYear() === Number(activeDateFilterYear) &&
+               (d.getMonth() + 1) === Number(activeDateFilterMonth) &&
+               weekOfMonth(d) === Number(activeDateFilterWeek);
     }
 
     if(activeDateFilterMode === "CALENDAR"){
-        if(!activeDateFilterValue || activeDateFilterValue === "ALL") return true;
-        return formatDateInput(d) === activeDateFilterValue;
+        if(!activeCalendarDate) return true;
+        return formatDateInput(d) === activeCalendarDate;
     }
 
     if(activeDateFilterMode === "RANGE"){
@@ -1452,31 +1550,70 @@ function setDateFilterMode(mode){
 
     activeDateFilterMode = mode;
 
+    const today = new Date();
+    const currentYear = String(today.getFullYear());
+    const currentMonth = String(today.getMonth() + 1);
+    const currentWeek = String(weekOfMonth(today));
+
     if(mode === "ALL"){
-        activeDateFilterValue = "ALL";
+        /* No subordinate filter. */
+
     }else if(mode === "YEARLY"){
         const years = getAvailableYears();
-        activeDateFilterValue = years.length ? String(years[0]) : "ALL";
-    }else if(["QUARTERLY","MONTHLY","WEEKLY"].includes(mode)){
-        activeDateFilterValue = "1";
+        activeDateFilterYear = years.length ? String(years[0]) : currentYear;
+
+    }else if(mode === "QUARTERLY"){
+        activeDateFilterYear = currentYear;
+        activeDateFilterQuarter = String(Math.floor(today.getMonth() / 3) + 1);
+
+    }else if(mode === "MONTHLY"){
+        activeDateFilterYear = currentYear;
+        activeDateFilterMonth = currentMonth;
+
+    }else if(mode === "WEEKLY"){
+        activeDateFilterYear = currentYear;
+        activeDateFilterMonth = currentMonth;
+        activeDateFilterWeek = currentWeek;
+
     }else if(mode === "CALENDAR"){
-        activeDateFilterValue = "";
+        /* Calendar always opens on today's date. */
+        activeCalendarDate = formatDateInput(today);
+
     }else if(mode === "RANGE"){
-        activeDateFilterValue = "ALL";
+        activeFromDate = "";
+        activeToDate = "";
     }
 
     renderFilters();
     render();
 }
 
-function setDateFilterValue(value){
-    activeDateFilterValue = String(value);
+function setDateYear(value){
+    activeDateFilterYear = String(value);
+    renderFilters();
+    render();
+}
+
+function setDateQuarter(value){
+    activeDateFilterQuarter = String(value);
+    renderFilters();
+    render();
+}
+
+function setDateMonth(value){
+    activeDateFilterMonth = String(value);
+    renderFilters();
+    render();
+}
+
+function setDateWeek(value){
+    activeDateFilterWeek = String(value);
     renderFilters();
     render();
 }
 
 function setCalendarDate(value){
-    activeDateFilterValue = value || "ALL";
+    activeCalendarDate = value || formatDateInput(new Date());
     renderFilters();
     render();
 }
