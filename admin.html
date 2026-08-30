@@ -124,10 +124,35 @@ header{
    DASHBOARD STAT CARDS + CONTINUOUS ICON ANIMATION
 ========================================================= */
 .stats{
+    position:sticky;
+    top:71px;
+    z-index:15;
     display:grid;
     grid-template-columns:repeat(6,1fr);
     gap:10px;
     margin-bottom:18px;
+    padding:8px 0;
+    background:#f4f7f4;
+    isolation:isolate;
+}
+
+.stats::before{
+    content:"";
+    position:absolute;
+    inset:0 -18px;
+    background:#f4f7f4;
+    z-index:-1;
+}
+
+.stats::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:1px;
+    background:rgba(225,232,225,.75);
+    pointer-events:none;
 }
 
 .stat{
@@ -310,6 +335,7 @@ header{
 
 @media(max-width:600px){
     .stats{
+        top:64px;
         grid-template-columns:repeat(2,1fr);
         gap:8px;
     }
