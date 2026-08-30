@@ -1097,6 +1097,48 @@ header{
 
 
 /* =========================================================
+   QUEUED REASON MODAL
+========================================================= */
+.queue-reason-modal{
+    position:fixed;inset:0;z-index:100001;display:none;align-items:center;justify-content:center;
+    padding:16px;background:rgba(15,23,15,.48);backdrop-filter:blur(4px);
+}
+.queue-reason-modal.open{display:flex}
+.queue-reason-dialog{
+    width:min(520px,100%);background:#fff;border-radius:16px;
+    box-shadow:0 20px 60px rgba(0,0,0,.22);overflow:hidden;
+}
+.queue-reason-head{
+    padding:14px 16px;border-bottom:1px solid #e7ece7;background:#fff7ed;
+}
+.queue-reason-head h3{margin:0;color:#9a3412;font-size:15px}
+.queue-reason-head p{margin:5px 0 0;color:#68736a;font-size:11px;line-height:1.45}
+.queue-reason-body{padding:15px 16px}
+.queue-reason-label{display:block;color:#315338;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
+.queue-reason-textarea{
+    width:100%;min-height:115px;resize:vertical;box-sizing:border-box;
+    border:1px solid #dfe7df;border-radius:10px;padding:11px 12px;outline:none;
+    color:#172017;font-size:12px;line-height:1.5;background:#fff;
+}
+.queue-reason-textarea:focus{border-color:#15803d;box-shadow:0 0 0 2px rgba(21,128,61,.12)}
+.queue-reason-error{display:none;margin-top:7px;color:#b91c1c;font-size:11px;font-weight:700}
+.queue-reason-error.show{display:block}
+.queue-reason-footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid #e7ece7;background:#fafcf9}
+.queue-reason-cancel,.queue-reason-submit{border-radius:9px;padding:9px 13px;font-size:11px;font-weight:800;cursor:pointer}
+.queue-reason-cancel{border:1px solid #d8e2d9;background:#fff;color:#315338}
+.queue-reason-submit{border:1px solid #15803d;background:#15803d;color:#fff}
+.queue-reason-submit:disabled{opacity:.55;cursor:wait}
+.queue-reason-display{
+    margin:0 16px 10px;padding:9px 11px;border-radius:10px;
+    background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12;font-size:11px;line-height:1.5;
+}
+.queue-reason-display strong{display:block;color:#9a3412;font-size:10px;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px}
+@media(max-width:600px){
+    .queue-reason-modal{padding:8px}
+    .queue-reason-dialog{max-height:90vh}
+}
+
+/* =========================================================
    GOOGLE LOGIN
 ========================================================= */
 .auth-overlay{
@@ -1274,6 +1316,24 @@ body.auth-locked{overflow:hidden}
 </main>
 
 
+
+<div id="queueReasonModal" class="queue-reason-modal" aria-hidden="true">
+    <div class="queue-reason-dialog" role="dialog" aria-modal="true" aria-labelledby="queueReasonTitle">
+        <div class="queue-reason-head">
+            <h3 id="queueReasonTitle">Move Order to QUEUED</h3>
+            <p id="queueReasonOrderText">Please enter the reason so Manager and Staff can understand why this order was returned to the queue.</p>
+        </div>
+        <div class="queue-reason-body">
+            <label class="queue-reason-label" for="queueReasonText">Reason</label>
+            <textarea id="queueReasonText" class="queue-reason-textarea" maxlength="500" placeholder="Example: Customer asked to confirm later / staff unavailable / product availability needs checking..."></textarea>
+            <div id="queueReasonError" class="queue-reason-error">Please enter a reason.</div>
+        </div>
+        <div class="queue-reason-footer">
+            <button type="button" class="queue-reason-cancel" onclick="closeQueueReasonModal(false)">Cancel</button>
+            <button type="button" id="queueReasonSubmit" class="queue-reason-submit" onclick="closeQueueReasonModal(true)">Continue to QUEUED</button>
+        </div>
+    </div>
+</div>
 
 <div id="addProductModal" class="add-product-modal" aria-hidden="true">
     <div class="add-product-dialog" role="dialog" aria-modal="true" aria-labelledby="addProductTitle">
@@ -1652,6 +1712,12 @@ let addProductOrderId = "";
 let selectedAddProduct = null;
 let addProductModalOpen = false;
 
+/* QUEUED REASON WORKFLOW */
+let queueReasonModalOpen = false;
+let queueReasonOrderId = "";
+let queueReasonResolve = null;
+
+
 /* =========================================================
    TWO-LEVEL ORDER FILTER
    ALL    → New, Confirmed, Packing, Out for Delivery,
@@ -1733,6 +1799,7 @@ document
 autoRefreshMinutes = getSavedAutoRefreshMinutes();
 document.getElementById("autoRefreshInterval").value = String(autoRefreshMinutes);
 setupAddProductModalEvents();
+setupQueueReasonModalEvents();
 updateRefreshInfo();
 
 /* Google login starts the existing admin application. */
@@ -2752,6 +2819,92 @@ function setStaffFilter(name){
     render();
 }
 
+function quickStatus(orderId, newStatus){
+    changeStatus(orderId, newStatus);
+}
+
+function requestQueueReason(order){
+    return new Promise(function(resolve){
+        queueReasonOrderId = order ? order.orderId : "";
+        queueReasonResolve = resolve;
+        queueReasonModalOpen = true;
+
+        const modal = document.getElementById("queueReasonModal");
+        const textarea = document.getElementById("queueReasonText");
+        const error = document.getElementById("queueReasonError");
+        const orderText = document.getElementById("queueReasonOrderText");
+
+        if(orderText){
+            orderText.textContent =
+                "Enter why " + queueReasonOrderId + " is being returned to QUEUED. Manager and Staff will be able to read this reason.";
+        }
+        if(textarea) textarea.value = "";
+        if(error) error.classList.remove("show");
+        if(modal){
+            modal.classList.add("open");
+            modal.setAttribute("aria-hidden","false");
+        }
+        setTimeout(function(){ if(textarea) textarea.focus(); },50);
+    });
+}
+
+function closeQueueReasonModal(confirmed){
+    const textarea = document.getElementById("queueReasonText");
+    const error = document.getElementById("queueReasonError");
+    const modal = document.getElementById("queueReasonModal");
+
+    if(confirmed){
+        const reason = textarea ? textarea.value.trim() : "";
+        if(!reason){
+            if(error) error.classList.add("show");
+            if(textarea) textarea.focus();
+            return;
+        }
+        if(queueReasonResolve) queueReasonResolve(reason);
+    }else{
+        if(queueReasonResolve) queueReasonResolve("");
+    }
+
+    queueReasonResolve = null;
+    queueReasonOrderId = "";
+    queueReasonModalOpen = false;
+
+    if(modal){
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden","true");
+    }
+}
+
+function setupQueueReasonModalEvents(){
+    const modal = document.getElementById("queueReasonModal");
+    const textarea = document.getElementById("queueReasonText");
+
+    if(modal){
+        modal.addEventListener("click",function(event){
+            if(event.target === modal){
+                closeQueueReasonModal(false);
+            }
+        });
+    }
+
+    document.addEventListener("keydown",function(event){
+        if(event.key === "Escape" && queueReasonModalOpen){
+            closeQueueReasonModal(false);
+        }
+        if(event.key === "Enter" && (event.ctrlKey || event.metaKey) && queueReasonModalOpen){
+            event.preventDefault();
+            closeQueueReasonModal(true);
+        }
+    });
+
+    if(textarea){
+        textarea.addEventListener("input",function(){
+            const error = document.getElementById("queueReasonError");
+            if(error && textarea.value.trim()) error.classList.remove("show");
+        });
+    }
+}
+
 function renderStatusFlow(order){
 
     const flow = [
@@ -3217,6 +3370,13 @@ function renderOrder(order){
 
             ${renderStatusFlow(order)}
 
+            ${String(order.status || "").toUpperCase() === "QUEUED" && String(order.queueReason || "").trim() ? `
+                <div class="queue-reason-display">
+                    <strong>Why this order is queued</strong>
+                    <span>${esc(order.queueReason)}</span>
+                </div>
+            ` : ""}
+
             <div class="order-details">
                 <div class="order-body">
                     <section class="section">
@@ -3290,38 +3450,73 @@ function renderOrder(order){
 
 async function acceptOrder(orderId){
     if(!isStaff()) return;
+
     const order = getOrderById(orderId);
     if(!order) return;
+
     const currentStatus = String(order.status || "NEW").toUpperCase();
     if(currentStatus !== "NEW" && currentStatus !== "QUEUED"){
         showNotice("This order is no longer available to accept.");
         return;
     }
-    if(!confirm("Accept " + orderId + "?\\n\\nThis order will be assigned to you and will no longer be available to other staff.")) return;
+
+    /* No confirmation popup: Accept is a direct staff action. */
     const button = document.getElementById("accept-" + orderId);
-    if(button){button.disabled=true;button.textContent="Accepting...";}
+    if(button){
+        button.disabled = true;
+        button.textContent = "Accepting...";
+    }
+
     try{
-        const url = API_URL + "?action=acceptOrder&idToken=" + encodeURIComponent(googleIdToken) + "&orderId=" + encodeURIComponent(orderId) + "&t=" + Date.now();
+        const url = API_URL +
+            "?action=acceptOrder" +
+            "&idToken=" + encodeURIComponent(googleIdToken) +
+            "&orderId=" + encodeURIComponent(orderId) +
+            "&t=" + Date.now();
+
         const response = await fetch(url,{cache:"no-store"});
-        if(!response.ok) throw new Error("Could not accept the order.");
+
+        if(!response.ok){
+            throw new Error("Could not accept the order.");
+        }
+
         const data = await response.json();
+
         if(!data.success){
-            if(["AUTH_REQUIRED","TOKEN_INVALID","TOKEN_EXPIRED","NOT_AUTHORIZED","SHIFT_NOT_ACTIVE","SHIFT_EXPIRED"].includes(data.code)){handleAuthorizationFailure(data);return;}
+            if(["AUTH_REQUIRED","TOKEN_INVALID","TOKEN_EXPIRED","NOT_AUTHORIZED","SHIFT_NOT_ACTIVE","SHIFT_EXPIRED"].includes(data.code)){
+                handleAuthorizationFailure(data);
+                return;
+            }
             throw new Error(data.message || "Could not accept the order.");
         }
+
         const result = data.order || {};
-        order.status = "ASSIGNED";
-        order.assignedStaffEmail = result.assignedStaffEmail || googleAdminUser.email;
-        order.assignedStaffName = result.assignedStaffName || googleAdminUser.name;
+
+        /* The server is the authority. Reflect its assignment immediately. */
+        order.status = String(result.status || "ASSIGNED").toUpperCase();
+        order.assignedStaffEmail = String(result.assignedStaffEmail || googleAdminUser.email || "").toLowerCase();
+        order.assignedStaffName = result.assignedStaffName || googleAdminUser.name || "";
         order.assignedAt = result.assignedAt || new Date().toISOString();
         order.everAssigned = true;
+
+        /* If an older deployment accepted the assignment but did not return the
+           status, the local UI still immediately becomes ASSIGNED. */
+        if(order.status !== "ASSIGNED") order.status = "ASSIGNED";
+
         showNotice(orderId + " assigned to " + order.assignedStaffName + ".");
-        renderStats(); renderFilters(); render();
+        renderStats();
+        renderFilters();
+        render();
+
         setTimeout(function(){showNotice("");},1800);
+
     }catch(error){
         console.error(error);
         showNotice(error.message || "Could not accept the order.");
-        if(button){button.disabled=false;button.textContent="Accept";}
+        if(button){
+            button.disabled = false;
+            button.textContent = "Accept";
+        }
     }
 }
 
@@ -3342,116 +3537,92 @@ async function changeStatus(orderId, newStatus){
         return;
     }
 
+    /* QUEUED always requires a reason before the status is changed. */
+    let queueReason = "";
+    if(nextStatus === "QUEUED"){
+        queueReason = await requestQueueReason(order);
+        if(!queueReason){
+            render();
+            return;
+        }
+    }
+
     const pendingCount = (order.items || []).filter(function(item){
         return String(item.productStatus || "PENDING").toUpperCase() === "PENDING";
     }).length;
 
-    /* Safety warning when manually sending an order to OUT FOR DELIVERY
-       while unfinished PENDING products still exist. */
     if(nextStatus === "OUT FOR DELIVERY" && pendingCount > 0){
         const proceed = confirm(
-            "This order still has " +
-            pendingCount +
-            " pending product" +
+            "This order still has " + pendingCount + " pending product" +
             (pendingCount === 1 ? "" : "s") +
             ".\n\nAre you sure you want to change the order status to OUT FOR DELIVERY?"
         );
-
         if(!proceed){
             render();
             return;
         }
     }
 
-    /* Safety warning when manually moving an OUT FOR DELIVERY order
-       backwards to CONFIRMED or PACKING. */
-    if(
-        oldStatus === "OUT FOR DELIVERY" &&
-        (nextStatus === "CONFIRMED" || nextStatus === "PACKING")
-    ){
+    if(oldStatus === "OUT FOR DELIVERY" && (nextStatus === "CONFIRMED" || nextStatus === "PACKING")){
         const proceed = confirm(
             "This order is already OUT FOR DELIVERY.\n\n" +
-            "Changing it back to " +
-            nextStatus +
-            " moves the order backwards in the workflow.\n\n" +
+            "Changing it back to " + nextStatus + " moves the order backwards in the workflow.\n\n" +
             "Do you want to continue?"
         );
-
         if(!proceed){
             render();
             return;
         }
     }
 
-    if(!confirm(
-        "Change " +
-        orderId +
-        " from \"" +
-        oldStatus +
-        "\" to \"" +
-        nextStatus +
-        "\"?"
+    if(nextStatus !== "QUEUED" && !confirm(
+        "Change " + orderId + " from \"" + oldStatus + "\" to \"" + nextStatus + "\"?"
     )){
         render();
         return;
     }
 
     try{
-
         showNotice("");
 
         const url =
             API_URL +
             "?action=updateStatus" +
-            "&idToken=" +
-            encodeURIComponent(googleIdToken) +
-            "&orderId=" +
-            encodeURIComponent(orderId) +
-            "&status=" +
-            encodeURIComponent(nextStatus) +
-            "&t=" +
-            Date.now();
+            "&idToken=" + encodeURIComponent(googleIdToken) +
+            "&orderId=" + encodeURIComponent(orderId) +
+            "&status=" + encodeURIComponent(nextStatus) +
+            (nextStatus === "QUEUED" ? "&queueReason=" + encodeURIComponent(queueReason) : "") +
+            "&t=" + Date.now();
 
-        const response =
-            await fetch(
-                url,
-                {
-                    cache:"no-store"
-                }
-            );
+        const response = await fetch(url,{cache:"no-store"});
 
         if(!response.ok){
             throw new Error("Status update failed.");
         }
 
-        const data =
-            await response.json();
+        const data = await response.json();
 
         if(!data.success){
-            throw new Error(
-                data.message || "Status update failed."
-            );
+            if(["AUTH_REQUIRED","TOKEN_INVALID","TOKEN_EXPIRED","NOT_AUTHORIZED","SHIFT_NOT_ACTIVE","SHIFT_EXPIRED"].includes(data.code)){
+                handleAuthorizationFailure(data);
+                return;
+            }
+            throw new Error(data.message || "Status update failed.");
         }
 
         order.status = nextStatus;
+        if(nextStatus === "QUEUED") order.queueReason = queueReason;
+        else if(oldStatus === "QUEUED") order.queueReason = "";
 
         renderStats();
         renderFilters();
         render();
 
     }catch(error){
-
         console.error(error);
-
-        showNotice(
-            error.message ||
-            "Could not update order status."
-        );
-
+        showNotice(error.message || "Could not update order status.");
         render();
-
     }
-
 }
 
 async function changeProductStatus(orderId, rowNumber, newProductStatus){
@@ -3798,6 +3969,10 @@ function buildStatusWhatsAppMessage(order){
     const messages = {
         "NEW":
             "We have received your order and it is currently being reviewed.",
+        "QUEUED":
+            "Your order is currently queued and waiting to be accepted by our staff.",
+        "ASSIGNED":
+            "Your order has been assigned to a staff member and will be confirmed shortly.",
         "QUEUED":
             "Your order is queued and waiting to be accepted by our staff.",
         "ASSIGNED":
