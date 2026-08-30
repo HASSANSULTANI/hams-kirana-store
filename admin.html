@@ -120,6 +120,9 @@ header{
     white-space:nowrap;
 }
 
+/* =========================================================
+   DASHBOARD STAT CARDS + CONTINUOUS ICON ANIMATION
+========================================================= */
 .stats{
     display:grid;
     grid-template-columns:repeat(6,1fr);
@@ -128,21 +131,218 @@ header{
 }
 
 .stat{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-width:0;
     background:#fff;
     border:1px solid #e1e8e1;
     border-radius:13px;
-    padding:13px;
+    padding:12px 13px;
+    overflow:hidden;
+    transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.stat:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 22px rgba(21,128,61,.10);
+    border-color:#cfe2d2;
+}
+
+.stat-icon{
+    flex:0 0 48px;
+    width:48px;
+    height:48px;
+    border-radius:15px;
+    display:grid;
+    place-items:center;
+    background:#f0fdf4;
+    color:#15803d;
+    position:relative;
+    isolation:isolate;
+}
+
+.stat-icon::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    border:1px solid rgba(21,128,61,.10);
+    animation:statIconRing 2.4s ease-in-out infinite;
+    z-index:-1;
+}
+
+.stat-icon svg{
+    width:26px;
+    height:26px;
+    stroke:currentColor;
+    fill:none;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    animation:statIconFloat 2.6s ease-in-out infinite;
+}
+
+.stat-icon.icon-total{
+    background:#eff6ff;
+    color:#2563eb;
+}
+.stat-icon.icon-new{
+    background:#fff7ed;
+    color:#f59e0b;
+}
+.stat-icon.icon-confirmed{
+    background:#ecfdf5;
+    color:#16a34a;
+}
+.stat-icon.icon-packing{
+    background:#fff1f2;
+    color:#ef4444;
+}
+.stat-icon.icon-delivery{
+    background:#ecfdf5;
+    color:#16a34a;
+}
+.stat-icon.icon-delivered{
+    background:#f3f4f6;
+    color:#4b5563;
+}
+
+.stat-icon.icon-new svg{
+    animation:statIconSun 2.2s linear infinite;
+}
+
+.stat-icon.icon-confirmed svg{
+    animation:statIconCheck 2.4s ease-in-out infinite;
+}
+
+.stat-icon.icon-packing svg{
+    animation:statIconBox 2.3s ease-in-out infinite;
+}
+
+.stat-icon.icon-delivery svg{
+    animation:statIconTruck 2.2s ease-in-out infinite;
+}
+
+.stat-icon.icon-delivered svg{
+    animation:statIconClipboard 2.5s ease-in-out infinite;
+}
+
+.stat-content{
+    min-width:0;
+}
+
+.stat-label{
+    display:block;
+    color:#172017;
+    font-size:11px;
+    font-weight:700;
+    line-height:1.2;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 .stat strong{
     display:block;
-    font-size:21px;
-    margin-top:5px;
+    font-size:22px;
+    line-height:1.1;
+    margin-top:4px;
 }
 
-.stat span{
+.stat-sub{
+    display:block;
     color:#68736a;
-    font-size:11px;
+    font-size:10px;
+    margin-top:3px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+@keyframes statIconFloat{
+    0%,100%{transform:translateY(0) scale(1)}
+    50%{transform:translateY(-3px) scale(1.04)}
+}
+
+@keyframes statIconRing{
+    0%,100%{transform:scale(.96);opacity:.45}
+    50%{transform:scale(1.08);opacity:1}
+}
+
+@keyframes statIconSun{
+    0%{transform:rotate(0deg) scale(1)}
+    50%{transform:rotate(180deg) scale(1.05)}
+    100%{transform:rotate(360deg) scale(1)}
+}
+
+@keyframes statIconCheck{
+    0%,100%{transform:scale(1) rotate(0deg)}
+    35%{transform:scale(1.10) rotate(-4deg)}
+    70%{transform:scale(1.04) rotate(4deg)}
+}
+
+@keyframes statIconBox{
+    0%,100%{transform:translateY(0) rotate(0deg)}
+    35%{transform:translateY(-2px) rotate(-4deg)}
+    70%{transform:translateY(0) rotate(4deg)}
+}
+
+@keyframes statIconTruck{
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(1px)}
+    45%{transform:translateX(-2px)}
+    70%{transform:translateX(2px)}
+}
+
+@keyframes statIconClipboard{
+    0%,100%{transform:translateY(0) rotate(0deg)}
+    45%{transform:translateY(-2px) rotate(-3deg)}
+    75%{transform:translateY(0) rotate(3deg)}
+}
+
+@media(max-width:1050px){
+    .stats{
+        grid-template-columns:repeat(3,1fr);
+    }
+}
+
+@media(max-width:600px){
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+        gap:8px;
+    }
+
+    .stat{
+        padding:10px;
+        gap:9px;
+    }
+
+    .stat-icon{
+        flex-basis:42px;
+        width:42px;
+        height:42px;
+        border-radius:13px;
+    }
+
+    .stat-icon svg{
+        width:22px;
+        height:22px;
+    }
+
+    .stat strong{
+        font-size:19px;
+    }
+}
+
+@media(prefers-reduced-motion:reduce){
+    .stat,
+    .stat-icon svg,
+    .stat-icon::after{
+        animation:none !important;
+        transition:none !important;
+    }
 }
 
 .filter-group-title{
@@ -488,10 +688,9 @@ header{
     color:#fff;
     border-color:#15803d;
 }
-/* PENDING follows the same filled active style as PREPARED. */
 .product-status-btn.pending.active{
-    background:#15803d;
-    color:#fff;
+    background:#fff;
+    color:#166534;
     border-color:#15803d;
 }
 .product-status-btn.cancelled.active{
@@ -1723,10 +1922,98 @@ function renderStats(){
 
 function statCard(label, value){
 
+    const cards = {
+        "All Orders": {
+            className: "icon-total",
+            sub: "All Time",
+            icon:
+                '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+                '<rect x="5" y="3" width="14" height="18" rx="2"></rect>' +
+                '<path d="M9 7h6"></path>' +
+                '<path d="M9 11h6"></path>' +
+                '<path d="M9 15h4"></path>' +
+                '</svg>'
+        },
+
+        "New": {
+            className: "icon-new",
+            sub: "New Orders",
+            icon:
+                '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+                '<circle cx="12" cy="12" r="4"></circle>' +
+                '<path d="M12 2v2"></path>' +
+                '<path d="M12 20v2"></path>' +
+                '<path d="M4.93 4.93l1.41 1.41"></path>' +
+                '<path d="M17.66 17.66l1.41 1.41"></path>' +
+                '<path d="M2 12h2"></path>' +
+                '<path d="M20 12h2"></path>' +
+                '<path d="M4.93 19.07l1.41-1.41"></path>' +
+                '<path d="M17.66 6.34l1.41-1.41"></path>' +
+                '</svg>'
+        },
+
+        "Confirmed": {
+            className: "icon-confirmed",
+            sub: "Confirmed",
+            icon:
+                '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+                '<circle cx="12" cy="12" r="9"></circle>' +
+                '<path d="m8 12 2.5 2.5L16 9"></path>' +
+                '</svg>'
+        },
+
+        "Packing": {
+            className: "icon-packing",
+            sub: "Packing",
+            icon:
+                '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+                '<path d="m4 7 8-4 8 4-8 4-8-4Z"></path>' +
+                '<path d="M4 7v10l8 4 8-4V7"></path>' +
+                '<path d="M12 11v10"></path>' +
+                '</svg>'
+        },
+
+        "Out for Delivery": {
+            className: "icon-delivery",
+            sub: "Out for Delivery",
+            icon:
+                '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+                '<path d="M3 6h11v10H3z"></path>' +
+                '<path d="M14 10h4l3 3v3h-7z"></path>' +
+                '<circle cx="7" cy="18" r="2"></circle>' +
+                '<circle cx="18" cy="18" r="2"></circle>' +
+                '</svg>'
+        },
+
+        "Delivered": {
+            className: "icon-delivered",
+            sub: "Delivered",
+            icon:
+                '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+                '<rect x="5" y="3" width="14" height="18" rx="2"></rect>' +
+                '<path d="M9 7h6"></path>' +
+                '<path d="m9 12 2 2 4-4"></path>' +
+                '<path d="M9 17h6"></path>' +
+                '</svg>'
+        }
+    };
+
+    const card = cards[label] || {
+        className: "icon-total",
+        sub: "",
+        icon: ""
+    };
+
     return `
         <div class="stat">
-            <span>${esc(label)}</span>
-            <strong>${value}</strong>
+            <div class="stat-icon ${card.className}" aria-hidden="true">
+                ${card.icon}
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">${esc(label)}</span>
+                <strong>${value}</strong>
+                <span class="stat-sub">${esc(card.sub)}</span>
+            </div>
         </div>
     `;
 
