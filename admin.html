@@ -1686,6 +1686,7 @@ function enterAdminApplication(){
     }
 
     startAutoRefresh();
+    startIncomingQueueRefresh();
     updateRefreshInfo();
 }
 
@@ -1696,6 +1697,16 @@ function googleLogout(){
     try{
         sessionStorage.removeItem(GOOGLE_AUTH_STORAGE_KEY);
     }catch(error){}
+
+    if(incomingQueueRefreshTimer){
+        clearInterval(incomingQueueRefreshTimer);
+        incomingQueueRefreshTimer = null;
+    }
+
+    if(autoRefreshTimer){
+        clearInterval(autoRefreshTimer);
+        autoRefreshTimer = null;
+    }
 
     if(window.google && google.accounts && google.accounts.id){
         try{ google.accounts.id.disableAutoSelect(); }catch(error){}
@@ -1718,6 +1729,8 @@ const AUTO_REFRESH_STORAGE_KEY = "hamsKiranaAdminAutoRefreshMinutes";
 let autoRefreshMinutes = 1;
 let lastRefreshAt = Date.now();
 let autoRefreshTimer = null;
+let incomingQueueRefreshTimer = null;
+const INCOMING_QUEUE_REFRESH_MS = 10000;
 
 function getSavedAutoRefreshMinutes(){
     try{
@@ -1921,6 +1934,79 @@ function manualRefresh(){
     loadOrders(true);
 }
 
+function startIncomingQueueRefresh(){
+    if(incomingQueueRefreshTimer){
+        clearInterval(incomingQueueRefreshTimer);
+    }
+
+    /*
+     * Incoming orders are time-sensitive.  Refresh the order data every
+     * 10 seconds independently of the user's normal auto-refresh setting.
+     * The existing expandedOrders Set is preserved, so expanded cards stay
+     * expanded after the refresh.
+     */
+    incomingQueueRefreshTimer = setInterval(async function(){
+        if(!googleIdToken || !googleAdminUser){
+            return;
+        }
+
+        const active = document.activeElement;
+        const userIsEditing =
+            active &&
+            (active.tagName === "SELECT" ||
+             active.tagName === "INPUT" ||
+             active.tagName === "TEXTAREA" ||
+             active.isContentEditable);
+
+        if(userIsEditing || addProductModalOpen || queueReasonModalOpen){
+            return;
+        }
+
+        try{
+            const url =
+                API_URL +
+                "?action=orders&idToken=" +
+                encodeURIComponent(googleIdToken) +
+                "&incomingRefresh=1&t=" +
+                Date.now();
+
+            const response = await fetch(url,{cache:"no-store"});
+
+            if(!response.ok){
+                return;
+            }
+
+            const data = await response.json();
+
+            if(!data.success){
+                if(["AUTH_REQUIRED","TOKEN_INVALID","TOKEN_EXPIRED","NOT_AUTHORIZED","SHIFT_NOT_ACTIVE","SHIFT_EXPIRED"].includes(data.code)){
+                    handleAuthorizationFailure(data);
+                }
+                return;
+            }
+
+            orders = Array.isArray(data.orders) ? data.orders : [];
+
+            orders.forEach(function(order){
+                if(String(order.status || "").toUpperCase() === "NEW" && order.everAssigned){
+                    order.status = "QUEUED";
+                }
+            });
+
+            /*
+             * Re-render from the fresh server data.  expandedOrders is not
+             * cleared, so existing expanded cards remain expanded.
+             */
+            renderStats();
+            renderFilters();
+            render();
+
+        }catch(error){
+            console.warn("Incoming queue refresh failed:", error);
+        }
+    }, INCOMING_QUEUE_REFRESH_MS);
+}
+
 function startAutoRefresh(){
     if(autoRefreshTimer){
         clearInterval(autoRefreshTimer);
@@ -1959,6 +2045,11 @@ function handleAuthorizationFailure(data){
     if(autoRefreshTimer){
         clearInterval(autoRefreshTimer);
         autoRefreshTimer = null;
+    }
+
+    if(incomingQueueRefreshTimer){
+        clearInterval(incomingQueueRefreshTimer);
+        incomingQueueRefreshTimer = null;
     }
 
     showGoogleAuthError(message);
