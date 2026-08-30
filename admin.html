@@ -136,6 +136,11 @@ header{
     isolation:isolate;
 }
 
+/* Staff dashboard has one additional My Orders card. */
+.stats.staff-dashboard-stats{
+    grid-template-columns:repeat(8,minmax(0,1fr));
+}
+
 .stats::before{
     content:"";
     position:absolute;
@@ -344,6 +349,10 @@ header{
 @media(max-width:1050px){
     .stats{
         grid-template-columns:repeat(4,1fr);
+    }
+
+    .stats.staff-dashboard-stats{
+        grid-template-columns:repeat(4,minmax(0,1fr));
     }
 }
 
@@ -1057,6 +1066,10 @@ header{
 
     .stats{
         grid-template-columns:repeat(2,1fr);
+    }
+
+    .stats.staff-dashboard-stats{
+        grid-template-columns:repeat(2,minmax(0,1fr));
     }
 
     .order-head{
@@ -2230,8 +2243,19 @@ function render(){
                 const status = String(order.status || "").toUpperCase();
                 const assignedEmail = String(order.assignedStaffEmail || "").toLowerCase();
                 const myEmail = String(googleAdminUser && googleAdminUser.email || "").toLowerCase();
-                const visible = status === "NEW" || status === "QUEUED" ||
-                    (status === "ASSIGNED" && assignedEmail === myEmail);
+
+                /*
+                 * Staff can always see the shared Incoming Queue (NEW/QUEUED).
+                 * Every other order is visible only when it belongs to this
+                 * staff member. This keeps their complete assigned workflow
+                 * visible: ASSIGNED -> CONFIRMED -> PACKING -> DELIVERY ->
+                 * DELIVERED/CANCELLED.
+                 */
+                const visible =
+                    status === "NEW" ||
+                    status === "QUEUED" ||
+                    assignedEmail === myEmail;
+
                 if(!visible) return false;
             }
 
@@ -2293,8 +2317,10 @@ function render(){
 
     if(showActiveSection && activeOrders.length){
         html += renderOrderSection(
-            "ASSIGNED & ACTIVE ORDERS",
-            "Assigned, confirmed, packing, delivery and closed orders",
+            isStaff() ? "MY ASSIGNED & ACTIVE ORDERS" : "ASSIGNED & ACTIVE ORDERS",
+            isStaff()
+                ? "Your assigned, confirmed, packing, delivery and completed orders"
+                : "Assigned, confirmed, packing, delivery and closed orders",
             activeOrders,
             "active"
         );
@@ -2324,7 +2350,7 @@ function renderOrderSection(title, subtitle, sectionOrders, sectionClass){
 function renderStats(){
 
     const counts = {
-        ALL: orders.length,
+        ALL: 0,
         NEW: 0,
         QUEUED: 0,
         ASSIGNED: 0,
@@ -2335,13 +2361,60 @@ function renderStats(){
         CANCELLED: 0
     };
 
+    if(isStaff()){
+        const myEmail = String(googleAdminUser && googleAdminUser.email || "").toLowerCase();
+
+        let myOrders = 0;
+
+        orders.forEach(function(order){
+            const status = String(order.status || "").toUpperCase();
+            const assignedEmail = String(order.assignedStaffEmail || "").toLowerCase();
+
+            /* NEW and QUEUED are shared availability for all staff. */
+            if(status === "NEW") counts.NEW++;
+            if(status === "QUEUED") counts.QUEUED++;
+
+            /* Everything else is counted only for this staff member. */
+            if(assignedEmail === myEmail){
+                myOrders++;
+
+                if(counts[status] !== undefined){
+                    counts[status]++;
+                }
+            }
+        });
+
+        /* My Orders means orders currently assigned to this staff account. */
+        counts.ALL = myOrders;
+
+        document.getElementById("stats").className = "stats staff-dashboard-stats";
+
+        document.getElementById("stats").innerHTML = [
+            statCard("My Orders", counts.ALL),
+            statCard("New", counts.NEW),
+            statCard("Queued", counts.QUEUED),
+            statCard("Assigned", counts.ASSIGNED),
+            statCard("Confirmed", counts.CONFIRMED),
+            statCard("Packing", counts.PACKING),
+            statCard("Out for Delivery", counts["OUT FOR DELIVERY"]),
+            statCard("Delivered", counts.DELIVERED)
+        ].join("");
+
+        return;
+    }
+
+    /* Manager dashboard remains global. */
     orders.forEach(function(order){
+        const status = String(order.status || "").toUpperCase();
 
-        if(counts[order.status] !== undefined){
-            counts[order.status]++;
+        if(counts[status] !== undefined){
+            counts[status]++;
         }
-
     });
+
+    counts.ALL = orders.length;
+
+    document.getElementById("stats").className = "stats";
 
     document.getElementById("stats").innerHTML = [
         statCard("All Orders", counts.ALL),
@@ -2355,10 +2428,21 @@ function renderStats(){
 
 }
 
-
 function statCard(label, value){
 
     const cards = {
+        "My Orders": {
+            className: "icon-total",
+            sub: "Assigned to You",
+            icon:
+                '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+                '<rect x="5" y="3" width="14" height="18" rx="2"></rect>' +
+                '<path d="M9 7h6"></path>' +
+                '<path d="M9 11h6"></path>' +
+                '<path d="M9 15h4"></path>' +
+                '</svg>'
+        },
+
         "All Orders": {
             className: "icon-total",
             sub: "All Time",
