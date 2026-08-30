@@ -577,9 +577,6 @@ header{
     color:#166534;
     font-weight:700;
 }
-@media(max-width:1200px){
-    .orders{grid-template-columns:repeat(3,minmax(0,1fr));}
-}
 @media(max-width:900px){
     .orders{grid-template-columns:repeat(2,minmax(0,1fr));}
     .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -587,7 +584,7 @@ header{
 
 .orders{
     display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
+    grid-template-columns:repeat(2,minmax(0,1fr));
     gap:14px;
     align-items:start;
 }
@@ -613,6 +610,14 @@ header{
     gap:10px;
 }
 
+.order-id{
+    font-weight:800;
+    color:#166534;
+}
+.accept-btn{border:1px solid #15803d;background:#15803d;color:#fff;border-radius:8px;padding:7px 11px;cursor:pointer;font-size:10px;font-weight:800;white-space:nowrap;transition:transform .15s ease,box-shadow .15s ease,opacity .15s ease}
+.accept-btn:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(21,128,61,.18)}
+.accept-btn:disabled{opacity:.55;cursor:wait;transform:none;box-shadow:none}
+.assigned-badge{display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:3px 6px;border-radius:6px;background:#eff6ff;color:#1d4ed8;font-size:9px;font-weight:800}
 .order-id{
     font-weight:800;
     color:#166534;
@@ -1632,6 +1637,8 @@ function changeAutoRefreshInterval(){
 
 const STATUSES = [
     "NEW",
+    "QUEUED",
+    "ASSIGNED",
     "CONFIRMED",
     "PACKING",
     "OUT FOR DELIVERY",
@@ -1655,6 +1662,7 @@ let addProductModalOpen = false;
 
 let activeGroup = "ALL";
 let activeStatusFilter = "ALL";
+let activeStaffFilter = "ALL";
 
 /* DATE FILTER */
 /*
@@ -1689,6 +1697,8 @@ const FILTER_GROUPS = {
         statuses: [
             "ALL",
             "NEW",
+            "QUEUED",
+            "ASSIGNED",
             "CONFIRMED",
             "PACKING",
             "OUT FOR DELIVERY",
@@ -1825,6 +1835,12 @@ async function loadOrders(isManualRefresh){
                 ? data.orders
                 : [];
 
+        orders.forEach(function(order){
+            if(String(order.status || "").toUpperCase() === "NEW" && order.everAssigned){
+                order.status = "QUEUED";
+            }
+        });
+
         renderStats();
         renderFilters();
         render();
@@ -1852,6 +1868,8 @@ function render(){
 
     const openStatuses = [
         "NEW",
+        "QUEUED",
+        "ASSIGNED",
         "CONFIRMED",
         "PACKING",
         "OUT FOR DELIVERY"
@@ -1883,6 +1901,20 @@ function render(){
             if(activeStatusFilter !== "ALL" &&
                order.status !== activeStatusFilter){
                 return false;
+            }
+
+            if(isManager() && activeStaffFilter !== "ALL" &&
+               String(order.assignedStaffName || "") !== activeStaffFilter){
+                return false;
+            }
+
+            if(isStaff()){
+                const status = String(order.status || "").toUpperCase();
+                const assignedEmail = String(order.assignedStaffEmail || "").toLowerCase();
+                const myEmail = String(googleAdminUser && googleAdminUser.email || "").toLowerCase();
+                const visible = status === "NEW" || status === "QUEUED" ||
+                    (status === "ASSIGNED" && assignedEmail === myEmail);
+                if(!visible) return false;
             }
 
             /* Search */
@@ -1925,6 +1957,8 @@ function renderStats(){
     const counts = {
         ALL: orders.length,
         NEW: 0,
+        QUEUED: 0,
+        ASSIGNED: 0,
         CONFIRMED: 0,
         PACKING: 0,
         "OUT FOR DELIVERY": 0,
@@ -2055,6 +2089,25 @@ function statCard(label, value){
 /* =========================================================
    PRIMARY FILTERS
 ========================================================= */
+
+function isManager(){
+    return !!(googleAdminUser && String(googleAdminUser.role || "").toUpperCase() === "MANAGER");
+}
+function isStaff(){
+    return !!(googleAdminUser && String(googleAdminUser.role || "").toUpperCase() === "STAFF");
+}
+function getStaffNamesFromOrders(){
+    const names = new Set();
+    orders.forEach(function(order){
+        const name = String(order.assignedStaffName || "").trim();
+        if(name) names.add(name);
+    });
+    return Array.from(names).sort(function(a,b){return a.localeCompare(b,undefined,{sensitivity:"base"});});
+}
+function normalizeWorkflowStatus(order, requestedStatus){
+    const next = String(requestedStatus || "").toUpperCase();
+    return next === "NEW" && order.everAssigned ? "QUEUED" : next;
+}
 
 function renderFilters(){
 
@@ -2216,6 +2269,16 @@ function renderFilters(){
         <div class="filter-row">
             ${statusHtml}
         </div>
+
+        ${isManager() ? `
+            <div class="filter-group-title status-title">Staff</div>
+            <div class="filter-row">
+                <button class="filter ${activeStaffFilter === "ALL" ? "active" : ""}" onclick="setStaffFilter('ALL')">All Staff</button>
+                ${getStaffNamesFromOrders().map(function(name){
+                    return `<button class="filter ${activeStaffFilter === name ? "active" : ""}" onclick="setStaffFilter('${js(name)}')">${esc(name)}</button>`;
+                }).join("")}
+            </div>
+        ` : ""}
     `;
 
     renderSorting();
@@ -2512,7 +2575,7 @@ function dateSortValue(value){
 }
 
 function statusSortValue(value){
-    const order = {"NEW":1,"CONFIRMED":2,"PACKING":3,"OUT FOR DELIVERY":4,"DELIVERED":5,"CANCELLED":6};
+    const order = {"NEW":1,"QUEUED":2,"ASSIGNED":3,"CONFIRMED":4,"PACKING":5,"OUT FOR DELIVERY":6,"DELIVERED":7,"CANCELLED":8};
     return order[String(value || "").toUpperCase()] || 99;
 }
 
@@ -2682,10 +2745,19 @@ function setStatusFilter(status){
 }
 
 
+function setStaffFilter(name){
+    if(!isManager()) return;
+    activeStaffFilter = String(name || "ALL");
+    renderFilters();
+    render();
+}
+
 function renderStatusFlow(order){
 
     const flow = [
         "NEW",
+        "QUEUED",
+        "ASSIGNED",
         "CONFIRMED",
         "PACKING",
         "OUT FOR DELIVERY",
@@ -3099,8 +3171,13 @@ function renderOrder(order){
                     <div>
                         <div class="order-id">${esc(order.orderId)}</div>
                         <div class="time">${esc(order.timestamp)}</div>
+                        ${order.assignedStaffName ? `<div class="assigned-badge">👤 ${esc(order.assignedStaffName)}</div>` : ""}
                     </div>
                 </div>
+
+                ${isStaff() && (safeStatus === "NEW" || safeStatus === "QUEUED") && !order.assignedStaffEmail ? `
+                    <button type="button" class="accept-btn" id="accept-${attr(order.orderId)}" onclick="acceptOrder('${js(order.orderId)}'); event.stopPropagation();">Accept</button>
+                ` : ""}
 
                 <select
                     class="status"
@@ -3211,6 +3288,43 @@ function renderOrder(order){
     `;
 }
 
+async function acceptOrder(orderId){
+    if(!isStaff()) return;
+    const order = getOrderById(orderId);
+    if(!order) return;
+    const currentStatus = String(order.status || "NEW").toUpperCase();
+    if(currentStatus !== "NEW" && currentStatus !== "QUEUED"){
+        showNotice("This order is no longer available to accept.");
+        return;
+    }
+    if(!confirm("Accept " + orderId + "?\\n\\nThis order will be assigned to you and will no longer be available to other staff.")) return;
+    const button = document.getElementById("accept-" + orderId);
+    if(button){button.disabled=true;button.textContent="Accepting...";}
+    try{
+        const url = API_URL + "?action=acceptOrder&idToken=" + encodeURIComponent(googleIdToken) + "&orderId=" + encodeURIComponent(orderId) + "&t=" + Date.now();
+        const response = await fetch(url,{cache:"no-store"});
+        if(!response.ok) throw new Error("Could not accept the order.");
+        const data = await response.json();
+        if(!data.success){
+            if(["AUTH_REQUIRED","TOKEN_INVALID","TOKEN_EXPIRED","NOT_AUTHORIZED","SHIFT_NOT_ACTIVE","SHIFT_EXPIRED"].includes(data.code)){handleAuthorizationFailure(data);return;}
+            throw new Error(data.message || "Could not accept the order.");
+        }
+        const result = data.order || {};
+        order.status = "ASSIGNED";
+        order.assignedStaffEmail = result.assignedStaffEmail || googleAdminUser.email;
+        order.assignedStaffName = result.assignedStaffName || googleAdminUser.name;
+        order.assignedAt = result.assignedAt || new Date().toISOString();
+        order.everAssigned = true;
+        showNotice(orderId + " assigned to " + order.assignedStaffName + ".");
+        renderStats(); renderFilters(); render();
+        setTimeout(function(){showNotice("");},1800);
+    }catch(error){
+        console.error(error);
+        showNotice(error.message || "Could not accept the order.");
+        if(button){button.disabled=false;button.textContent="Accept";}
+    }
+}
+
 async function changeStatus(orderId, newStatus){
 
     const order = orders.find(function(item){
@@ -3222,7 +3336,7 @@ async function changeStatus(orderId, newStatus){
     }
 
     const oldStatus = String(order.status || "NEW").toUpperCase();
-    const nextStatus = String(newStatus || "").toUpperCase();
+    const nextStatus = normalizeWorkflowStatus(order, newStatus);
 
     if(oldStatus === nextStatus){
         return;
@@ -3684,6 +3798,10 @@ function buildStatusWhatsAppMessage(order){
     const messages = {
         "NEW":
             "We have received your order and it is currently being reviewed.",
+        "QUEUED":
+            "Your order is queued and waiting to be accepted by our staff.",
+        "ASSIGNED":
+            "Your order has been assigned to our staff and is being processed.",
         "CONFIRMED":
             "Good news! Your order has been confirmed and will be prepared shortly.",
         "PACKING":
