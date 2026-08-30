@@ -1579,6 +1579,16 @@ function enterAdminApplication(){
     /* Start the existing admin functionality only after login. */
     loadOrders(false);
     loadProductCatalog();
+
+    /*
+     * Managers receive the complete Admin Staff list from Code.gs.
+     * This allows the Staff filter to show staff members who currently
+     * have zero assigned orders.
+     */
+    if(isManager()){
+        loadAdminStaffList();
+    }
+
     startAutoRefresh();
     updateRefreshInfo();
 }
@@ -1707,6 +1717,7 @@ const STATUSES = [
 ];
 
 let orders = [];
+let adminStaffList = [];
 let productCatalog = [];
 let addProductOrderId = "";
 let selectedAddProduct = null;
@@ -1854,6 +1865,57 @@ function handleAuthorizationFailure(data){
 
     showGoogleAuthError(message);
     showGoogleLoginScreen();
+}
+
+async function loadAdminStaffList(){
+    if(!isManager()){
+        adminStaffList = [];
+        return;
+    }
+
+    try{
+        const url =
+            API_URL +
+            "?action=staffList" +
+            "&idToken=" + encodeURIComponent(googleIdToken) +
+            "&t=" + Date.now();
+
+        const response = await fetch(url,{cache:"no-store"});
+
+        if(!response.ok){
+            throw new Error("Could not load the Admin Staff list.");
+        }
+
+        const data = await response.json();
+
+        if(!data.success){
+            if(["AUTH_REQUIRED","TOKEN_INVALID","TOKEN_EXPIRED","NOT_AUTHORIZED","SHIFT_NOT_ACTIVE","SHIFT_EXPIRED"].includes(data.code)){
+                handleAuthorizationFailure(data);
+                return;
+            }
+
+            throw new Error(
+                data.message || "Could not load the Admin Staff list."
+            );
+        }
+
+        adminStaffList =
+            Array.isArray(data.staff)
+                ? data.staff
+                : [];
+
+        renderFilters();
+
+    }catch(error){
+        console.error("Could not load Admin Staff list:", error);
+
+        /*
+         * Do not break the Manager dashboard if the staff-list request
+         * fails. The filter will fall back to names found in orders.
+         */
+        adminStaffList = [];
+        renderFilters();
+    }
 }
 
 async function loadOrders(isManualRefresh){
@@ -2163,14 +2225,53 @@ function isManager(){
 function isStaff(){
     return !!(googleAdminUser && String(googleAdminUser.role || "").toUpperCase() === "STAFF");
 }
-function getStaffNamesFromOrders(){
-    const names = new Set();
+function getStaffNamesForFilter(){
+    const names = new Map();
+
+    /*
+     * Primary source: Admin Staff sheet.
+     * Include STAFF records even when they have zero assigned orders.
+     * Staff Name comes from the Admin Staff sheet, not Google profile name.
+     */
+    adminStaffList.forEach(function(staff){
+        const role = String(staff.role || "").toUpperCase();
+        const name = String(staff.staffName || "").trim();
+
+        if(role === "STAFF" && name){
+            const key = name.toLowerCase();
+
+            if(!names.has(key)){
+                names.set(key, name);
+            }
+        }
+    });
+
+    /*
+     * Secondary source: existing orders.
+     * This preserves historical assigned names if an old order refers
+     * to a staff member who is no longer in Admin Staff.
+     */
     orders.forEach(function(order){
         const name = String(order.assignedStaffName || "").trim();
-        if(name) names.add(name);
+
+        if(name){
+            const key = name.toLowerCase();
+
+            if(!names.has(key)){
+                names.set(key, name);
+            }
+        }
     });
-    return Array.from(names).sort(function(a,b){return a.localeCompare(b,undefined,{sensitivity:"base"});});
+
+    return Array.from(names.values()).sort(function(a,b){
+        return a.localeCompare(
+            b,
+            undefined,
+            {sensitivity:"base"}
+        );
+    });
 }
+
 function normalizeWorkflowStatus(order, requestedStatus){
     const next = String(requestedStatus || "").toUpperCase();
     return next === "NEW" && order.everAssigned ? "QUEUED" : next;
@@ -2341,7 +2442,7 @@ function renderFilters(){
             <div class="filter-group-title status-title">Staff</div>
             <div class="filter-row">
                 <button class="filter ${activeStaffFilter === "ALL" ? "active" : ""}" onclick="setStaffFilter('ALL')">All Staff</button>
-                ${getStaffNamesFromOrders().map(function(name){
+                ${getStaffNamesForFilter().map(function(name){
                     return `<button class="filter ${activeStaffFilter === name ? "active" : ""}" onclick="setStaffFilter('${js(name)}')">${esc(name)}</button>`;
                 }).join("")}
             </div>
@@ -2814,7 +2915,22 @@ function setStatusFilter(status){
 
 function setStaffFilter(name){
     if(!isManager()) return;
-    activeStaffFilter = String(name || "ALL");
+
+    const requested = String(name || "ALL");
+
+    if(requested === "ALL"){
+        activeStaffFilter = "ALL";
+    }else{
+        const available = getStaffNamesForFilter();
+
+        activeStaffFilter =
+            available.some(function(staffName){
+                return staffName === requested;
+            })
+                ? requested
+                : "ALL";
+    }
+
     renderFilters();
     render();
 }
