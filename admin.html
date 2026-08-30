@@ -594,10 +594,42 @@ header{
 @media(max-width:900px){
     .orders{grid-template-columns:repeat(2,minmax(0,1fr));}
     .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+    .order-section .orders{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
 }
 
 .order-section{
-    margin:0 0 22px;
+    /* Each section is a full-width block. This guarantees that
+       INCOMING QUEUE and ASSIGNED & ACTIVE ORDERS can never sit
+       beside each other, even if the outer container is changed
+       to grid/flex by another responsive rule. */
+    display:block;
+    width:100%;
+    grid-column:1 / -1;
+    flex:0 0 100%;
+    clear:both;
+    margin:0 0 26px;
+}
+
+.order-section + .order-section{
+    margin-top:26px;
+}
+
+/* Orders inside each section: maximum 2 collapsed cards per row. */
+.order-section .orders{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px;
+    align-items:start;
+    width:100%;
+}
+
+/* An expanded order always occupies the complete row. */
+.order-section .orders .order.expanded{
+    grid-column:1 / -1;
+    width:100%;
 }
 
 .order-section-head{
