@@ -128,7 +128,7 @@ header{
     top:71px;
     z-index:15;
     display:grid;
-    grid-template-columns:repeat(6,1fr);
+    grid-template-columns:repeat(7,1fr);
     gap:10px;
     margin-bottom:18px;
     padding:8px 0;
@@ -217,6 +217,10 @@ header{
     background:#fff7ed;
     color:#f59e0b;
 }
+.stat-icon.icon-queued{
+    background:#fff7ed;
+    color:#d97706;
+}
 .stat-icon.icon-confirmed{
     background:#ecfdf5;
     color:#16a34a;
@@ -236,6 +240,9 @@ header{
 
 .stat-icon.icon-new svg{
     animation:statIconSun 2.2s linear infinite;
+}
+.stat-icon.icon-queued svg{
+    animation:statIconQueue 2.1s ease-in-out infinite;
 }
 
 .stat-icon.icon-confirmed svg{
@@ -302,6 +309,13 @@ header{
     100%{transform:rotate(360deg) scale(1)}
 }
 
+@keyframes statIconQueue{
+    0%,100%{transform:translateX(0) rotate(0deg) scale(1)}
+    25%{transform:translateX(-2px) rotate(-3deg) scale(1.04)}
+    50%{transform:translateX(2px) rotate(3deg) scale(1.08)}
+    75%{transform:translateX(-1px) rotate(-2deg) scale(1.04)}
+}
+
 @keyframes statIconCheck{
     0%,100%{transform:scale(1) rotate(0deg)}
     35%{transform:scale(1.10) rotate(-4deg)}
@@ -329,7 +343,7 @@ header{
 
 @media(max-width:1050px){
     .stats{
-        grid-template-columns:repeat(3,1fr);
+        grid-template-columns:repeat(4,1fr);
     }
 }
 
@@ -580,6 +594,56 @@ header{
 @media(max-width:900px){
     .orders{grid-template-columns:repeat(2,minmax(0,1fr));}
     .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+.order-section{
+    margin:0 0 22px;
+}
+
+.order-section-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin:0 0 10px;
+    padding:12px 14px;
+    border:1px solid #dfe8e0;
+    border-radius:12px;
+    background:#fff;
+}
+
+.order-section-head h2{
+    font-size:14px;
+    color:#166534;
+    margin:0;
+}
+
+.order-section-head p{
+    margin-top:3px;
+    color:#68736a;
+    font-size:11px;
+}
+
+.order-section-count{
+    min-width:30px;
+    height:30px;
+    padding:0 9px;
+    display:grid;
+    place-items:center;
+    border-radius:999px;
+    background:#ecfdf5;
+    color:#166534;
+    border:1px solid #cde8d4;
+    font-size:12px;
+    font-weight:800;
+}
+
+.order-section.incoming .order-section-head{
+    border-left:4px solid #f59e0b;
+}
+
+.order-section.active .order-section-head{
+    border-left:4px solid #15803d;
 }
 
 .orders{
@@ -1788,6 +1852,8 @@ const FILTER_GROUPS = {
         statuses: [
             "ALL",
             "NEW",
+            "QUEUED",
+            "ASSIGNED",
             "CONFIRMED",
             "PACKING",
             "OUT FOR DELIVERY"
@@ -2053,7 +2119,9 @@ function render(){
                 order.mobile,
                 order.city,
                 order.area,
-                order.status
+                order.status,
+                order.assignedStaffName,
+                order.queueReason
             ]
             .join(" ")
             .toLowerCase();
@@ -2064,20 +2132,69 @@ function render(){
 
     const sorted = filtered.slice().sort(compareOrders);
 
-    if(!sorted.length){
+    const incomingOrders = sorted.filter(function(order){
+        const status = String(order.status || "").toUpperCase();
+        return status === "NEW" || status === "QUEUED";
+    });
 
+    const activeOrders = sorted.filter(function(order){
+        const status = String(order.status || "").toUpperCase();
+        return status !== "NEW" && status !== "QUEUED";
+    });
+
+    const showIncomingSection =
+        activeStatusFilter === "ALL" ||
+        activeStatusFilter === "NEW" ||
+        activeStatusFilter === "QUEUED";
+
+    const showActiveSection =
+        activeStatusFilter === "ALL" ||
+        activeStatusFilter !== "NEW" && activeStatusFilter !== "QUEUED";
+
+    if(!sorted.length){
         document.getElementById("orders").innerHTML =
             '<div class="empty">No matching orders found.</div>';
-
         return;
-
     }
 
-    document.getElementById("orders").innerHTML =
-        sorted
-            .map(renderOrder)
-            .join("");
+    let html = "";
 
+    if(showIncomingSection && incomingOrders.length){
+        html += renderOrderSection(
+            "INCOMING QUEUE",
+            "NEW + QUEUED orders waiting for staff acceptance",
+            incomingOrders,
+            "incoming"
+        );
+    }
+
+    if(showActiveSection && activeOrders.length){
+        html += renderOrderSection(
+            "ASSIGNED & ACTIVE ORDERS",
+            "Assigned, confirmed, packing, delivery and closed orders",
+            activeOrders,
+            "active"
+        );
+    }
+
+    document.getElementById("orders").innerHTML = html;
+}
+
+function renderOrderSection(title, subtitle, sectionOrders, sectionClass){
+    return `
+        <section class="order-section ${sectionClass}">
+            <div class="order-section-head">
+                <div>
+                    <h2>${esc(title)}</h2>
+                    <p>${esc(subtitle)}</p>
+                </div>
+                <span class="order-section-count">${sectionOrders.length}</span>
+            </div>
+            <div class="orders">
+                ${sectionOrders.map(renderOrder).join("")}
+            </div>
+        </section>
+    `;
 }
 
 
@@ -2106,6 +2223,7 @@ function renderStats(){
     document.getElementById("stats").innerHTML = [
         statCard("All Orders", counts.ALL),
         statCard("New", counts.NEW),
+        statCard("Queued", counts.QUEUED),
         statCard("Confirmed", counts.CONFIRMED),
         statCard("Packing", counts.PACKING),
         statCard("Out for Delivery", counts["OUT FOR DELIVERY"]),
@@ -2144,6 +2262,18 @@ function statCard(label, value){
                 '<path d="M20 12h2"></path>' +
                 '<path d="M4.93 19.07l1.41-1.41"></path>' +
                 '<path d="M17.66 6.34l1.41-1.41"></path>' +
+                '</svg>'
+        },
+
+        "Queued": {
+            className: "icon-queued",
+            sub: "Queued Orders",
+            icon:
+                '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+                '<path d="M5 4h14v16H5z"></path>' +
+                '<path d="M8 8h8"></path>' +
+                '<path d="M8 12h5"></path>' +
+                '<path d="M8 16h8"></path>' +
                 '</svg>'
         },
 
