@@ -715,8 +715,8 @@ header{
     border-color:#15803d;
 }
 .product-status-btn.pending.active{
-    background:#15803d;
-    color:#fff;
+    background:#fff;
+    color:#166534;
     border-color:#15803d;
 }
 .product-status-btn.cancelled.active{
@@ -3385,8 +3385,64 @@ async function changeProductStatus(orderId, rowNumber, newProductStatus){
         }
     }
 
+    /*
+       FAST UI:
+       Update the product status locally FIRST, so the admin panel changes
+       immediately instead of waiting ~3 seconds for Apps Script + Sheets.
+       The server request still runs and the local change is rolled back if
+       the server rejects it.
+    */
+
+    const oldOrderStatus = String(order.status || "NEW").toUpperCase();
+    const oldOrderTotal = Number(order.total) || 0;
+    const oldOrderQuantity = Number(order.totalQuantity) || 0;
+
+    const oldItemStatus = oldStatus;
+
+    /* Predict the resulting product state. */
+    item.productStatus = nextStatus;
+    recalculateOrderTotal(order);
+
+    const hasPendingProducts = (order.items || []).some(function(product){
+        return String(product.productStatus || "PENDING").toUpperCase() === "PENDING";
+    });
+
+    const activeProductCount = (order.items || []).filter(function(product){
+        return String(product.productStatus || "PENDING").toUpperCase() !== "CANCELLED";
+    }).length;
+
+    let automaticOrderStatus = null;
+
+    if(nextStatus === "CANCELLED" && activeProductCount === 0){
+        if(order.status !== "CANCELLED" && order.status !== "DELIVERED"){
+            automaticOrderStatus = "CANCELLED";
+        }
+    }else if(hasPendingProducts){
+        if(order.status === "OUT FOR DELIVERY"){
+            automaticOrderStatus = "PACKING";
+        }
+    }else if(
+        order.status !== "OUT FOR DELIVERY" &&
+        order.status !== "DELIVERED" &&
+        order.status !== "CANCELLED"
+    ){
+        automaticOrderStatus = "OUT FOR DELIVERY";
+    }
+
+    /*
+       Also update the order status immediately when the product change
+       logically requires it. This makes the complete workflow feel instant.
+    */
+    if(automaticOrderStatus){
+        order.status = automaticOrderStatus;
+    }
+
+    renderStats();
+    renderFilters();
+    render();
+
     try{
-        showNotice("");
+        showNotice("Saving product status...");
 
         const url =
             API_URL +
@@ -3398,57 +3454,102 @@ async function changeProductStatus(orderId, rowNumber, newProductStatus){
             "&t=" + Date.now();
 
         const response = await fetch(url,{cache:"no-store"});
+
         if(!response.ok){
             throw new Error("Product status update failed.");
         }
 
         const data = await response.json();
+
         if(!data.success){
             throw new Error(data.message || "Product status update failed.");
         }
 
-        item.productStatus = nextStatus;
-        recalculateOrderTotal(order);
+        /*
+           Only after the product-status write succeeds do we commit any
+           automatic order-status change to the server.
+        */
+        if(automaticOrderStatus){
+            try{
+                await updateOrderStatusWithoutConfirmation(
+                    order,
+                    automaticOrderStatus
+                );
+            }catch(orderStatusError){
+                /*
+                   The product status IS already saved successfully.
+                   Only the automatic order-status transition failed.
+                   Keep the product change visible and restore the order
+                   status so it can be retried manually.
+                */
+                console.error(orderStatusError);
 
-        const hasPendingProducts = (order.items || []).some(function(product){
-            return String(product.productStatus || "PENDING").toUpperCase() === "PENDING";
-        });
+                order.status = oldOrderStatus;
 
-        const activeProductCount = (order.items || []).filter(function(product){
-            return String(product.productStatus || "PENDING").toUpperCase() !== "CANCELLED";
-        }).length;
+                renderStats();
+                renderFilters();
+                render();
 
-        if(nextStatus === "CANCELLED" && activeProductCount === 0){
-            if(order.status !== "CANCELLED" && order.status !== "DELIVERED"){
-                await updateOrderStatusWithoutConfirmation(order,"CANCELLED");
+                showNotice(
+                    "Product status saved, but the automatic order status " +
+                    "could not be updated."
+                );
+
+                setTimeout(function(){
+                    showNotice("");
+                },2500);
+
+                return;
             }
-        }else if(hasPendingProducts){
-            if(order.status === "OUT FOR DELIVERY"){
-                await updateOrderStatusWithoutConfirmation(order,"PACKING");
-            }
-        }else if(
-            order.status !== "OUT FOR DELIVERY" &&
-            order.status !== "DELIVERED" &&
-            order.status !== "CANCELLED"
-        ){
-            await updateOrderStatusWithoutConfirmation(order,"OUT FOR DELIVERY");
         }
+
+        showNotice("Product status updated.");
+
+        setTimeout(function(){
+            showNotice("");
+        },1200);
+
+    }catch(error){
+        console.error(error);
+
+        /*
+           Roll back the optimistic UI because the server did not accept
+           the product-status change.
+        */
+        item.productStatus = oldItemStatus;
+        order.status = oldOrderStatus;
+        order.total = oldOrderTotal;
+        order.totalQuantity = oldOrderQuantity;
 
         renderStats();
         renderFilters();
         render();
 
-    }catch(error){
-        console.error(error);
-        showNotice(error.message || "Could not update product status.");
-        render();
+        showNotice(
+            error.message || "Could not update product status."
+        );
     }
 }
 
+
 async function updateOrderStatusWithoutConfirmation(order, newStatus){
-    const oldStatus = order.status;
-    if(!order || oldStatus === newStatus){
+
+    if(!order){
         return;
+    }
+
+    const oldStatus = String(order.status || "NEW").toUpperCase();
+
+    /*
+       The caller may already have changed order.status optimistically.
+       We still send the requested target status to the server.
+    */
+    if(oldStatus === newStatus){
+        /*
+           Do NOT return here when the UI was changed optimistically.
+           We need to know whether the server has actually been updated.
+           This helper is only called for automatic status transitions.
+        */
     }
 
     const url =
@@ -3460,17 +3561,22 @@ async function updateOrderStatusWithoutConfirmation(order, newStatus){
         "&t=" + Date.now();
 
     const response = await fetch(url, {cache:"no-store"});
+
     if(!response.ok){
         throw new Error("Automatic order status update failed.");
     }
 
     const data = await response.json();
+
     if(!data.success){
-        throw new Error(data.message || "Automatic order status update failed.");
+        throw new Error(
+            data.message || "Automatic order status update failed."
+        );
     }
 
     order.status = newStatus;
 }
+
 
 function recalculateOrderTotal(order){
     let total = 0;
