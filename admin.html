@@ -815,6 +815,15 @@ header{
     font-weight:700;
     white-space:nowrap;
 }
+.product-status-btn:disabled{
+    cursor:not-allowed;
+    opacity:.72;
+}
+
+.product-status-locked .product-status-btn{
+    pointer-events:none;
+}
+
 .product-status-btn:hover{
     border-color:#15803d;
     color:#166534;
@@ -3701,6 +3710,44 @@ function renderOrder(order){
         const productStatus = String(item.productStatus || "PENDING").toUpperCase();
         const row = Number(item.rowNumber) || 0;
         const oid = js(order.orderId);
+        const orderStatus = String(order.status || "NEW").toUpperCase();
+
+        /*
+         * Once an order is DELIVERED, Staff must not be able to alter
+         * any product status. Manager retains full control.
+         * CANCELLED orders are also locked for Staff.
+         */
+        const lockedForStaff =
+            !isManager() &&
+            (orderStatus === "DELIVERED" || orderStatus === "CANCELLED");
+
+        if(lockedForStaff){
+            return `
+                <div class="product-status-buttons product-status-locked"
+                     role="group"
+                     aria-label="Product status locked for this order">
+                    <button type="button"
+                            class="product-status-btn pending ${productStatus === "PENDING" ? "active" : ""}"
+                            disabled
+                            title="Product status is locked after the order is closed.">
+                        PENDING
+                    </button>
+                    <button type="button"
+                            class="product-status-btn prepared ${productStatus === "PREPARED" ? "active" : ""}"
+                            disabled
+                            title="Product status is locked after the order is closed.">
+                        PREPARED
+                    </button>
+                    <button type="button"
+                            class="product-status-btn cancelled ${productStatus === "CANCELLED" ? "active" : ""}"
+                            disabled
+                            title="Product status is locked after the order is closed.">
+                        CANCELLED
+                    </button>
+                </div>
+            `;
+        }
+
         return `
             <div class="product-status-buttons" role="group" aria-label="Product status for ${attr(item.product)}">
                 <button type="button" class="product-status-btn pending ${productStatus === "PENDING" ? "active" : ""}" onclick="changeProductStatus('${oid}', ${row}, 'PENDING'); event.stopPropagation();">PENDING</button>
@@ -4170,6 +4217,12 @@ async function changeProductStatus(orderId, rowNumber, newProductStatus){
 
     const oldStatus = String(item.productStatus || "PENDING").toUpperCase();
     const nextStatus = String(newProductStatus || "PENDING").toUpperCase();
+    const orderStatus = String(order.status || "NEW").toUpperCase();
+
+    if(!isManager() && (orderStatus === "DELIVERED" || orderStatus === "CANCELLED")){
+        showNotice("Product status is locked for closed orders.");
+        return;
+    }
 
     if(oldStatus === nextStatus){ return; }
 
