@@ -3374,10 +3374,23 @@ function renderStatusFlow(order){
         `;
     }).join("");
 
+    /*
+     * Staff must NOT manually move PACKING ↔ OUT FOR DELIVERY.
+     * Those two transitions are controlled automatically by the
+     * product-level PENDING / PREPARED / CANCELLED logic.
+     * Managers retain their broader manual controls.
+     */
+    const allowedQuickStatuses = getClientAllowedStatuses(order.status);
+
     const quick = order.status === "CANCELLED"
-        ? `<button onclick="quickStatus('${js(order.orderId)}','NEW')">Reopen → NEW</button>`
+        ? (isManager()
+            ? `<button onclick="quickStatus('${js(order.orderId)}','NEW')">Reopen → NEW</button>`
+            : "")
         : flow
-            .filter(function(status){ return status !== order.status; })
+            .filter(function(status){
+                return status !== order.status &&
+                       allowedQuickStatuses.includes(status);
+            })
             .map(function(status){
                 return `<button onclick="quickStatus('${js(order.orderId)}','${js(status)}')">→ ${esc(status)}</button>`;
             }).join("");
@@ -3972,7 +3985,12 @@ function getClientAllowedStatuses(currentStatus){
         "QUEUED": ["QUEUED"],
         "ASSIGNED": ["ASSIGNED", "CONFIRMED", "QUEUED", "CANCELLED"],
         "CONFIRMED": ["CONFIRMED", "PACKING", "QUEUED", "CANCELLED"],
-        "PACKING": ["PACKING", "OUT FOR DELIVERY", "QUEUED", "CANCELLED"],
+        /*
+         * PACKING → OUT FOR DELIVERY and
+         * OUT FOR DELIVERY → PACKING are automatic only.
+         * Product status determines these transitions.
+         */
+        "PACKING": ["PACKING", "QUEUED", "CANCELLED"],
         "OUT FOR DELIVERY": ["OUT FOR DELIVERY", "DELIVERED", "QUEUED", "CANCELLED"],
         "DELIVERED": ["DELIVERED"],
         "CANCELLED": ["CANCELLED"]
@@ -4010,8 +4028,14 @@ async function changeStatus(orderId, newStatus){
     const allowed = getClientAllowedStatuses(oldStatus);
 
     if(!allowed.includes(nextStatus)){
+        const automaticTransition =
+            (oldStatus === "PACKING" && nextStatus === "OUT FOR DELIVERY") ||
+            (oldStatus === "OUT FOR DELIVERY" && nextStatus === "PACKING");
+
         showNotice(
-            "That status change is not allowed. Use QUEUED to release an active order back to the common queue."
+            automaticTransition
+                ? "This status is controlled automatically by product status. Mark products PREPARED or change a product back to PENDING."
+                : "That status change is not allowed. Use QUEUED to release an active order back to the common queue."
         );
         render();
         setTimeout(function(){ showNotice(""); }, 2500);
