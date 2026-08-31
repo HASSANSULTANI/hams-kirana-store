@@ -2348,7 +2348,6 @@ function renderOrderSection(title, subtitle, sectionOrders, sectionClass){
 
 
 function renderStats(){
-
     const counts = {
         ALL: 0,
         NEW: 0,
@@ -2361,36 +2360,29 @@ function renderStats(){
         CANCELLED: 0
     };
 
+    const myEmail = String(googleAdminUser && googleAdminUser.email || "").toLowerCase();
+    let myOrders = 0;
+
+    orders.forEach(function(order){
+        const status = String(order.status || "NEW").toUpperCase();
+        counts.ALL++;
+
+        if(counts[status] !== undefined){
+            counts[status]++;
+        }
+
+        if(isStaff() &&
+           String(order.assignedStaffEmail || "").toLowerCase() === myEmail){
+            myOrders++;
+        }
+    });
+
+    const stats = document.getElementById("stats");
+    if(!stats) return;
+
     if(isStaff()){
-        const myEmail = String(googleAdminUser && googleAdminUser.email || "").toLowerCase();
-
-        let myOrders = 0;
-
-        orders.forEach(function(order){
-            const status = String(order.status || "").toUpperCase();
-            const assignedEmail = String(order.assignedStaffEmail || "").toLowerCase();
-
-            /* NEW and QUEUED are shared availability for all staff. */
-            if(status === "NEW") counts.NEW++;
-            if(status === "QUEUED") counts.QUEUED++;
-
-            /* Everything else is counted only for this staff member. */
-            if(assignedEmail === myEmail){
-                myOrders++;
-
-                if(counts[status] !== undefined){
-                    counts[status]++;
-                }
-            }
-        });
-
-        /* My Orders means orders currently assigned to this staff account. */
-        counts.ALL = myOrders;
-
-        document.getElementById("stats").className = "stats staff-dashboard-stats";
-
-        document.getElementById("stats").innerHTML = [
-            statCard("My Orders", counts.ALL),
+        stats.innerHTML = [
+            statCard("My Orders", myOrders),
             statCard("New", counts.NEW),
             statCard("Queued", counts.QUEUED),
             statCard("Assigned", counts.ASSIGNED),
@@ -2399,33 +2391,18 @@ function renderStats(){
             statCard("Out for Delivery", counts["OUT FOR DELIVERY"]),
             statCard("Delivered", counts.DELIVERED)
         ].join("");
-
-        return;
+    }else{
+        stats.innerHTML = [
+            statCard("All Orders", counts.ALL),
+            statCard("New", counts.NEW),
+            statCard("Queued", counts.QUEUED),
+            statCard("Assigned", counts.ASSIGNED),
+            statCard("Confirmed", counts.CONFIRMED),
+            statCard("Packing", counts.PACKING),
+            statCard("Out for Delivery", counts["OUT FOR DELIVERY"]),
+            statCard("Delivered", counts.DELIVERED)
+        ].join("");
     }
-
-    /* Manager dashboard remains global. */
-    orders.forEach(function(order){
-        const status = String(order.status || "").toUpperCase();
-
-        if(counts[status] !== undefined){
-            counts[status]++;
-        }
-    });
-
-    counts.ALL = orders.length;
-
-    document.getElementById("stats").className = "stats";
-
-    document.getElementById("stats").innerHTML = [
-        statCard("All Orders", counts.ALL),
-        statCard("New", counts.NEW),
-        statCard("Queued", counts.QUEUED),
-        statCard("Confirmed", counts.CONFIRMED),
-        statCard("Packing", counts.PACKING),
-        statCard("Out for Delivery", counts["OUT FOR DELIVERY"]),
-        statCard("Delivered", counts.DELIVERED)
-    ].join("");
-
 }
 
 function statCard(label, value){
@@ -2481,6 +2458,18 @@ function statCard(label, value){
                 '<path d="M8 8h8"></path>' +
                 '<path d="M8 12h5"></path>' +
                 '<path d="M8 16h8"></path>' +
+                '</svg>'
+        },
+
+        "Assigned": {
+            className: "icon-total",
+            sub: "Assigned Orders",
+            icon:
+                '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+                '<rect x="4" y="5" width="16" height="14" rx="2"></rect>' +
+                '<path d="M8 9h8"></path>' +
+                '<path d="M8 13h5"></path>' +
+                '<path d="M8 17h3"></path>' +
                 '</svg>'
         },
 
@@ -3790,9 +3779,7 @@ function renderOrder(order){
                     id="status-${attr(order.orderId)}"
                     onchange="changeStatus('${js(order.orderId)}', this.value)"
                 >
-                    ${STATUSES.map(function(status){
-                        return `<option value="${attr(status)}" ${status === safeStatus ? "selected" : ""}>${esc(status)}</option>`;
-                    }).join("")}
+                    ${getStatusOptionsHtml(order)}
                 </select>
             </div>
 
@@ -3973,6 +3960,36 @@ async function acceptOrder(orderId){
     }
 }
 
+function getClientAllowedStatuses(currentStatus){
+    const current = String(currentStatus || "NEW").toUpperCase();
+
+    if(isManager()){
+        return STATUSES.slice();
+    }
+
+    const transitions = {
+        "NEW": ["NEW"],
+        "QUEUED": ["QUEUED"],
+        "ASSIGNED": ["ASSIGNED", "CONFIRMED", "QUEUED", "CANCELLED"],
+        "CONFIRMED": ["CONFIRMED", "PACKING", "QUEUED", "CANCELLED"],
+        "PACKING": ["PACKING", "OUT FOR DELIVERY", "QUEUED", "CANCELLED"],
+        "OUT FOR DELIVERY": ["OUT FOR DELIVERY", "DELIVERED", "QUEUED", "CANCELLED"],
+        "DELIVERED": ["DELIVERED"],
+        "CANCELLED": ["CANCELLED"]
+    };
+
+    return transitions[current] || [current];
+}
+
+function getStatusOptionsHtml(order){
+    const current = String(order && order.status || "NEW").toUpperCase();
+    const allowed = getClientAllowedStatuses(current);
+
+    return allowed.map(function(status){
+        return `<option value="${attr(status)}" ${status === current ? "selected" : ""}>${esc(status)}</option>`;
+    }).join("");
+}
+
 async function changeStatus(orderId, newStatus){
 
     const order = orders.find(function(item){
@@ -3987,6 +4004,17 @@ async function changeStatus(orderId, newStatus){
     const nextStatus = normalizeWorkflowStatus(order, newStatus);
 
     if(oldStatus === nextStatus){
+        return;
+    }
+
+    const allowed = getClientAllowedStatuses(oldStatus);
+
+    if(!allowed.includes(nextStatus)){
+        showNotice(
+            "That status change is not allowed. Use QUEUED to release an active order back to the common queue."
+        );
+        render();
+        setTimeout(function(){ showNotice(""); }, 2500);
         return;
     }
 
@@ -4016,10 +4044,27 @@ async function changeStatus(orderId, newStatus){
         }
     }
 
-    if(oldStatus === "OUT FOR DELIVERY" && (nextStatus === "CONFIRMED" || nextStatus === "PACKING")){
+    /* Manager is allowed to move backwards, but should be warned. */
+    if(isManager() && oldStatus === "OUT FOR DELIVERY" &&
+       (nextStatus === "CONFIRMED" || nextStatus === "PACKING" || nextStatus === "ASSIGNED")){
         const proceed = confirm(
             "This order is already OUT FOR DELIVERY.\n\n" +
             "Changing it back to " + nextStatus + " moves the order backwards in the workflow.\n\n" +
+            "Do you want to continue?"
+        );
+        if(!proceed){
+            render();
+            return;
+        }
+    }
+
+    /* Manager can override workflow transitions, but terminal states deserve a warning. */
+    if(isManager() &&
+       (oldStatus === "DELIVERED" || oldStatus === "CANCELLED") &&
+       nextStatus !== oldStatus){
+        const proceed = confirm(
+            "This order is currently " + oldStatus + ".\n\n" +
+            "Changing it to " + nextStatus + " reopens or changes a closed order.\n\n" +
             "Do you want to continue?"
         );
         if(!proceed){
@@ -4064,8 +4109,14 @@ async function changeStatus(orderId, newStatus){
         }
 
         order.status = nextStatus;
-        if(nextStatus === "QUEUED") order.queueReason = queueReason;
-        else if(oldStatus === "QUEUED") order.queueReason = "";
+        if(nextStatus === "QUEUED"){
+            order.queueReason = queueReason;
+            order.assignedStaffEmail = "";
+            order.assignedStaffName = "";
+            order.assignedAt = "";
+        }else if(oldStatus === "QUEUED"){
+            order.queueReason = "";
+        }
 
         renderStats();
         renderFilters();
