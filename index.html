@@ -3361,6 +3361,41 @@ async function placeOrder(e){
         return;
     }
 
+    /* ========================================================
+       CUSTOMER LOGIN — STEP 2
+       A customer must be signed in with Google before
+       placing an order. Code.gs verifies the token again.
+    ======================================================== */
+
+    if(
+        !customerGoogleToken ||
+        !customerProfile ||
+        !customerProfile.email
+    ){
+        alert(
+            "Please sign in with your Google account before placing an order."
+        );
+
+        const menu =
+            document.getElementById("accountMenu");
+
+        const btn =
+            document.getElementById("accountBtn");
+
+        if(menu){
+            menu.classList.add("show");
+        }
+
+        if(btn){
+            btn.setAttribute(
+                "aria-expanded",
+                "true"
+            );
+        }
+
+        return;
+    }
+
     const name =
         document.getElementById("name").value.trim();
 
@@ -3463,6 +3498,16 @@ async function placeOrder(e){
     }
 
     const payload = {
+
+        /* ====================================================
+           CUSTOMER LOGIN — STEP 2
+           Send the Google ID token to Code.gs.
+           Code.gs verifies it server-side and links this
+           order to the customer's Customers record.
+        ==================================================== */
+
+        customerGoogleToken:
+            customerGoogleToken,
 
         name: name,
         mobile: cleanMobile,
