@@ -1398,6 +1398,12 @@ footer{
 
 }
 
+
+/* ============================================================
+   CUSTOMER PROFILE — STEP 3A
+============================================================ */
+.account-profile-btn{width:100%;border:1px solid #bbf7d0;background:#f0fdf4;color:#166534;border-radius:9px;padding:9px 12px;cursor:pointer;font-weight:700;margin-top:10px}.account-profile-btn:hover{background:#dcfce7}.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}.profile-field{background:#f8faf8;border:1px solid #e7ece8;border-radius:10px;padding:11px}.profile-field.full{grid-column:1/-1}.profile-field-label{font-size:11px;color:#68736a;margin-bottom:4px}.profile-field-value{font-size:14px;font-weight:700;color:#172019;word-break:break-word}.profile-avatar-large{width:72px;height:72px;border-radius:50%;object-fit:cover;background:#dcfce7;display:block;margin:2px auto 12px}.profile-header{text-align:center;padding-bottom:14px;border-bottom:1px solid #edf0ed}.profile-header h3{margin:0 0 4px;font-size:18px}.profile-header p{margin:0;color:#68736a;font-size:12px;word-break:break-all}.profile-note{font-size:12px;line-height:1.5;color:#68736a;background:#f8faf8;border-radius:10px;padding:10px;margin-top:13px}@media(max-width:500px){.profile-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 
@@ -1475,7 +1481,8 @@ footer{
                     <div><div class="account-name" id="accountName">Customer</div><div class="account-email" id="accountEmail"></div></div>
                 </div>
                 <div class="login-success">✓ Google account verified successfully.</div>
-                <button type="button" class="account-logout" style="margin-top:12px" onclick="customerLogout()">Sign Out</button>
+                <button type="button" class="account-profile-btn" onclick="openCustomerProfile()">👤 My Account</button>
+                <button type="button" class="account-logout" style="margin-top:10px" onclick="customerLogout()">Sign Out</button>
             </div>
         </div>
     </div>
@@ -1811,6 +1818,47 @@ footer{
 
 
 <!-- =========================================================
+     CUSTOMER PROFILE MODAL — STEP 3A
+========================================================= -->
+<div id="customerProfileModal" class="modal">
+<div class="modalbox">
+    <div class="mhead">
+        <h2>My Account</h2>
+        <button class="close" type="button" onclick="closeCustomerProfile()">✕</button>
+    </div>
+
+    <div class="profile-header">
+        <img id="profileAvatarLarge" class="profile-avatar-large" alt="Customer profile">
+        <h3 id="profileName">Customer</h3>
+        <p id="profileEmail">—</p>
+    </div>
+
+    <div class="profile-grid">
+        <div class="profile-field">
+            <div class="profile-field-label">Customer ID</div>
+            <div class="profile-field-value" id="profileCustomerId">—</div>
+        </div>
+        <div class="profile-field">
+            <div class="profile-field-label">Mobile Number</div>
+            <div class="profile-field-value" id="profileMobile">Not added</div>
+        </div>
+        <div class="profile-field full">
+            <div class="profile-field-label">Google Account</div>
+            <div class="profile-field-value" id="profileGoogleEmail">—</div>
+        </div>
+    </div>
+
+    <div class="profile-note">
+        Your Google account is securely verified and is used to connect your orders to your customer account.
+        Your profile details will be used for future order history and tracking features.
+    </div>
+
+    <button type="button" class="place" style="margin-top:14px" onclick="closeCustomerProfile()">Done</button>
+</div>
+</div>
+
+
+<!-- =========================================================
      SUCCESS MODAL
 ========================================================= -->
 
@@ -1993,6 +2041,43 @@ function updateCustomerAccountUI(){
     const avatar=document.getElementById("accountAvatar");
     if(avatar){ avatar.src=customerProfile?.picture||placeholder(customerProfile?.name||"Customer"); avatar.onerror=function(){this.src=placeholder(customerProfile?.name||"Customer")}; }
 }
+function openCustomerProfile(){
+    if(!customerGoogleToken || !customerProfile || !customerProfile.email){
+        alert("Please sign in with your Google account first.");
+        return;
+    }
+
+    const profile = customerProfile || {};
+    const name = profile.name || "Customer";
+    const email = profile.email || "—";
+    const mobile = profile.mobile || profile.phone || "Not added";
+    const customerId = profile.customerId || "Not available";
+
+    document.getElementById("profileName").textContent = name;
+    document.getElementById("profileEmail").textContent = email;
+    document.getElementById("profileGoogleEmail").textContent = email;
+    document.getElementById("profileMobile").textContent = mobile;
+    document.getElementById("profileCustomerId").textContent = customerId;
+
+    const avatar = document.getElementById("profileAvatarLarge");
+    if(avatar){
+        avatar.src = profile.picture || placeholder(name);
+        avatar.onerror = function(){ this.src = placeholder(name); };
+    }
+
+    const accountMenu = document.getElementById("accountMenu");
+    const accountBtn = document.getElementById("accountBtn");
+    if(accountMenu) accountMenu.classList.remove("show");
+    if(accountBtn) accountBtn.setAttribute("aria-expanded","false");
+
+    document.getElementById("customerProfileModal").classList.add("show");
+}
+
+function closeCustomerProfile(){
+    const modal = document.getElementById("customerProfileModal");
+    if(modal) modal.classList.remove("show");
+}
+
 function toggleAccountMenu(){
     const menu=document.getElementById("accountMenu"), btn=document.getElementById("accountBtn"); if(!menu)return;
     const open=!menu.classList.contains("show"); menu.classList.toggle("show",open); if(btn)btn.setAttribute("aria-expanded",String(open));
@@ -2003,6 +2088,12 @@ function customerLogout(){
     updateCustomerAccountUI(); const menu=document.getElementById("accountMenu"),btn=document.getElementById("accountBtn");
     if(menu)menu.classList.remove("show"); if(btn)btn.setAttribute("aria-expanded","false");
 }
+document.getElementById("customerProfileModal")?.addEventListener("click",function(event){
+    if(event.target === this){
+        closeCustomerProfile();
+    }
+});
+
 document.addEventListener("click",function(event){
     const area=document.getElementById("accountArea"),menu=document.getElementById("accountMenu");
     if(area&&menu&&!area.contains(event.target)){menu.classList.remove("show");const btn=document.getElementById("accountBtn");if(btn)btn.setAttribute("aria-expanded","false");}
