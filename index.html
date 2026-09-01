@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="HAMS Kirana Store - Online Grocery Ordering">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <title>HAMS Kirana Store</title>
 
 <style>
@@ -39,6 +40,11 @@ textarea{
     padding:7px;
     font-size:13px;
 }
+
+
+/* CUSTOMER GOOGLE ACCOUNT — STEP 1 */
+.account-area{position:relative;min-width:max-content}.account-btn{border:1px solid #dce3dd;background:#fff;color:#166534;border-radius:10px;padding:10px 12px;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:7px;white-space:nowrap}.account-btn:hover{background:#f0fdf4;border-color:#15803d}.account-menu{position:absolute;right:0;top:calc(100% + 8px);width:280px;background:#fff;border:1px solid #e5e9e5;border-radius:14px;box-shadow:0 14px 35px #0002;padding:14px;display:none;z-index:100}.account-menu.show{display:block}.account-user{display:flex;align-items:center;gap:10px;padding-bottom:12px;border-bottom:1px solid #edf0ed;margin-bottom:12px}.account-avatar{width:42px;height:42px;border-radius:50%;object-fit:cover;background:#dcfce7}.account-name{font-weight:800;font-size:14px}.account-email{color:#68736a;font-size:11px;word-break:break-all;margin-top:2px}.login-note{color:#68736a;font-size:12px;line-height:1.45;margin-bottom:10px}.login-success{color:#166534;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:9px;padding:9px 10px;font-size:12px;line-height:1.4}.account-logout{width:100%;border:1px solid #fecaca;background:#fff;color:#dc2626;border-radius:9px;padding:9px 12px;cursor:pointer;font-weight:700}.account-logout:hover{background:#fef2f2}
+@media(max-width:700px){.account-area{order:2}.account-btn{padding:10px}.account-label{display:none}.account-menu{position:fixed;right:12px;top:70px;width:min(300px,calc(100vw - 24px))}}
 
 /* ============================================================
    HEADER
@@ -1454,6 +1460,26 @@ footer{
     </div>
 
 
+    <div class="account-area" id="accountArea">
+        <button type="button" class="account-btn" id="accountBtn" onclick="toggleAccountMenu()" aria-expanded="false">
+            👤 <span class="account-label" id="accountLabel">Sign in</span>
+        </button>
+        <div class="account-menu" id="accountMenu">
+            <div id="loggedOutAccount">
+                <div class="login-note">Sign in with Google to securely connect your customer account.</div>
+                <div id="googleSignInButton"></div>
+            </div>
+            <div id="loggedInAccount" style="display:none">
+                <div class="account-user">
+                    <img id="accountAvatar" class="account-avatar" alt="Customer profile">
+                    <div><div class="account-name" id="accountName">Customer</div><div class="account-email" id="accountEmail"></div></div>
+                </div>
+                <div class="login-success">✓ Google account verified successfully.</div>
+                <button type="button" class="account-logout" style="margin-top:12px" onclick="customerLogout()">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
     <button
         class="cartbtn"
         onclick="openCart()"
@@ -1845,6 +1871,12 @@ let category = "All";
 
 let wa = DEFAULT_WA;
 
+const GOOGLE_CLIENT_ID = "666183638799-67fatp0p1p5i7glh95dsqnamq1tg6la5.apps.googleusercontent.com";
+const CUSTOMER_TOKEN_KEY = "hamsKiranaCustomerGoogleToken";
+const CUSTOMER_PROFILE_KEY = "hamsKiranaCustomerProfile";
+let customerGoogleToken = "";
+let customerProfile = null;
+
 
 /* ============================================================
    INITIAL PAGE SETUP
@@ -1895,6 +1927,11 @@ try{
 
 
 /* ============================================================
+   INITIAL CUSTOMER ACCOUNT
+============================================================ */
+initializeCustomerGoogleLogin();
+
+/* ============================================================
    INITIAL DISPLAY
 ============================================================ */
 
@@ -1902,6 +1939,74 @@ updateCart();
 
 loadProducts();
 
+
+/* ============================================================
+   CUSTOMER GOOGLE LOGIN — STEP 1
+============================================================ */
+function initializeCustomerGoogleLogin(){
+    try{
+        customerGoogleToken=localStorage.getItem(CUSTOMER_TOKEN_KEY)||"";
+        customerProfile=JSON.parse(localStorage.getItem(CUSTOMER_PROFILE_KEY)||"null");
+    }catch(e){ customerGoogleToken=""; customerProfile=null; }
+    updateCustomerAccountUI();
+    waitForGoogleIdentity();
+}
+function waitForGoogleIdentity(){
+    if(window.google&&google.accounts&&google.accounts.id){ setupGoogleLogin(); return; }
+    setTimeout(waitForGoogleIdentity,150);
+}
+function setupGoogleLogin(){
+    const container=document.getElementById("googleSignInButton");
+    if(!container) return;
+    container.innerHTML="";
+    google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:handleGoogleCredential,auto_select:false,cancel_on_tap_outside:true});
+    google.accounts.id.renderButton(container,{theme:"outline",size:"large",type:"standard",text:"signin_with",shape:"rectangular",width:250,logo_alignment:"left"});
+}
+async function handleGoogleCredential(response){
+    if(!response||!response.credential){alert("Google sign-in could not be completed. Please try again.");return;}
+    try{
+        const r=await fetch(API_URL+"?action=verifyCustomerGoogle&idToken="+encodeURIComponent(response.credential),{cache:"no-store"});
+        if(!r.ok) throw Error("Customer authentication request failed.");
+        const d=await r.json();
+        if(!d.success) throw Error(d.message||"Google account verification failed.");
+        customerGoogleToken=response.credential;
+        customerProfile=d.customer||{email:d.email||"",name:d.name||"",picture:d.picture||""};
+        localStorage.setItem(CUSTOMER_TOKEN_KEY,customerGoogleToken);
+        localStorage.setItem(CUSTOMER_PROFILE_KEY,JSON.stringify(customerProfile));
+        updateCustomerAccountUI();
+        document.getElementById("accountMenu").classList.add("show");
+        document.getElementById("accountBtn").setAttribute("aria-expanded","true");
+    }catch(err){
+        console.error(err); customerGoogleToken=""; customerProfile=null;
+        localStorage.removeItem(CUSTOMER_TOKEN_KEY); localStorage.removeItem(CUSTOMER_PROFILE_KEY);
+        updateCustomerAccountUI(); alert(err.message||"Google account verification failed. Please try again.");
+    }
+}
+function updateCustomerAccountUI(){
+    const isLoggedIn=!!(customerGoogleToken&&customerProfile&&customerProfile.email);
+    const out=document.getElementById("loggedOutAccount"), inn=document.getElementById("loggedInAccount");
+    if(out) out.style.display=isLoggedIn?"none":"block";
+    if(inn) inn.style.display=isLoggedIn?"block":"none";
+    const label=document.getElementById("accountLabel"); if(label) label.textContent=isLoggedIn?(customerProfile.name||"My Account"):"Sign in";
+    const name=document.getElementById("accountName"); if(name) name.textContent=customerProfile?.name||"Customer";
+    const email=document.getElementById("accountEmail"); if(email) email.textContent=customerProfile?.email||"";
+    const avatar=document.getElementById("accountAvatar");
+    if(avatar){ avatar.src=customerProfile?.picture||placeholder(customerProfile?.name||"Customer"); avatar.onerror=function(){this.src=placeholder(customerProfile?.name||"Customer")}; }
+}
+function toggleAccountMenu(){
+    const menu=document.getElementById("accountMenu"), btn=document.getElementById("accountBtn"); if(!menu)return;
+    const open=!menu.classList.contains("show"); menu.classList.toggle("show",open); if(btn)btn.setAttribute("aria-expanded",String(open));
+}
+function customerLogout(){
+    customerGoogleToken=""; customerProfile=null; localStorage.removeItem(CUSTOMER_TOKEN_KEY); localStorage.removeItem(CUSTOMER_PROFILE_KEY);
+    try{if(window.google&&google.accounts&&google.accounts.id)google.accounts.id.disableAutoSelect();}catch(e){}
+    updateCustomerAccountUI(); const menu=document.getElementById("accountMenu"),btn=document.getElementById("accountBtn");
+    if(menu)menu.classList.remove("show"); if(btn)btn.setAttribute("aria-expanded","false");
+}
+document.addEventListener("click",function(event){
+    const area=document.getElementById("accountArea"),menu=document.getElementById("accountMenu");
+    if(area&&menu&&!area.contains(event.target)){menu.classList.remove("show");const btn=document.getElementById("accountBtn");if(btn)btn.setAttribute("aria-expanded","false");}
+});
 
 /* ============================================================
    LOAD PRODUCTS
