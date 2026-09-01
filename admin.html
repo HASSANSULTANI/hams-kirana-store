@@ -2252,6 +2252,7 @@ function decodeGoogleJwtPayload(token){
         );
 
         return null;
+
     }
 
 }
@@ -2527,6 +2528,7 @@ async function handleGoogleCredential(
         );
 
         return;
+
     }
 
     const loginButton =
@@ -8476,6 +8478,10 @@ function updateAddProductSelectionUI(){
 }
 
 
+/* =========================================================
+   STEP 20B — COMPLETE ADD PRODUCT HANDLER
+========================================================= */
+
 async function submitAddProduct(){
 
     if(
@@ -8543,6 +8549,55 @@ async function submitAddProduct(){
         );
 
 
+    /*
+     * =========================================================
+     * STEP 20B — ADD PRODUCT MUTATION LOCK
+     * =========================================================
+     *
+     * Prevent background GET requests from replacing this order
+     * while Code.gs is saving the product and calculating the
+     * authoritative order status.
+     */
+
+    const orderId =
+        String(
+            addProductOrderId
+        );
+
+
+    const previousOrderStatus =
+        String(
+            order &&
+            order.status ||
+            "NEW"
+        ).toUpperCase();
+
+
+    pendingOrderMutations.set(
+
+        orderId,
+
+        {
+
+            type:
+                "ADD_PRODUCT",
+
+            from:
+                previousOrderStatus,
+
+            productId:
+                String(
+                    selectedAddProduct.productId
+                ),
+
+            quantity:
+                quantity
+
+        }
+
+    );
+
+
     if(submit){
 
         submit.disabled =
@@ -8565,7 +8620,7 @@ async function submitAddProduct(){
             ) +
             "&orderId=" +
             encodeURIComponent(
-                addProductOrderId
+                orderId
             ) +
             "&productId=" +
             encodeURIComponent(
@@ -8603,6 +8658,28 @@ async function submitAddProduct(){
 
         if(!data.success){
 
+            if(
+                [
+                    "AUTH_REQUIRED",
+                    "TOKEN_INVALID",
+                    "TOKEN_EXPIRED",
+                    "NOT_AUTHORIZED",
+                    "SHIFT_NOT_ACTIVE",
+                    "SHIFT_EXPIRED"
+                ].includes(
+                    data.code
+                )
+            ){
+
+                handleAuthorizationFailure(
+                    data
+                );
+
+                return;
+
+            }
+
+
             throw new Error(
                 data.message ||
                 "Could not add product to the order."
@@ -8611,12 +8688,470 @@ async function submitAddProduct(){
         }
 
 
-        const orderId =
-            addProductOrderId;
+        /*
+         * =====================================================
+         * STEP 20B — SERVER-AUTHORITATIVE ORDER STATUS
+         * =====================================================
+         *
+         * Code.gs Step 20A is the authority for workflow status.
+         *
+         * The browser does NOT guess:
+         *
+         *     Add Product = PACKING
+         *
+         * Instead it uses the exact status returned by Code.gs.
+         *
+         * Supported response shapes:
+         *
+         *     data.orderStatus
+         *     data.order.orderStatus
+         *     data.order.status
+         *     data.status
+         *
+         * The first available server value wins.
+         */
+
+        const serverOrderStatus =
+            String(
+
+                data.orderStatus ||
+
+                (
+                    data.order &&
+                    data.order.orderStatus
+                ) ||
+
+                (
+                    data.order &&
+                    data.order.status
+                ) ||
+
+                data.status ||
+
+                previousOrderStatus
+
+            ).toUpperCase();
 
 
-        closeAddProductModal();
+        /*
+         * Apply the server status immediately.
+         */
 
+        if(order){
+
+            order.status =
+                serverOrderStatus;
+
+        }
+
+
+        /*
+         * =====================================================
+         * APPLY COMPLETE SERVER ORDER
+         * =====================================================
+         *
+         * If Step 20A returns the complete updated order, merge it
+         * into the existing browser object.
+         */
+
+        if(
+            order &&
+            data.order &&
+            typeof data.order ===
+                "object"
+        ){
+
+            Object.assign(
+                order,
+                data.order
+            );
+
+
+            /*
+             * Keep compatibility with either property name.
+             */
+
+            if(
+                data.order.orderStatus
+            ){
+
+                order.status =
+                    String(
+                        data.order.orderStatus
+                    ).toUpperCase();
+
+            }
+
+
+            if(
+                data.order.status
+            ){
+
+                order.status =
+                    String(
+                        data.order.status
+                    ).toUpperCase();
+
+            }
+
+        }
+
+
+        /*
+         * =====================================================
+         * APPLY SERVER-RETURNED PRODUCT
+         * =====================================================
+         *
+         * Step 20A may return the product which was just added.
+         *
+         * If returned, put it directly into the visible order.
+         */
+
+        const returnedProduct =
+            data.product ||
+            data.addedProduct ||
+            (
+                data.order &&
+                data.order.product
+            ) ||
+            null;
+
+
+        if(
+            order &&
+            returnedProduct &&
+            typeof returnedProduct ===
+                "object"
+        ){
+
+            if(
+                !Array.isArray(
+                    order.items
+                )
+            ){
+
+                order.items = [];
+
+            }
+
+
+            const returnedRow =
+                Number(
+                    returnedProduct.rowNumber ||
+                    returnedProduct.row ||
+                    0
+                );
+
+
+            let existingItem =
+                null;
+
+
+            /*
+             * First attempt to locate by server row number.
+             */
+
+            if(
+                returnedRow
+            ){
+
+                existingItem =
+                    order.items.find(
+
+                        function(item){
+
+                            return Number(
+                                item.rowNumber
+                            ) ===
+                            returnedRow;
+
+                        }
+
+                    ) || null;
+
+            }
+
+
+            /*
+             * Fallback: locate by product name.
+             */
+
+            if(!existingItem){
+
+                const returnedName =
+                    String(
+
+                        returnedProduct.product ||
+
+                        returnedProduct.productName ||
+
+                        ""
+
+                    )
+                    .trim()
+                    .toLowerCase();
+
+
+                if(returnedName){
+
+                    existingItem =
+                        order.items.find(
+
+                            function(item){
+
+                                return String(
+                                    item.product ||
+                                    ""
+                                )
+                                .trim()
+                                .toLowerCase() ===
+                                returnedName;
+
+                            }
+
+                        ) || null;
+
+                }
+
+            }
+
+
+            /*
+             * Update existing product if found.
+             */
+
+            if(existingItem){
+
+                Object.assign(
+                    existingItem,
+                    returnedProduct
+                );
+
+            }else{
+
+                /*
+                 * Otherwise append the server-returned product.
+                 */
+
+                const normalizedProduct =
+                    Object.assign(
+                        {},
+                        returnedProduct
+                    );
+
+
+                /*
+                 * Normalize product name.
+                 */
+
+                if(
+                    !normalizedProduct.product &&
+                    normalizedProduct.productName
+                ){
+
+                    normalizedProduct.product =
+                        normalizedProduct.productName;
+
+                }
+
+
+                /*
+                 * Normalize quantity.
+                 */
+
+                if(
+                    normalizedProduct.quantity ===
+                    undefined
+                ){
+
+                    normalizedProduct.quantity =
+                        quantity;
+
+                }
+
+
+                /*
+                 * Normalize price.
+                 */
+
+                if(
+                    normalizedProduct.price ===
+                    undefined
+                ){
+
+                    normalizedProduct.price =
+                        selectedAddProduct.price;
+
+                }
+
+
+                /*
+                 * Normalize total.
+                 */
+
+                if(
+                    normalizedProduct.total ===
+                    undefined
+                ){
+
+                    normalizedProduct.total =
+                        (
+                            Number(
+                                normalizedProduct.quantity
+                            ) || 0
+                        ) *
+                        (
+                            Number(
+                                normalizedProduct.price
+                            ) || 0
+                        );
+
+                }
+
+
+                /*
+                 * New products are normally PENDING unless Code.gs
+                 * explicitly returns another product status.
+                 */
+
+                if(
+                    !normalizedProduct.productStatus
+                ){
+
+                    normalizedProduct.productStatus =
+                        "PENDING";
+
+                }
+
+
+                order.items.push(
+                    normalizedProduct
+                );
+
+            }
+
+        }
+
+
+        /*
+         * =====================================================
+         * FALLBACK LOCAL PRODUCT INSERT
+         * =====================================================
+         *
+         * If Code.gs only returns orderStatus and does not return
+         * the newly-created product, add a temporary local copy.
+         *
+         * The next scheduled refresh will reconcile the exact
+         * server-side row.
+         */
+
+        if(
+            order &&
+            !returnedProduct
+        ){
+
+            if(
+                !Array.isArray(
+                    order.items
+                )
+            ){
+
+                order.items = [];
+
+            }
+
+
+            const localProductName =
+                String(
+                    selectedAddProduct.productName ||
+                    ""
+                );
+
+
+            const alreadyExists =
+                order.items.some(
+
+                    function(item){
+
+                        return (
+
+                            String(
+                                item.product ||
+                                ""
+                            )
+                            .trim()
+                            .toLowerCase() ===
+
+                            localProductName
+                                .trim()
+                                .toLowerCase()
+
+                            &&
+
+                            Number(
+                                item.quantity
+                            ) ===
+                            quantity
+
+                        );
+
+                    }
+
+                );
+
+
+            if(!alreadyExists){
+
+                order.items.push({
+
+                    rowNumber:
+                        0,
+
+                    product:
+                        localProductName,
+
+                    quantity:
+                        quantity,
+
+                    price:
+                        Number(
+                            selectedAddProduct.price
+                        ) || 0,
+
+                    total:
+                        (
+                            Number(
+                                selectedAddProduct.price
+                            ) || 0
+                        ) *
+                        quantity,
+
+                    productStatus:
+                        "PENDING"
+
+                });
+
+            }
+
+        }
+
+
+        /*
+         * Recalculate browser-side total.
+         */
+
+        if(order){
+
+            recalculateOrderTotal(
+                order
+            );
+
+        }
+
+
+        /*
+         * Keep the updated order expanded.
+         */
 
         expandedOrders.add(
             orderId
@@ -8624,37 +9159,87 @@ async function submitAddProduct(){
 
 
         /*
-         * Do NOT manually change OUT FOR DELIVERY -> PACKING here.
-         *
-         * Step 18 Code.gs owns the server-side workflow.
+         * Close modal only after successful server response.
          */
 
+        closeAddProductModal();
+
+
+        /*
+         * Product name for success message.
+         */
+
+        const productName =
+
+            (
+                returnedProduct &&
+
+                (
+                    returnedProduct.product ||
+                    returnedProduct.productName
+                )
+
+            ) ||
+
+            selectedAddProduct.productName;
+
+
+        /*
+         * =====================================================
+         * STEP 20B SUCCESS MESSAGE
+         * =====================================================
+         */
 
         showNotice(
 
-            (
-                data.product &&
-                data.product.product
-            ) ||
-            selectedAddProduct.productName +
+            productName +
+
             " added to " +
+
             orderId +
-            "."
+
+            " • Order Status: " +
+
+            (
+                order
+                    ? order.status
+                    : serverOrderStatus
+            )
 
         );
 
 
         /*
-         * Give the backend a moment to finish the write before
-         * the next ordinary refresh.
-         *
-         * More importantly, the next refresh is sequence-protected.
+         * Immediately redraw the complete dashboard.
          */
 
-        await loadOrders(
-            false,
-            true
-        );
+        renderStats();
+
+        renderFilters();
+
+        render();
+
+
+        /*
+         * =====================================================
+         * CRITICAL STEP 20B RULE
+         * =====================================================
+         *
+         * DO NOT immediately call:
+         *
+         *     loadOrders()
+         *
+         * after Add Product.
+         *
+         * Code.gs has already returned the authoritative order
+         * status.
+         *
+         * An immediate GET can race with Google Sheets persistence
+         * and temporarily return the old status.
+         *
+         * The existing background refresh will reconcile the
+         * complete server state later.
+         */
 
 
         setTimeout(
@@ -8678,6 +9263,23 @@ async function submitAddProduct(){
         );
 
 
+        /*
+         * =====================================================
+         * ROLLBACK
+         * =====================================================
+         *
+         * Only roll back the order status if the Add Product
+         * request itself failed.
+         */
+
+        if(order){
+
+            order.status =
+                previousOrderStatus;
+
+        }
+
+
         showNotice(
             error.message ||
             "Could not add product to the order."
@@ -8685,6 +9287,15 @@ async function submitAddProduct(){
 
 
     }finally{
+
+        /*
+         * Release mutation lock.
+         */
+
+        pendingOrderMutations.delete(
+            orderId
+        );
+
 
         if(submit){
 
@@ -8695,6 +9306,13 @@ async function submitAddProduct(){
                 "Add to Order";
 
         }
+
+
+        renderStats();
+
+        renderFilters();
+
+        render();
 
     }
 
@@ -8786,6 +9404,7 @@ function requestQueueReason(
         }
 
     );
+
 
 }
 
