@@ -2937,11 +2937,15 @@ let wa = DEFAULT_WA;
 const GOOGLE_CLIENT_ID = "666183638799-67fatp0p1p5i7glh95dsqnamq1tg6la5.apps.googleusercontent.com";
 const CUSTOMER_TOKEN_KEY = "hamsKiranaCustomerGoogleToken";
 const CUSTOMER_PROFILE_KEY = "hamsKiranaCustomerProfile";
+const CUSTOMER_CART_KEY_PREFIX = "hamsKiranaCartCustomer_";
 let customerGoogleToken = "";
 let customerProfile = null;
 let customerAddresses = [];
 let selectedCustomerAddressId = "";
 let usingNewCustomerAddress = false;
+let customerBasketReady = false;
+let customerBasketLoading = false;
+let customerBasketSyncChain = Promise.resolve();
 
 
 /* ============================================================
@@ -2969,27 +2973,23 @@ document
 
 
 /* ============================================================
-   LOAD SAVED BASKET
+   LOAD LOCAL BASKET CACHE
+   Logged-in customers are synchronized with the server basket
+   after Google authentication. The local basket remains a fast
+   cache so the existing basket experience is preserved.
 ============================================================ */
 
-try{
-
-    cart =
-        JSON.parse(
-            localStorage.getItem(
-                "hamsKiranaCart"
-            ) || "[]"
-        );
-
-    if(!Array.isArray(cart)){
+function loadLocalBasketCache(){
+    try{
+        const raw = localStorage.getItem("hamsKiranaCart") || "[]";
+        cart = JSON.parse(raw);
+        if(!Array.isArray(cart)) cart=[];
+    }catch(e){
         cart=[];
     }
-
-}catch(e){
-
-    cart=[];
-
 }
+
+loadLocalBasketCache();
 
 
 /* ============================================================
@@ -3017,6 +3017,7 @@ function initializeCustomerGoogleLogin(){
     updateCustomerAccountUI();
     if(customerGoogleToken && customerProfile && customerProfile.customerId){
         loadCustomerAddresses();
+        loadCustomerBasket();
     }
     waitForGoogleIdentity();
 }
@@ -3044,6 +3045,7 @@ async function handleGoogleCredential(response){
         localStorage.setItem(CUSTOMER_PROFILE_KEY,JSON.stringify(customerProfile));
         updateCustomerAccountUI();
         loadCustomerAddresses();
+        await loadCustomerBasket();
         document.getElementById("accountMenu").classList.add("show");
         document.getElementById("accountBtn").setAttribute("aria-expanded","true");
     }catch(err){
@@ -3063,6 +3065,141 @@ function updateCustomerAccountUI(){
     const avatar=document.getElementById("accountAvatar");
     if(avatar){ avatar.src=customerProfile?.picture||placeholder(customerProfile?.name||"Customer"); avatar.onerror=function(){this.src=placeholder(customerProfile?.name||"Customer")}; }
 }
+/* ============================================================
+   CUSTOMER ACCOUNT BASKET — SERVER SYNC
+============================================================ */
+
+function customerBasketSnapshot(){
+    return cart.map(function(item){
+        return {
+            productId:String(item.productId ?? ""),
+            productName:String(item.productName ?? ""),
+            quantity:Math.max(0,Number(item.quantity)||0),
+            price:Math.max(0,Number(item.price)||0)
+        };
+    }).filter(function(item){
+        return item.productName && item.quantity > 0;
+    });
+}
+
+async function loadCustomerBasket(){
+    if(!customerGoogleToken || !customerProfile || !customerProfile.customerId){
+        customerBasketReady=false;
+        return;
+    }
+
+    customerBasketLoading=true;
+    customerBasketReady=false;
+
+    try{
+        const r=await fetch(
+            API_URL+"?action=getCustomerBasket&idToken="+encodeURIComponent(customerGoogleToken),
+            {cache:"no-store"}
+        );
+        if(!r.ok) throw Error("Unable to load your saved basket.");
+
+        const d=await r.json();
+        if(!d.success) throw Error(d.message||"Unable to load your saved basket.");
+
+        const serverBasket=Array.isArray(d.items)?d.items:[];
+        const localBasket=Array.isArray(cart)?cart:[];
+
+        /*
+           The server is authoritative when it already contains
+           this customer's basket. If the account has no basket yet,
+           preserve the existing local basket and upload it once.
+        */
+        if(serverBasket.length){
+            cart=serverBasket.map(function(item){
+                return {
+                    productId:item.productId ?? "",
+                    productName:item.productName ?? "",
+                    quantity:Number(item.quantity)||0,
+                    price:Number(item.price)||0
+                };
+            }).filter(function(item){
+                return item.productName && item.quantity>0;
+            });
+        }else if(localBasket.length){
+            cart=localBasket;
+        }else{
+            cart=[];
+        }
+
+        localStorage.setItem("hamsKiranaCart",JSON.stringify(cart));
+        try{
+            localStorage.setItem(
+                CUSTOMER_CART_KEY_PREFIX + String(customerProfile.customerId),
+                JSON.stringify(cart)
+            );
+        }catch(e){}
+
+        updateCart();
+        render();
+
+        customerBasketReady=true;
+
+        if(!serverBasket.length && cart.length){
+            queueCustomerBasketSync();
+        }
+
+        return cart;
+    }catch(err){
+        console.error("Customer basket:",err);
+
+        /*
+           If the server is temporarily unavailable, keep the
+           existing browser basket usable. Future basket changes
+           will retry synchronization.
+        */
+        customerBasketReady=true;
+        updateCart();
+        render();
+        return cart;
+    }finally{
+        customerBasketLoading=false;
+    }
+}
+
+function queueCustomerBasketSync(){
+    const tokenSnapshot=customerGoogleToken;
+    const customerIdSnapshot=customerProfile && customerProfile.customerId
+        ? String(customerProfile.customerId)
+        : "";
+    const snapshot=customerBasketSnapshot();
+
+    if(!tokenSnapshot || !customerIdSnapshot) return;
+
+    customerBasketSyncChain=customerBasketSyncChain
+        .then(function(){
+            return syncCustomerBasketSnapshot(tokenSnapshot,customerIdSnapshot,snapshot);
+        })
+        .catch(function(error){
+            console.error("Customer basket sync:",error);
+        });
+}
+
+async function syncCustomerBasketSnapshot(tokenSnapshot,customerIdSnapshot,snapshot){
+    const response=await fetch(API_URL,{
+        method:"POST",
+        headers:{
+            "Content-Type":"text/plain;charset=utf-8"
+        },
+        body:JSON.stringify({
+            action:"saveCustomerBasket",
+            idToken:tokenSnapshot,
+            customerId:customerIdSnapshot,
+            items:snapshot
+        })
+    });
+
+    if(!response.ok) throw Error("Customer basket synchronization failed.");
+
+    const data=await response.json();
+    if(!data.success) throw Error(data.message||"Customer basket synchronization failed.");
+}
+
+
 /* ============================================================
    CUSTOMER SAVED ADDRESSES — STEP 4
 ============================================================ */
@@ -3222,7 +3359,12 @@ function toggleAccountMenu(){
     const open=!menu.classList.contains("show"); menu.classList.toggle("show",open); if(btn)btn.setAttribute("aria-expanded",String(open));
 }
 function customerLogout(){
-    customerGoogleToken=""; customerProfile=null; customerAddresses=[]; selectedCustomerAddressId=""; usingNewCustomerAddress=false; localStorage.removeItem(CUSTOMER_TOKEN_KEY); localStorage.removeItem(CUSTOMER_PROFILE_KEY);
+    customerBasketReady=false;
+    customerGoogleToken=""; customerProfile=null; customerAddresses=[]; selectedCustomerAddressId=""; usingNewCustomerAddress=false;
+    cart=[];
+    localStorage.removeItem(CUSTOMER_TOKEN_KEY);
+    localStorage.removeItem(CUSTOMER_PROFILE_KEY);
+    localStorage.removeItem("hamsKiranaCart");
     try{if(window.google&&google.accounts&&google.accounts.id)google.accounts.id.disableAutoSelect();}catch(e){}
     updateCustomerAccountUI(); const menu=document.getElementById("accountMenu"),btn=document.getElementById("accountBtn");
     if(menu)menu.classList.remove("show"); if(btn)btn.setAttribute("aria-expanded","false");
@@ -4345,13 +4487,33 @@ function removeItem(id){
 
 function save(){
 
+    /* Keep the existing browser cache for instant UI response. */
     localStorage.setItem(
         "hamsKiranaCart",
         JSON.stringify(cart)
     );
 
+    /* Also keep a customer-specific local cache when signed in. */
+    if(customerProfile && customerProfile.customerId){
+        try{
+            localStorage.setItem(
+                CUSTOMER_CART_KEY_PREFIX + String(customerProfile.customerId),
+                JSON.stringify(cart)
+            );
+        }catch(e){}
+    }
 
     updateCart();
+
+    /*
+       When a customer is signed in and the account basket has
+       finished loading, synchronize the complete basket with the
+       server. The queue prevents rapid +/- clicks from arriving
+       out of order and overwriting a newer basket state.
+    */
+    if(customerGoogleToken && customerProfile && customerProfile.customerId && customerBasketReady){
+        queueCustomerBasketSync();
+    }
 
 }
 
