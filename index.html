@@ -4,9 +4,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="HAMS Kirana Store - Online Grocery Ordering">
+<meta name="description" content="Riddhi Super Market - Online Grocery Ordering">
+<link rel="icon" type="image/png" href="favicon-riddhi.png">
+<link rel="apple-touch-icon" href="favicon-riddhi.png">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<title>HAMS Kirana Store</title>
+<title>Riddhi Super Market</title>
 
 <style>
 
@@ -1528,6 +1530,609 @@ footer{
 }
 
 
+
+/* ============================================================
+   RIDDHI SUPER MARKET — ZEpto-STYLE STOREFRONT
+   Visual layer only. Existing product/cart/account/order logic preserved.
+============================================================ */
+
+:root{
+    --brand:#16823f;
+    --brand-dark:#0b5f2a;
+    --brand-soft:#eef9f0;
+    --ink:#18251c;
+    --muted:#667267;
+    --line:#e5e9e5;
+}
+
+body{
+    background:#fff;
+    color:var(--ink);
+}
+
+header{
+    position:sticky;
+    top:0;
+    background:#fff;
+    border-bottom:1px solid #e7e9e7;
+    z-index:100;
+}
+
+.head{
+    max-width:1500px;
+    min-height:76px;
+    padding:11px 18px;
+    gap:22px;
+}
+
+.logo{
+    min-width:260px;
+    gap:11px;
+}
+
+.logoicon{
+    width:52px;
+    height:52px;
+    border-radius:14px;
+    background:#fff;
+    overflow:hidden;
+    box-shadow:0 2px 10px #00000012;
+}
+
+.logoicon::before{
+    content:"";
+    display:block;
+    width:100%;
+    height:100%;
+    background:url("favicon-riddhi.png") center/cover no-repeat;
+}
+
+.logoicon{
+    font-size:0;
+}
+
+.logo h1{
+    font-size:20px;
+    line-height:1.15;
+    color:#172019;
+}
+
+.logo small{
+    display:block;
+    margin-top:4px;
+    font-size:12px;
+}
+
+.logo::after{
+    content:"";
+}
+
+.search input{
+    height:54px;
+    border-radius:12px;
+    border:1px solid #dfe4df;
+    background:#fff;
+    font-size:16px;
+    padding-left:48px;
+    color:#202a22;
+}
+
+.search span{
+    top:14px;
+    left:17px;
+    font-size:20px;
+}
+
+.account-btn{
+    height:50px;
+    border:0;
+    background:#fff;
+    color:#26352b;
+    border-radius:10px;
+    padding:9px 12px;
+}
+
+.cartbtn{
+    height:50px;
+    min-width:112px;
+    border-radius:10px;
+    background:var(--brand);
+}
+
+main{
+    max-width:1500px;
+    padding:18px 18px 70px;
+}
+
+.riddhi-hero{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    margin:2px 0 18px;
+}
+
+.promo{
+    min-height:250px;
+    border-radius:28px;
+    padding:30px 34px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    overflow:hidden;
+    position:relative;
+}
+
+.promo-green{
+    background:linear-gradient(135deg,#e9f7ec,#d4f0dc);
+}
+
+.promo-light{
+    background:linear-gradient(135deg,#fff5d8,#fff1bf);
+}
+
+.promo-copy{
+    position:relative;
+    z-index:2;
+    max-width:70%;
+}
+
+.promo-kicker{
+    font-size:14px;
+    font-weight:900;
+    letter-spacing:.5px;
+    color:var(--brand-dark);
+    margin-bottom:9px;
+}
+
+.promo h2{
+    font-size:32px;
+    line-height:1.08;
+    margin-bottom:9px;
+    letter-spacing:-.5px;
+}
+
+.promo p{
+    color:#506056;
+    line-height:1.45;
+    font-size:14px;
+    max-width:470px;
+}
+
+.promo-btn{
+    margin-top:20px;
+    border:0;
+    background:var(--brand);
+    color:#fff;
+    border-radius:10px;
+    padding:11px 17px;
+    font-weight:800;
+    cursor:pointer;
+}
+
+.promo-btn span{
+    font-size:21px;
+    vertical-align:-2px;
+    margin-left:6px;
+}
+
+.promo-btn.dark{
+    background:#18251c;
+}
+
+.promo-badge{
+    width:145px;
+    height:145px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 12px 28px #2c6b3a20;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    transform:rotate(8deg);
+    flex:0 0 auto;
+}
+
+.promo-badge span{
+    font-size:48px;
+    font-weight:900;
+    color:var(--brand);
+    line-height:.8;
+}
+
+.promo-badge strong{
+    font-size:18px;
+    margin-top:7px;
+}
+
+.promo-badge small{
+    color:var(--brand);
+    font-weight:800;
+    font-size:10px;
+}
+
+.promo-basket{
+    width:165px;
+    height:165px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background:#fff;
+    box-shadow:0 12px 28px #9b7a211c;
+    flex:0 0 auto;
+}
+
+.promo-basket img{
+    width:135px;
+    height:135px;
+    object-fit:contain;
+}
+
+.shop-layout{
+    display:block;
+}
+
+.category-sidebar{
+    position:sticky;
+    top:76px;
+    z-index:50;
+    width:100%;
+    background:#fff;
+    border-top:1px solid #f0f1f0;
+    border-bottom:1px solid #e7e9e7;
+    margin:0 -18px 18px;
+    padding:0 18px;
+}
+
+.cats{
+    height:auto;
+    min-height:60px;
+    padding:0;
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    gap:30px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;
+}
+
+.cats::-webkit-scrollbar{display:none;}
+
+.cat{
+    width:auto;
+    min-height:60px;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    padding:18px 5px 15px;
+    color:#58655b;
+    font-size:15px;
+    font-weight:700;
+    text-align:center;
+    white-space:nowrap;
+    box-shadow:none;
+    position:relative;
+}
+
+.cat:hover{
+    transform:none;
+    border-color:transparent;
+    box-shadow:none;
+    color:var(--brand);
+}
+
+.cat.active{
+    background:transparent;
+    color:var(--brand);
+    border:0;
+    box-shadow:none;
+}
+
+.cat.active::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:3px;
+    border-radius:3px 3px 0 0;
+    background:var(--brand);
+}
+
+.product-scroll{
+    height:auto;
+    max-height:none;
+    min-height:0;
+    overflow:visible;
+    padding:0;
+    scrollbar-width:none;
+}
+
+.title{
+    margin:4px 0 12px;
+}
+
+.title h2{
+    font-size:25px;
+    letter-spacing:-.3px;
+}
+
+.title span{
+    font-size:13px;
+}
+
+.category-sections{
+    display:block;
+}
+
+.product-section{
+    margin:0 0 30px;
+}
+
+.section-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    margin:0 2px 12px;
+}
+
+.section-head h3{
+    font-size:22px;
+    color:#172019;
+    margin:0;
+}
+
+.see-all{
+    border:0;
+    background:transparent;
+    color:#e60046;
+    font-size:14px;
+    font-weight:800;
+    cursor:pointer;
+    padding:4px 0;
+}
+
+.see-all span{
+    font-size:22px;
+    vertical-align:-2px;
+    margin-left:3px;
+}
+
+.product-row{
+    display:grid;
+    grid-template-columns:repeat(8,minmax(0,1fr));
+    gap:18px;
+}
+
+.card{
+    min-width:0;
+    border:1px solid #e2e6e3;
+    border-radius:12px;
+    background:#fff;
+    box-shadow:none;
+    overflow:hidden;
+}
+
+.card:hover{
+    transform:none;
+    box-shadow:0 5px 16px #0000000c;
+}
+
+.pic{
+    width:100%;
+    aspect-ratio:1/1;
+    object-fit:contain;
+    background:#fafbfa;
+    display:block;
+}
+
+.info{
+    padding:10px;
+    gap:5px;
+}
+
+.category{
+    font-size:8px;
+    line-height:1.1;
+    color:#16823f;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.name{
+    font-size:14px;
+    line-height:1.3;
+    min-height:36px;
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    overflow:hidden;
+}
+
+.desc{
+    font-size:11px;
+    color:#788178;
+    min-height:0;
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:1;
+    overflow:hidden;
+}
+
+.meta{
+    font-size:11px;
+    min-height:16px;
+}
+
+.bottom{
+    padding-top:5px;
+    align-items:center;
+}
+
+.price{
+    font-size:17px;
+}
+
+.add{
+    min-width:64px;
+    padding:7px 10px;
+    border-radius:8px;
+    font-size:12px;
+    background:#fff;
+    color:#e60046;
+    border:1px solid #e60046;
+}
+
+.add:hover{
+    background:#fff5f8;
+}
+
+.add:disabled{
+    background:#f1f3f1;
+    color:#89928b;
+    border-color:#cfd5d0;
+}
+
+.product-controls{
+    gap:4px;
+}
+
+.product-qty{
+    gap:4px;
+}
+
+.product-qty button{
+    width:27px;
+    height:27px;
+    font-size:17px;
+}
+
+.product-remove{
+    font-size:9px;
+}
+
+.zeppo-search-grid{
+    display:grid;
+    grid-template-columns:repeat(8,minmax(0,1fr));
+    gap:18px;
+}
+
+@media(max-width:1250px){
+    .head{max-width:1200px;}
+    main{max-width:1200px;}
+    .logo{min-width:220px;}
+    .product-row,.zeppo-search-grid{
+        grid-template-columns:repeat(6,minmax(0,1fr));
+    }
+}
+
+@media(max-width:900px){
+    .head{
+        gap:10px;
+        padding:10px 12px;
+    }
+    .logo{min-width:190px;}
+    .logo h1{font-size:17px;}
+    .logo small{font-size:10px;}
+    .search input{height:46px;font-size:14px;}
+    .account-btn{height:44px;}
+    .cartbtn{height:44px;min-width:92px;}
+    .riddhi-hero{grid-template-columns:1fr;}
+    .promo{min-height:190px;padding:24px;}
+    .promo h2{font-size:27px;}
+    .product-row,.zeppo-search-grid{
+        grid-template-columns:repeat(5,minmax(0,1fr));
+        gap:12px;
+    }
+}
+
+@media(max-width:700px){
+    main{padding:10px 8px 50px;}
+    .head{
+        flex-wrap:wrap;
+        min-height:0;
+    }
+    .logo{flex:1;min-width:0;}
+    .logoicon{width:43px;height:43px;border-radius:11px;}
+    .logo h1{font-size:16px;}
+    .logo small{display:none;}
+    .account-area{order:2;}
+    .cartbtn{order:3;min-width:82px;padding:9px 10px;font-size:12px;}
+    .search{order:4;flex-basis:100%;}
+    .search input{height:43px;}
+    .category-sidebar{
+        position:sticky;
+        top:101px;
+        margin:0 -8px 12px;
+        padding:0 8px;
+    }
+    .cats{min-height:48px;gap:15px;}
+    .cat{
+        min-height:48px;
+        padding:14px 3px 12px;
+        font-size:12px;
+    }
+    .riddhi-hero{
+        grid-template-columns:1fr 1fr;
+        gap:8px;
+        overflow:hidden;
+    }
+    .promo{
+        min-height:150px;
+        border-radius:16px;
+        padding:15px;
+    }
+    .promo-copy{max-width:100%;}
+    .promo-kicker{font-size:8px;}
+    .promo h2{font-size:17px;}
+    .promo p{font-size:9px;line-height:1.3;}
+    .promo-btn{font-size:9px;padding:7px 9px;margin-top:10px;}
+    .promo-badge,.promo-basket{display:none;}
+    .title h2{font-size:18px;}
+    .section-head{margin-bottom:8px;}
+    .section-head h3{font-size:17px;}
+    .see-all{font-size:11px;}
+    .product-row{
+        display:grid;
+        grid-auto-flow:column;
+        grid-auto-columns:minmax(145px,1fr);
+        grid-template-columns:none;
+        overflow-x:auto;
+        gap:10px;
+        padding:1px 1px 7px;
+        scrollbar-width:none;
+    }
+    .product-row::-webkit-scrollbar{display:none;}
+    .card{border-radius:9px;}
+    .pic{aspect-ratio:1/1;}
+    .info{padding:7px;}
+    .name{font-size:11px;min-height:28px;}
+    .meta{font-size:9px;}
+    .desc{display:none;}
+    .price{font-size:13px;}
+    .add{font-size:10px;min-width:54px;padding:6px 7px;}
+    .zeppo-search-grid{
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:10px;
+    }
+}
+
+@media(max-width:390px){
+    .riddhi-hero{grid-template-columns:1fr;}
+    .promo-light{display:none;}
+    .product-row{grid-auto-columns:140px;}
+    .logo h1{font-size:15px;}
+}
+
+/* ============================================================
+   END RIDDHI SUPER MARKET STOREFRONT
+============================================================ */
+
+
 /* ============================================================
    CUSTOMER PROFILE — STEP 3A
 ============================================================ */
@@ -1713,7 +2318,7 @@ footer{
         <div>
 
             <h1>
-                HAMS Kirana Store
+                Riddhi Super Market
             </h1>
 
             <small>
@@ -1791,68 +2396,53 @@ footer{
 
 <main>
 
-<section class="hero">
+<section class="riddhi-hero">
+    <div class="promo promo-green">
+        <div class="promo-copy">
+            <div class="promo-kicker">RIDDHI SUPER MARKET</div>
+            <h2>Fresh groceries.<br>Great prices.</h2>
+            <p>Everything you need for your home, delivered conveniently.</p>
+            <button type="button" class="promo-btn" onclick="document.getElementById('search').focus()">Shop Now <span>›</span></button>
+        </div>
+        <div class="promo-badge">
+            <span>₹</span>
+            <strong>VALUE</strong>
+            <small>EVERY DAY</small>
+        </div>
+    </div>
 
-    <h2>
-        Shop groceries easily.
-    </h2>
-
-    <p>
-        Choose products, add them to your basket,
-        and place your order online.
-    </p>
-
+    <div class="promo promo-light">
+        <div class="promo-copy">
+            <div class="promo-kicker">RIDDHI DELIVERY</div>
+            <h2>Daily essentials<br>at your doorstep.</h2>
+            <p>Shop rice, dals, oils, snacks, cleaning products and more.</p>
+            <button type="button" class="promo-btn dark" onclick="document.getElementById('search').focus()">Order Now <span>›</span></button>
+        </div>
+        <div class="promo-basket">
+            <img src="favicon-riddhi.png" alt="Riddhi Super Market">
+        </div>
+    </div>
 </section>
 
-
-<div
-    id="status"
-    class="status"
-></div>
-
+<div id="status" class="status"></div>
 
 <div class="shop-layout">
-
-    <aside class="category-sidebar">
-
-        <div
-            id="cats"
-            class="cats"
-        ></div>
-
-    </aside>
-
+    <nav class="category-sidebar" aria-label="Product categories">
+        <div id="cats" class="cats"></div>
+    </nav>
 
     <section class="products-area">
-
         <div class="title">
-
-            <h2>
-                Products
-            </h2>
-
+            <h2 id="storefrontTitle">Shop by category</h2>
             <span id="results"></span>
-
         </div>
-
 
         <div class="product-scroll" id="productScroll">
-
-            <div
-                id="products"
-                class="grid"
-            >
-
-                <div class="empty">
-                    Loading products...
-                </div>
-
+            <div id="products" class="category-sections">
+                <div class="empty">Loading products...</div>
             </div>
-
         </div>
-
     </section>
-
 </div>
 
 </main>
@@ -1866,7 +2456,7 @@ footer{
 
     ©
     <span id="year"></span>
-    HAMS Kirana Store
+    Riddhi Super Market
 
 </footer>
 
@@ -2030,7 +2620,7 @@ footer{
 
             <div class="field">
                 <label>Building / Apartment Name *</label>
-                <input id="building" autocomplete="organization" placeholder="e.g. HAMS Residency" required>
+                <input id="building" autocomplete="organization" placeholder="e.g. Riddhi Residency" required>
             </div>
 
             <div class="field">
@@ -2217,7 +2807,7 @@ footer{
 <div id="customerOrdersModal" class="modal customer-page-modal">
 <div class="modalbox">
     <div class="mhead">
-        <div><h2>My Orders</h2><div class="customer-page-head-sub">Your previous HAMS Kirana Store orders.</div></div>
+        <div><h2>My Orders</h2><div class="customer-page-head-sub">Your previous Riddhi Super Market orders.</div></div>
         <button class="close" type="button" onclick="closeCustomerOrdersPage()">✕</button>
     </div>
     <div id="customerOrdersList" class="customer-order-list"></div>
@@ -2233,7 +2823,7 @@ footer{
 <div class="confirm-screen">
 <div class="confirm-check">✓</div>
 <h2>Order Confirmed!</h2>
-<p class="confirm-note">Thank you for shopping with HAMS Kirana Store.<br>Your order has been placed successfully.</p>
+<p class="confirm-note">Thank you for shopping with Riddhi Super Market.<br>Your order has been placed successfully.</p>
 <div class="confirm-card">
 <div class="confirm-card-title">📋 Order Details</div>
 <div class="confirm-row"><span class="label">Order ID</span><span class="value" id="confirmOrderId">—</span></div>
@@ -2785,69 +3375,73 @@ function setCategory(c){
 
 function render(){
 
-    let q =
-        document
-            .getElementById("search")
-            .value
-            .trim()
-            .toLowerCase();
+    const q = document.getElementById("search").value.trim().toLowerCase();
 
+    const filtered = products.filter(function(p){
+        const text = `${p.productName||""} ${p.description||""} ${p.category||""}`.toLowerCase();
+        const matchesSearch = !q || text.includes(q);
+        const matchesCategory = category === "All" || String(p.category || "") === category;
+        return matchesSearch && matchesCategory;
+    });
 
-    let list =
-        products.filter(
+    document.getElementById("results").textContent =
+        filtered.length + " product" + (filtered.length === 1 ? "" : "s");
 
-            p => {
+    const title = document.getElementById("storefrontTitle");
 
-                let cat =
-                    category==="All" ||
-                    String(
-                        p.category || ""
-                    ) === category;
+    if(q){
+        title.textContent = "Search results";
+        document.getElementById("products").innerHTML =
+            filtered.length
+            ? `<div class="zeppo-search-grid">${filtered.map(card).join("")}</div>`
+            : '<div class="empty">No products found.</div>';
+        return;
+    }
 
+    if(category !== "All"){
+        title.textContent = category;
+        document.getElementById("products").innerHTML =
+            filtered.length
+            ? `<section class="product-section single-category">
+                    <div class="section-head">
+                        <h3>${esc(category)}</h3>
+                    </div>
+                    <div class="product-row">${filtered.map(card).join("")}</div>
+               </section>`
+            : '<div class="empty">No products found in this category.</div>';
+        return;
+    }
 
-                let text =
-                    `${p.productName||""}
-                     ${p.description||""}
-                     ${p.category||""}`
-                    .toLowerCase();
+    title.textContent = "Shop by category";
 
+    const groups = [];
+    const seen = new Set();
 
-                return (
-                    cat &&
-                    (
-                        !q ||
-                        text.includes(q)
-                    )
-                );
+    products.forEach(function(p){
+        const cat = String(p.category || "Grocery").trim() || "Grocery";
+        if(!seen.has(cat)){
+            seen.add(cat);
+            groups.push(cat);
+        }
+    });
 
-            }
+    document.getElementById("products").innerHTML = groups.map(function(cat){
+        const items = products.filter(function(p){
+            const text = `${p.productName||""} ${p.description||""} ${p.category||""}`.toLowerCase();
+            return String(p.category || "Grocery").trim() === cat && (!q || text.includes(q));
+        });
 
-        );
+        if(!items.length) return "";
 
-
-    document
-        .getElementById("results")
-        .textContent =
-
-        list.length +
-        " product" +
-        (
-            list.length===1
-            ? ""
-            : "s"
-        );
-
-
-    document
-        .getElementById("products")
-        .innerHTML =
-
-        list.length
-        ? list.map(card).join("")
-        : '<div class="empty">No products found.</div>';
-
+        return `<section class="product-section" data-section-category="${attr(cat)}">
+            <div class="section-head">
+                <h3>${esc(cat)}</h3>
+                <button type="button" class="see-all" onclick="setCategory('${js(cat)}')">See All <span>›</span></button>
+            </div>
+            <div class="product-row">${items.slice(0, 12).map(card).join("")}</div>
+        </section>`;
+    }).join("") || '<div class="empty">No products found.</div>';
 }
-
 
 /* ============================================================
    PRODUCT CARD
@@ -4472,7 +5066,7 @@ function buildWhatsAppMessage(orderId, payload, total){
     }
 
     return [
-        "🛒 HAMS KIRANA STORE",
+        "🛒 RIDDHI SUPER MARKET",
         "NEW ORDER",
         "",
         "Order ID: " + orderId,
