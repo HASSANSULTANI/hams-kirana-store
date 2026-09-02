@@ -418,6 +418,15 @@ main{
         min-height:62px;
     }
 
+    .dhead .close{
+        width:40px;
+        height:40px;
+        font-size:20px;
+        display:grid;
+        place-items:center;
+        flex:0 0 40px;
+    }
+
     .items{
         padding:10px 14px;
         min-height:0;
@@ -773,7 +782,7 @@ footer{
 
     background:#0008;
 
-    z-index:30;
+    z-index:200;
 
     display:none;
 }
@@ -808,7 +817,7 @@ footer{
 
     background:#fff;
 
-    z-index:31;
+    z-index:210;
 
     transform:
         translateX(100%);
@@ -970,6 +979,48 @@ footer{
     padding-bottom:
         max(16px, env(safe-area-inset-bottom));
 }
+
+/* ============================================================
+   FORGOT SOMETHING — ADD MORE ITEMS
+============================================================ */
+
+.add-more-items{
+    width:100%;
+    border:0;
+    background:#fff;
+    color:#e60046;
+    border-radius:10px;
+    padding:10px 8px;
+    margin-bottom:10px;
+    cursor:pointer;
+    font-weight:800;
+    font-size:14px;
+    text-align:center;
+    transition:background .18s ease, transform .12s ease;
+}
+
+.add-more-items:hover{
+    background:#fff5f8;
+}
+
+.add-more-items:active{
+    transform:scale(.98);
+}
+
+.add-more-items span{
+    font-size:19px;
+    vertical-align:-1px;
+    margin-left:3px;
+}
+
+@media(max-width:600px){
+    .add-more-items{
+        padding:9px 6px;
+        margin-bottom:8px;
+        font-size:13px;
+    }
+}
+
 
 /* ============================================================
    EMPTY BASKET BUTTON
@@ -2505,6 +2556,14 @@ main{
 
     <div class="dfoot">
 
+        <button
+            type="button"
+            class="add-more-items"
+            onclick="addMoreItems()"
+        >
+            Forgot something? <span>Add More Items ›</span>
+        </button>
+
         <div class="total">
 
             <span>
@@ -3366,6 +3425,62 @@ function setCategory(c){
 
     render();
 
+    /*
+       Move smoothly to the category content after the new
+       category view has been rendered. This keeps the category
+       navigation feeling like a real section jump instead of
+       an abrupt page replacement.
+    */
+    requestAnimationFrame(function(){
+        scrollToCategoryContent();
+    });
+
+}
+
+
+/* ============================================================
+   SMOOTH CATEGORY SCROLL
+============================================================ */
+
+function scrollToCategoryContent(){
+
+    const target =
+        document.getElementById("storefrontTitle");
+
+    if(!target){
+        return;
+    }
+
+    const header =
+        document.querySelector("header");
+
+    const categoryBar =
+        document.querySelector(".category-sidebar");
+
+    const headerHeight =
+        header
+        ? header.getBoundingClientRect().height
+        : 0;
+
+    const categoryHeight =
+        categoryBar
+        ? categoryBar.getBoundingClientRect().height
+        : 0;
+
+    const extraGap = 10;
+
+    const targetTop =
+        window.scrollY +
+        target.getBoundingClientRect().top -
+        headerHeight -
+        categoryHeight -
+        extraGap;
+
+    window.scrollTo({
+        top:Math.max(0,targetTop),
+        behavior:"smooth"
+    });
+
 }
 
 
@@ -3403,9 +3518,6 @@ function render(){
         document.getElementById("products").innerHTML =
             filtered.length
             ? `<section class="product-section single-category">
-                    <div class="section-head">
-                        <h3>${esc(category)}</h3>
-                    </div>
                     <div class="product-row">${filtered.map(card).join("")}</div>
                </section>`
             : '<div class="empty">No products found in this category.</div>';
@@ -3433,12 +3545,25 @@ function render(){
 
         if(!items.length) return "";
 
+        /*
+           The home/category overview shows exactly one row.
+           "See All" switches to the full category view.
+        */
+        const initialLimit =
+            window.innerWidth > 1250
+            ? 8
+            : window.innerWidth > 900
+                ? 6
+                : window.innerWidth > 700
+                    ? 5
+                    : 6;
+
         return `<section class="product-section" data-section-category="${attr(cat)}">
             <div class="section-head">
                 <h3>${esc(cat)}</h3>
                 <button type="button" class="see-all" onclick="setCategory('${js(cat)}')">See All <span>›</span></button>
             </div>
-            <div class="product-row">${items.slice(0, 12).map(card).join("")}</div>
+            <div class="product-row">${items.slice(0, initialLimit).map(card).join("")}</div>
         </section>`;
     }).join("") || '<div class="empty">No products found.</div>';
 }
@@ -4424,6 +4549,70 @@ function clearCart(){
 
 
     render();
+
+}
+
+
+/* ============================================================
+   ADD MORE ITEMS FROM BASKET
+============================================================ */
+
+function addMoreItems(){
+
+    /*
+       Return to the home/category overview so the customer can
+       continue shopping without losing the current basket.
+    */
+    category = "All";
+
+    renderCats();
+    render();
+
+    closeCart();
+
+    requestAnimationFrame(function(){
+        const hero =
+            document.querySelector(".riddhi-hero");
+
+        const header =
+            document.querySelector("header");
+
+        const categoryBar =
+            document.querySelector(".category-sidebar");
+
+        /*
+           Scroll to the product area rather than the very top
+           so the customer can immediately continue shopping.
+        */
+        const target =
+            document.getElementById("storefrontTitle");
+
+        if(!target){
+            return;
+        }
+
+        const headerHeight =
+            header
+            ? header.getBoundingClientRect().height
+            : 0;
+
+        const categoryHeight =
+            categoryBar
+            ? categoryBar.getBoundingClientRect().height
+            : 0;
+
+        const targetTop =
+            window.scrollY +
+            target.getBoundingClientRect().top -
+            headerHeight -
+            categoryHeight -
+            10;
+
+        window.scrollTo({
+            top:Math.max(0,targetTop),
+            behavior:"smooth"
+        });
+    });
 
 }
 
