@@ -1429,6 +1429,96 @@ footer{
 .saved-address-empty{font-size:12px;color:#68736a;padding:4px 0 8px}
 .address-mode-note{font-size:12px;color:#68736a;background:#fff;border:1px solid #e4e9e5;border-radius:9px;padding:9px;margin-bottom:12px}
 @media(max-width:600px){.saved-address-section{padding:10px}.saved-address-actions{flex-direction:column}.saved-address-action{width:100%}}
+
+
+/* ============================================================
+   CUSTOMER ACCOUNT — REDESIGNED MENU + ACCOUNT PAGES
+============================================================ */
+.account-menu.account-menu-redesigned{
+    width:min(330px,calc(100vw - 24px));
+    padding:0;
+    overflow:hidden;
+}
+.account-menu-user{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    padding:15px;
+    border-bottom:1px solid #edf1ed;
+    background:#fbfdfb;
+}
+.account-menu-user img{width:46px;height:46px;border-radius:50%;object-fit:cover;background:#dcfce7}
+.account-menu-user strong{display:block;font-size:14px}
+.account-menu-user span{display:block;color:#68736a;font-size:11px;margin-top:3px;word-break:break-all}
+.account-menu-items{padding:7px}
+.account-menu-item{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:11px;
+    border:0;
+    background:#fff;
+    color:#172019;
+    border-radius:10px;
+    padding:12px 11px;
+    text-align:left;
+    font-weight:700;
+    cursor:pointer;
+}
+.account-menu-item:hover{background:#f0fdf4;color:#166534}
+.account-menu-item .menu-icon{width:24px;text-align:center;font-size:17px}
+.account-menu-signout{color:#dc2626;border-top:1px solid #edf1ed;border-radius:0;margin-top:4px}
+.account-menu-signout:hover{background:#fef2f2;color:#b91c1c}
+.account-menu-login{padding:15px}
+
+.customer-page-modal .modalbox{max-width:720px}
+.customer-page-head-sub{color:#68736a;font-size:12px;margin-top:3px}
+.customer-address-list{display:grid;gap:10px}
+.customer-address-card{
+    border:1px solid #dce5de;
+    border-radius:13px;
+    padding:13px;
+    background:#fff;
+}
+.customer-address-card.default{border-color:#15803d;box-shadow:0 0 0 1px #15803d22}
+.customer-address-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.customer-address-title{font-weight:800;font-size:14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.customer-address-badge{font-size:10px;color:#166534;background:#dcfce7;border-radius:999px;padding:3px 7px}
+.customer-address-text{font-size:12px;line-height:1.5;color:#58645b;margin-top:5px}
+.customer-address-meta{font-size:11px;color:#166534;margin-top:5px}
+.customer-address-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.customer-address-action{border:1px solid #cfd9d1;background:#fff;color:#166534;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:800}
+.customer-address-action:hover{background:#f0fdf4}
+.customer-address-action.danger{color:#dc2626;border-color:#fecaca}
+.customer-address-action.danger:hover{background:#fef2f2}
+.customer-address-empty{padding:25px 10px;text-align:center;color:#68736a;border:1px dashed #d8e2d8;border-radius:12px}
+.customer-page-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.customer-order-list{display:grid;gap:10px}
+.customer-order-card{border:1px solid #dfe7df;border-radius:13px;background:#fff;overflow:hidden}
+.customer-order-summary{padding:12px 13px;display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.customer-order-id{font-weight:800;color:#166534;font-size:14px}
+.customer-order-date{font-size:11px;color:#68736a;margin-top:3px}
+.customer-order-status{font-size:10px;font-weight:800;border-radius:999px;padding:4px 8px;background:#ecfdf3;color:#166534;white-space:nowrap}
+.customer-order-items{border-top:1px solid #edf1ed;border-bottom:1px solid #edf1ed;padding:9px 13px}
+.customer-order-item{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:3px 0}
+.customer-order-item span{min-width:0}
+.customer-order-item b{white-space:nowrap}
+.customer-order-more{font-size:11px;color:#68736a;padding-top:3px}
+.customer-order-bottom{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 13px}
+.customer-order-total{font-weight:800;color:#166534}
+.customer-buy-again{border:0;border-radius:9px;background:#15803d;color:#fff;padding:8px 11px;font-size:11px;font-weight:800}
+.customer-buy-again:hover{background:#166534}
+.customer-order-empty{padding:30px 10px;text-align:center;color:#68736a;border:1px dashed #d8e2d8;border-radius:12px}
+.customer-page-loading{text-align:center;padding:25px;color:#68736a}
+.address-editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.address-editor-grid .full{grid-column:1/-1}
+.address-editor-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+@media(max-width:600px){
+    .address-editor-grid{grid-template-columns:1fr}
+    .address-editor-grid .full{grid-column:auto}
+    .customer-order-summary,.customer-order-bottom{align-items:flex-start;flex-direction:column}
+    .customer-buy-again{width:100%}
+}
 </style>
 </head>
 
@@ -1495,19 +1585,22 @@ footer{
         <button type="button" class="account-btn" id="accountBtn" onclick="toggleAccountMenu()" aria-expanded="false">
             👤 <span class="account-label" id="accountLabel">Sign in</span>
         </button>
-        <div class="account-menu" id="accountMenu">
-            <div id="loggedOutAccount">
+        <div class="account-menu account-menu-redesigned" id="accountMenu">
+            <div id="loggedOutAccount" class="account-menu-login">
                 <div class="login-note">Sign in with Google to securely connect your customer account.</div>
                 <div id="googleSignInButton"></div>
             </div>
             <div id="loggedInAccount" style="display:none">
-                <div class="account-user">
-                    <img id="accountAvatar" class="account-avatar" alt="Customer profile">
-                    <div><div class="account-name" id="accountName">Customer</div><div class="account-email" id="accountEmail"></div></div>
+                <div class="account-menu-user">
+                    <img id="accountAvatar" alt="Customer profile">
+                    <div><strong id="accountName">Customer</strong><span id="accountEmail"></span></div>
                 </div>
-                <div class="login-success">✓ Google account verified successfully.</div>
-                <button type="button" class="account-profile-btn" onclick="openCustomerProfile()">👤 My Account</button>
-                <button type="button" class="account-logout" style="margin-top:10px" onclick="customerLogout()">Sign Out</button>
+                <div class="account-menu-items">
+                    <button type="button" class="account-menu-item" onclick="openCustomerProfile()"><span class="menu-icon">👤</span><span>My Profile</span></button>
+                    <button type="button" class="account-menu-item" onclick="openCustomerAddressesPage()"><span class="menu-icon">📍</span><span>My Addresses</span></button>
+                    <button type="button" class="account-menu-item" onclick="openCustomerOrdersPage()"><span class="menu-icon">🛍️</span><span>My Orders</span></button>
+                    <button type="button" class="account-menu-item account-menu-signout" onclick="customerLogout()"><span class="menu-icon">🚪</span><span>Sign Out</span></button>
+                </div>
             </div>
         </div>
     </div>
@@ -1901,6 +1994,76 @@ footer{
 </div>
 </div>
 
+
+
+<!-- =========================================================
+     CUSTOMER ADDRESSES PAGE
+========================================================= -->
+<div id="customerAddressesModal" class="modal customer-page-modal">
+<div class="modalbox">
+    <div class="mhead">
+        <div><h2>My Addresses</h2><div class="customer-page-head-sub">Manage your saved delivery locations.</div></div>
+        <button class="close" type="button" onclick="closeCustomerAddressesPage()">✕</button>
+    </div>
+    <div id="customerAddressesList" class="customer-address-list"></div>
+    <div class="customer-page-footer">
+        <button type="button" class="saved-address-action" onclick="openAddressEditor()">＋ Add New Address</button>
+    </div>
+</div>
+</div>
+
+<!-- ADDRESS EDITOR -->
+<div id="customerAddressEditorModal" class="modal customer-page-modal">
+<div class="modalbox">
+    <div class="mhead">
+        <h2 id="customerAddressEditorTitle">Add New Address</h2>
+        <button class="close" type="button" onclick="closeAddressEditor()">✕</button>
+    </div>
+    <form id="customerAddressEditorForm" onsubmit="saveCustomerAddressFromEditor(event)">
+        <input type="hidden" id="editorAddressId">
+        <div class="address-editor-grid">
+            <div class="field"><label>Address Label *</label><input id="editorLabel" maxlength="30" placeholder="Home, Office, Shop" required></div>
+            <div class="field"><label>House / Flat *</label><input id="editorHouseFlat" required></div>
+            <div class="field"><label>Building *</label><input id="editorBuilding" required></div>
+            <div class="field"><label>Street / Road *</label><input id="editorStreet" required></div>
+            <div class="field"><label>Area / Locality *</label><input id="editorArea" required></div>
+            <div class="field"><label>City *</label><input id="editorCity" required></div>
+            <div class="field"><label>Pincode *</label><input id="editorPincode" inputmode="numeric" maxlength="6" required></div>
+            <div class="field"><label>Landmark / Instructions</label><input id="editorLandmark"></div>
+            <div class="field full"><label>Map Address</label><input id="editorMapAddress"></div>
+            <div class="field"><label>Latitude</label><input id="editorLatitude" inputmode="decimal"></div>
+            <div class="field"><label>Longitude</label><input id="editorLongitude" inputmode="decimal"></div>
+            <div class="field full"><label>Google Maps Link</label><input id="editorMapsLink" type="url" placeholder="https://www.google.com/maps/..." ></div>
+        </div>
+        <div class="location-box" style="margin-top:12px">
+            <strong>📍 Delivery Location</strong>
+            <div class="muted" style="margin-top:4px;margin-bottom:9px">Use GPS or keep the saved coordinates/link. The complete address and map location are stored together.</div>
+            <div class="location-actions">
+                <button type="button" class="saved-address-action" onclick="captureEditorCurrentLocation()">📍 Use Current Location</button>
+                <button type="button" class="saved-address-action" onclick="openEditorGoogleMaps()">🗺 Choose on Google Maps</button>
+            </div>
+            <div id="editorLocationStatus" class="muted" style="margin-top:8px"></div>
+        </div>
+        <div class="address-editor-actions">
+            <button type="button" class="saved-address-action" onclick="closeAddressEditor()">Cancel</button>
+            <button type="submit" class="place" id="customerAddressSaveButton">Save Address</button>
+        </div>
+    </form>
+</div>
+</div>
+
+<!-- =========================================================
+     CUSTOMER ORDERS PAGE
+========================================================= -->
+<div id="customerOrdersModal" class="modal customer-page-modal">
+<div class="modalbox">
+    <div class="mhead">
+        <div><h2>My Orders</h2><div class="customer-page-head-sub">Your previous HAMS Kirana Store orders.</div></div>
+        <button class="close" type="button" onclick="closeCustomerOrdersPage()">✕</button>
+    </div>
+    <div id="customerOrdersList" class="customer-order-list"></div>
+</div>
+</div>
 
 <!-- =========================================================
      SUCCESS MODAL
@@ -4269,6 +4432,223 @@ function js(v){
 /* ============================================================
    PLACEHOLDER PRODUCT IMAGE
 ============================================================ */
+
+
+/* ============================================================
+   CUSTOMER ACCOUNT PAGES — ADDRESSES / ORDERS
+============================================================ */
+function requireCustomerLogin(){
+    if(!customerGoogleToken || !customerProfile || !customerProfile.email){
+        alert("Please sign in with your Google account first.");
+        const menu=document.getElementById("accountMenu"),btn=document.getElementById("accountBtn");
+        if(menu) menu.classList.add("show");
+        if(btn) btn.setAttribute("aria-expanded","true");
+        return false;
+    }
+    return true;
+}
+
+function closeAccountMenu(){
+    const menu=document.getElementById("accountMenu"),btn=document.getElementById("accountBtn");
+    if(menu) menu.classList.remove("show");
+    if(btn) btn.setAttribute("aria-expanded","false");
+}
+
+function openCustomerAddressesPage(){
+    if(!requireCustomerLogin()) return;
+    closeAccountMenu();
+    document.getElementById("customerAddressesModal").classList.add("show");
+    renderCustomerAddressesPage();
+}
+function closeCustomerAddressesPage(){ document.getElementById("customerAddressesModal")?.classList.remove("show"); }
+
+function renderCustomerAddressesPage(){
+    const box=document.getElementById("customerAddressesList");
+    if(!box) return;
+    if(!customerAddresses.length){
+        box.innerHTML='<div class="customer-address-empty">No saved addresses yet.<br>Add your first delivery address.</div>';
+        return;
+    }
+    box.innerHTML=customerAddresses.map(function(a){
+        const address=formatSavedAddress(a);
+        const coords=(a.latitude && a.longitude) ? "📍 Location available" : (a.mapsLink ? "🗺 Google Maps link saved" : "");
+        return '<div class="customer-address-card '+(a.isDefault?'default':'')+'">'
+          +'<div class="customer-address-top"><div><div class="customer-address-title">'+esc(a.label||"Other")+(a.isDefault?'<span class="customer-address-badge">Default</span>':'')+'</div>'
+          +'<div class="customer-address-text">'+esc(address)+'</div>'
+          +(a.landmark?'<div class="customer-address-text">Landmark: '+esc(a.landmark)+'</div>':'')
+          +(coords?'<div class="customer-address-meta">'+esc(coords)+'</div>':'')+'</div></div>'
+          +'<div class="customer-address-actions">'
+          +(!a.isDefault?'<button type="button" class="customer-address-action" onclick="setCustomerDefaultAddressUI('+JSON.stringify(a.addressId)+')">✓ Set Default</button>':'')
+          +'<button type="button" class="customer-address-action" onclick="openAddressEditor('+JSON.stringify(a.addressId)+')">✎ Edit</button>'
+          +'<button type="button" class="customer-address-action danger" onclick="deleteCustomerAddressUI('+JSON.stringify(a.addressId)+')">🗑 Delete</button>'
+          +'</div></div>';
+    }).join("");
+}
+
+async function customerAddressRequest(action, params){
+    const query=new URLSearchParams();
+    query.set("action",action);
+    query.set("idToken",customerGoogleToken);
+    Object.keys(params||{}).forEach(function(k){ query.set(k, params[k] ?? ""); });
+    const r=await fetch(API_URL+"?"+query.toString(),{cache:"no-store"});
+    if(!r.ok) throw Error("Could not connect to the customer account service.");
+    const d=await r.json();
+    if(!d.success) throw Error(d.message||"Customer account request failed.");
+    return d;
+}
+
+async function setCustomerDefaultAddressUI(addressId){
+    if(!requireCustomerLogin()) return;
+    try{
+        const d=await customerAddressRequest("setCustomerDefaultAddress",{addressId:addressId});
+        customerAddresses=Array.isArray(d.addresses)?d.addresses:customerAddresses;
+        const selected=customerAddresses.find(a=>a.addressId===addressId);
+        if(selected){ selectedCustomerAddressId=selected.addressId; }
+        renderCustomerAddressesPage();
+        updateCustomerAddressSection();
+    }catch(err){ alert(err.message||"Unable to set the default address."); }
+}
+
+function openAddressEditor(addressId){
+    if(!requireCustomerLogin()) return;
+    const address=addressId ? customerAddresses.find(a=>a.addressId===addressId) : null;
+    document.getElementById("customerAddressEditorTitle").textContent=address?"Edit Address":"Add New Address";
+    document.getElementById("editorAddressId").value=address?.addressId||"";
+    document.getElementById("editorLabel").value=address?.label||"Home";
+    document.getElementById("editorHouseFlat").value=address?.houseFlat||"";
+    document.getElementById("editorBuilding").value=address?.building||"";
+    document.getElementById("editorStreet").value=address?.street||"";
+    document.getElementById("editorArea").value=address?.area||"";
+    document.getElementById("editorCity").value=address?.city||"";
+    document.getElementById("editorPincode").value=address?.pincode||"";
+    document.getElementById("editorLandmark").value=address?.landmark||"";
+    document.getElementById("editorMapAddress").value=address?.mapAddress||"";
+    document.getElementById("editorLatitude").value=address?.latitude||"";
+    document.getElementById("editorLongitude").value=address?.longitude||"";
+    document.getElementById("editorMapsLink").value=address?.mapsLink||"";
+    document.getElementById("editorLocationStatus").textContent=address ? ((address.latitude&&address.longitude)?"✓ Saved map coordinates available.":(address.mapsLink?"✓ Saved Google Maps link available.":"No map location saved.")) : "No map location selected yet.";
+    closeAccountMenu();
+    document.getElementById("customerAddressEditorModal").classList.add("show");
+}
+function closeAddressEditor(){ document.getElementById("customerAddressEditorModal")?.classList.remove("show"); }
+
+function captureEditorCurrentLocation(){
+    const status=document.getElementById("editorLocationStatus");
+    if(!navigator.geolocation){ status.textContent="Your browser does not support location services."; return; }
+    status.textContent="Please allow location access...";
+    navigator.geolocation.getCurrentPosition(function(position){
+        const lat=position.coords.latitude,lng=position.coords.longitude;
+        document.getElementById("editorLatitude").value=lat;
+        document.getElementById("editorLongitude").value=lng;
+        document.getElementById("editorMapsLink").value="https://www.google.com/maps?q="+encodeURIComponent(lat+","+lng);
+        document.getElementById("editorMapAddress").value="Customer current location (GPS)";
+        status.textContent="✓ Current location captured: "+lat.toFixed(6)+" • "+lng.toFixed(6);
+    },function(error){ status.textContent=error.code===1?"Location permission was denied.":error.code===3?"Location request timed out.":"Could not get your location."; },{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+}
+function openEditorGoogleMaps(){
+    const q=["editorHouseFlat","editorBuilding","editorStreet","editorArea","editorCity","editorPincode"].map(id=>document.getElementById(id).value.trim()).filter(Boolean).join(", ");
+    window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q||"delivery location"),"_blank","noopener");
+    document.getElementById("editorLocationStatus").textContent="Google Maps opened. Copy the Maps link back into the Google Maps Link field.";
+}
+
+async function saveCustomerAddressFromEditor(event){
+    event.preventDefault();
+    if(!requireCustomerLogin()) return;
+    const p={
+        addressId:document.getElementById("editorAddressId").value.trim(),
+        label:document.getElementById("editorLabel").value.trim(),
+        houseFlat:document.getElementById("editorHouseFlat").value.trim(),
+        building:document.getElementById("editorBuilding").value.trim(),
+        street:document.getElementById("editorStreet").value.trim(),
+        area:document.getElementById("editorArea").value.trim(),
+        city:document.getElementById("editorCity").value.trim(),
+        pincode:document.getElementById("editorPincode").value.trim(),
+        landmark:document.getElementById("editorLandmark").value.trim(),
+        mapAddress:document.getElementById("editorMapAddress").value.trim(),
+        latitude:document.getElementById("editorLatitude").value.trim(),
+        longitude:document.getElementById("editorLongitude").value.trim(),
+        mapsLink:document.getElementById("editorMapsLink").value.trim()
+    };
+    if(!/^\d{6}$/.test(p.pincode)){ alert("Please enter a valid 6-digit pincode."); return; }
+    if(p.latitude!=="" && isNaN(Number(p.latitude))){ alert("Latitude must be a valid number."); return; }
+    if(p.longitude!=="" && isNaN(Number(p.longitude))){ alert("Longitude must be a valid number."); return; }
+    const btn=document.getElementById("customerAddressSaveButton");
+    btn.disabled=true; btn.textContent="Saving...";
+    try{
+        const d=await customerAddressRequest(p.addressId?"updateCustomerAddress":"createCustomerAddress",p);
+        customerAddresses=Array.isArray(d.addresses)?d.addresses:customerAddresses;
+        closeAddressEditor();
+        renderCustomerAddressesPage();
+        updateCustomerAddressSection();
+        if(d.address) selectedCustomerAddressId=d.address.addressId||selectedCustomerAddressId;
+    }catch(err){ alert(err.message||"Unable to save address."); }
+    finally{ btn.disabled=false; btn.textContent="Save Address"; }
+}
+
+async function deleteCustomerAddressUI(addressId){
+    const address=customerAddresses.find(a=>a.addressId===addressId);
+    if(!address) return;
+    if(!confirm('Delete the saved address "'+(address.label||"Other")+'"?')) return;
+    try{
+        const d=await customerAddressRequest("deleteCustomerAddress",{addressId:addressId});
+        customerAddresses=Array.isArray(d.addresses)?d.addresses:[];
+        if(selectedCustomerAddressId===addressId) selectedCustomerAddressId=customerAddresses.find(a=>a.isDefault)?.addressId||customerAddresses[0]?.addressId||"";
+        renderCustomerAddressesPage(); updateCustomerAddressSection();
+    }catch(err){ alert(err.message||"Unable to delete address."); }
+}
+
+async function openCustomerOrdersPage(){
+    if(!requireCustomerLogin()) return;
+    closeAccountMenu();
+    const modal=document.getElementById("customerOrdersModal");
+    modal.classList.add("show");
+    const box=document.getElementById("customerOrdersList");
+    box.innerHTML='<div class="customer-page-loading">Loading your orders...</div>';
+    try{
+        const d=await customerAddressRequest("getCustomerOrders",{});
+        window.__customerOrders=Array.isArray(d.orders)?d.orders:[];
+        renderCustomerOrdersPage(window.__customerOrders);
+    }catch(err){ box.innerHTML='<div class="customer-order-empty">Unable to load orders.<br>'+esc(err.message||"Please try again.")+'</div>'; }
+}
+function closeCustomerOrdersPage(){ document.getElementById("customerOrdersModal")?.classList.remove("show"); }
+
+function renderCustomerOrdersPage(orders){
+    const box=document.getElementById("customerOrdersList");
+    if(!orders.length){ box.innerHTML='<div class="customer-order-empty">You have not placed any orders yet.</div>'; return; }
+    box.innerHTML=orders.map(function(order){
+        const items=Array.isArray(order.items)?order.items:[];
+        const shown=items.slice(0,4);
+        const more=items.length>4?'<div class="customer-order-more">+'+(items.length-4)+' more item(s)</div>':'';
+        return '<div class="customer-order-card">'
+          +'<div class="customer-order-summary"><div><div class="customer-order-id">'+esc(order.orderId||"Order")+'</div><div class="customer-order-date">'+esc(order.timestamp||"")+'</div></div><span class="customer-order-status">'+esc(order.status||"NEW")+'</span></div>'
+          +'<div class="customer-order-items">'+shown.map(function(item){return '<div class="customer-order-item"><span>'+esc(item.productName||"")+" × "+(Number(item.quantity)||0)+'</span><b>₹'+money(item.total ?? ((Number(item.price)||0)*(Number(item.quantity)||0)))+'</b></div>';}).join("")+more+'</div>'
+          +'<div class="customer-order-bottom"><span class="customer-order-total">Total ₹'+money(order.total||0)+'</span><button type="button" class="customer-buy-again" onclick="buyAgain('+JSON.stringify(order.orderId)+')">↻ Buy Again</button></div>'
+          +'</div>';
+    }).join("");
+}
+
+function buyAgain(orderId){
+    const order=(window.__customerOrders||[]).find(o=>o.orderId===orderId);
+    if(!order){
+        /* Order cards are rendered from the latest response; reload once if needed. */
+        openCustomerOrdersPage();
+        return;
+    }
+    const items=Array.isArray(order.items)?order.items:[];
+    let added=0,unavailable=[];
+    items.forEach(function(item){
+        const product=products.find(function(p){ return String(p.productId||"")===String(item.productId||"") || String(p.productName||"").trim().toLowerCase()===String(item.productName||"").trim().toLowerCase(); });
+        if(!product || product.available===false){ unavailable.push(item.productName||"Product"); return; }
+        const qty=Number(item.quantity)||0;
+        if(qty<=0) return;
+        const existing=cart.find(function(c){return String(c.productId||"")===String(product.productId||"");});
+        if(existing){ existing.quantity=(Number(existing.quantity)||0)+qty; }
+        else { cart.push({productId:product.productId,productName:product.productName,price:Number(product.price)||Number(item.price)||0,quantity:qty}); }
+        added++;
+    });
+    save(); render(); closeCustomerOrdersPage(); openCart();
+    if(unavailable.length) alert(added+" item(s) added to your basket. These products are currently unavailable: "+unavailable.join(", ")+".");
+}
 
 function placeholder(n){
 
