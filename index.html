@@ -1276,6 +1276,120 @@ footer{
     }
 }
 
+
+/* ============================================================
+   RIDDHI SUPER MARKET — ZEpto-STYLE MOBILE INTERFACE
+============================================================ */
+.logoicon img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;}
+.basket-title-wrap{display:flex;align-items:center;gap:9px;}
+.basket-back{display:none;border:0;background:#f1f3f1;border-radius:50%;width:35px;height:35px;font-size:27px;line-height:30px;cursor:pointer;}
+
+.mobile-zepto-home{display:none;}
+
+@media(max-width:700px){
+    body{background:#fff;}
+    .top{display:none;}
+    header{position:sticky;top:0;background:#fff;z-index:100;border-bottom:1px solid #ecefec;box-shadow:0 1px 5px #00000008;}
+    .head{padding:10px 12px 9px;display:grid;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"brand account cart" "search search search";gap:8px 9px;align-items:center;}
+    .logo{grid-area:brand;min-width:0;gap:9px;}
+    .logoicon{width:46px;height:46px;border-radius:13px;background:#fff;box-shadow:0 2px 9px #00000012;flex:0 0 auto;}
+    .logo h1{font-size:17px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .logo small{display:block;font-size:10px;margin-top:3px;color:#6d776f;}
+    .account-area{grid-area:account;order:unset;min-width:42px;}
+    .account-btn{width:42px;height:42px;padding:0;border:0;border-radius:12px;background:#fff;color:#15803d;justify-content:center;font-size:24px;}
+    .account-label{display:none;}
+    .cartbtn{grid-area:cart;order:unset;height:42px;min-width:104px;padding:8px 11px;border-radius:11px;font-size:13px;}
+    .search{grid-area:search;order:unset;flex-basis:auto;}
+    .search input{height:47px;border-radius:14px;background:#fff;border:1px solid #dfe4df;font-size:15px;padding-left:45px;box-shadow:0 1px 5px #00000005;}
+    .search span{left:16px;top:11px;font-size:21px;}
+
+    .mobile-zepto-home{display:block;padding:9px 10px 0;background:#fff;}
+    .mobile-promo-row{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px 0 7px;}
+    .mobile-promo-row::-webkit-scrollbar{display:none;}
+    .mobile-promo{min-width:calc(100vw - 34px);height:164px;border-radius:18px;padding:17px 15px;display:flex;justify-content:space-between;align-items:center;overflow:hidden;scroll-snap-align:start;position:relative;}
+    .mobile-promo-green{background:linear-gradient(135deg,#e8f7ed,#ccebd7);}
+    .mobile-promo-yellow{background:linear-gradient(135deg,#fff4d7,#ffeab0);}
+    .mobile-promo-tag{font-size:8px;font-weight:900;letter-spacing:.4px;color:#116c35;}
+    .mobile-promo h2{font-size:21px;line-height:1.08;margin:7px 0 5px;color:#16261b;}
+    .mobile-promo p{font-size:10px;line-height:1.35;color:#536158;max-width:205px;}
+    .mobile-promo button{margin-top:10px;border:0;background:#166534;color:#fff;border-radius:8px;padding:7px 11px;font-size:10px;font-weight:800;}
+    .promo-logo-circle,.promo-cart-art{width:82px;height:82px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 8px 20px #00000010;flex:0 0 auto;}
+    .promo-logo-circle img{width:70px;height:70px;object-fit:contain;border-radius:50%;}
+    .promo-cart-art{font-size:42px;background:#fffaf0;}
+    .mobile-category-heading{display:flex;align-items:center;justify-content:space-between;padding:10px 2px 7px;}
+    .mobile-category-heading h2{font-size:18px;color:#18251c;}
+    .mobile-category-heading button,.mobile-section-head button{border:0;background:transparent;color:#e60046;font-size:11px;font-weight:800;padding:3px;}
+    .mobile-category-tiles{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding:0 1px 7px;}
+    .mobile-category-tiles::-webkit-scrollbar{display:none;}
+    .mobile-category-tile{border:0;background:#fff;width:72px;min-width:72px;display:flex;flex-direction:column;align-items:center;gap:5px;color:#202a22;font-size:9px;line-height:1.2;font-weight:700;cursor:pointer;}
+    .mobile-category-image{width:62px;height:62px;border-radius:15px;background:#f7f8f7;display:grid;place-items:center;overflow:hidden;box-shadow:0 1px 5px #0000000a;}
+    .mobile-category-image img{width:90%;height:90%;object-fit:contain;}
+
+    .hero{display:none;}
+    .status{margin:4px 10px;font-size:10px;}
+    .category-sidebar{position:sticky;top:116px;z-index:70;width:100%;margin:0;padding:0 9px;background:#fff;border-top:1px solid #f0f1f0;border-bottom:1px solid #e5e9e5;}
+    .cats{display:flex;gap:18px;overflow-x:auto;scrollbar-width:none;min-height:46px;padding:0;align-items:center;}
+    .cats::-webkit-scrollbar{display:none;}
+    .cat{position:relative;width:auto;min-width:max-content;min-height:46px;padding:14px 1px 11px;border:0;border-radius:0;background:transparent;box-shadow:none;color:#5d685f;font-size:11px;font-weight:700;white-space:nowrap;}
+    .cat.active{background:transparent;color:#00843d;box-shadow:none;}
+    .cat.active::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px 3px 0 0;background:#00843d;}
+    .shop-layout{display:block;}
+    .products-area{width:100%;}
+    .title{margin:11px 10px 7px;padding:0;}
+    .title h2{font-size:19px;}
+    .title span{font-size:10px;}
+    .product-scroll{height:auto;max-height:none;overflow:visible;padding:0 10px 40px;}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+    .mobile-product-section{margin:5px 0 25px;}
+    .mobile-section-head{display:flex;align-items:center;justify-content:space-between;margin:0 2px 8px;}
+    .mobile-section-head h3{font-size:18px;color:#18251c;}
+    .mobile-product-row{display:flex;gap:9px;overflow-x:auto;scrollbar-width:none;padding:1px 1px 5px;}
+    .mobile-product-row::-webkit-scrollbar{display:none;}
+    .mobile-product-row .card{width:146px;min-width:146px;border:1px solid #e4e8e4;border-radius:10px;box-shadow:none;background:#fff;overflow:hidden;}
+    .mobile-product-row .pic{width:100%;height:142px;aspect-ratio:auto;object-fit:contain;background:#fafbfa;}
+    .mobile-product-row .info{padding:7px;gap:4px;}
+    .mobile-product-row .category{font-size:7px;}
+    .mobile-product-row .name{font-size:11px;line-height:1.28;min-height:28px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .mobile-product-row .desc{display:none;}
+    .mobile-product-row .meta{font-size:9px;min-height:14px;}
+    .mobile-product-row .price{font-size:14px;}
+    .mobile-product-row .add{font-size:10px;padding:6px 8px;min-height:28px;border-radius:7px;}
+    .mobile-product-row .product-qty button{width:25px;height:25px;}
+    .mobile-product-row .qty-number{font-size:10px;}
+
+    .zeppo-search-grid,.grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .grid .card{border:1px solid #e4e8e4;border-radius:10px;box-shadow:none;min-width:0;}
+    .grid .pic{height:auto;aspect-ratio:1/1;object-fit:contain;}
+    .grid .info{padding:7px;}
+    .grid .name{font-size:11px;line-height:1.28;min-height:28px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .grid .desc{display:none;}
+    .grid .price{font-size:14px;}
+
+    .drawer{width:100%;height:100dvh;max-height:100dvh;}
+    .basket-back{display:block;}
+    .dhead{min-height:60px;padding:10px 14px;}
+    .dhead h2{font-size:19px;}
+    .items{padding:10px 13px;}
+    .dfoot{padding:13px 13px max(13px,env(safe-area-inset-bottom));}
+    .total{font-size:20px;}
+    .clear-cart{padding:11px 12px;}
+    .checkout{padding:13px 12px;}
+}
+
+@media(max-width:390px){
+    .logo h1{font-size:15px;}
+    .logoicon{width:42px;height:42px;}
+    .cartbtn{min-width:94px;font-size:12px;}
+    .mobile-promo{height:150px;padding:14px;}
+    .mobile-promo h2{font-size:18px;}
+    .promo-logo-circle,.promo-cart-art{width:70px;height:70px;}
+    .promo-logo-circle img{width:60px;height:60px;}
+    .mobile-category-tile{width:66px;min-width:66px;font-size:8px;}
+    .mobile-category-image{width:58px;height:58px;}
+    .mobile-product-row .card{width:136px;min-width:136px;}
+    .mobile-product-row .pic{height:132px;}
+}
+
 /* ============================================================
    RESPONSIVE
 ============================================================ */
@@ -1530,609 +1644,6 @@ footer{
 }
 
 
-
-/* ============================================================
-   RIDDHI SUPER MARKET — ZEpto-STYLE STOREFRONT
-   Visual layer only. Existing product/cart/account/order logic preserved.
-============================================================ */
-
-:root{
-    --brand:#16823f;
-    --brand-dark:#0b5f2a;
-    --brand-soft:#eef9f0;
-    --ink:#18251c;
-    --muted:#667267;
-    --line:#e5e9e5;
-}
-
-body{
-    background:#fff;
-    color:var(--ink);
-}
-
-header{
-    position:sticky;
-    top:0;
-    background:#fff;
-    border-bottom:1px solid #e7e9e7;
-    z-index:100;
-}
-
-.head{
-    max-width:1500px;
-    min-height:76px;
-    padding:11px 18px;
-    gap:22px;
-}
-
-.logo{
-    min-width:260px;
-    gap:11px;
-}
-
-.logoicon{
-    width:52px;
-    height:52px;
-    border-radius:14px;
-    background:#fff;
-    overflow:hidden;
-    box-shadow:0 2px 10px #00000012;
-}
-
-.logoicon::before{
-    content:"";
-    display:block;
-    width:100%;
-    height:100%;
-    background:url("favicon-riddhi.png") center/cover no-repeat;
-}
-
-.logoicon{
-    font-size:0;
-}
-
-.logo h1{
-    font-size:20px;
-    line-height:1.15;
-    color:#172019;
-}
-
-.logo small{
-    display:block;
-    margin-top:4px;
-    font-size:12px;
-}
-
-.logo::after{
-    content:"";
-}
-
-.search input{
-    height:54px;
-    border-radius:12px;
-    border:1px solid #dfe4df;
-    background:#fff;
-    font-size:16px;
-    padding-left:48px;
-    color:#202a22;
-}
-
-.search span{
-    top:14px;
-    left:17px;
-    font-size:20px;
-}
-
-.account-btn{
-    height:50px;
-    border:0;
-    background:#fff;
-    color:#26352b;
-    border-radius:10px;
-    padding:9px 12px;
-}
-
-.cartbtn{
-    height:50px;
-    min-width:112px;
-    border-radius:10px;
-    background:var(--brand);
-}
-
-main{
-    max-width:1500px;
-    padding:18px 18px 70px;
-}
-
-.riddhi-hero{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:18px;
-    margin:2px 0 18px;
-}
-
-.promo{
-    min-height:250px;
-    border-radius:28px;
-    padding:30px 34px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    overflow:hidden;
-    position:relative;
-}
-
-.promo-green{
-    background:linear-gradient(135deg,#e9f7ec,#d4f0dc);
-}
-
-.promo-light{
-    background:linear-gradient(135deg,#fff5d8,#fff1bf);
-}
-
-.promo-copy{
-    position:relative;
-    z-index:2;
-    max-width:70%;
-}
-
-.promo-kicker{
-    font-size:14px;
-    font-weight:900;
-    letter-spacing:.5px;
-    color:var(--brand-dark);
-    margin-bottom:9px;
-}
-
-.promo h2{
-    font-size:32px;
-    line-height:1.08;
-    margin-bottom:9px;
-    letter-spacing:-.5px;
-}
-
-.promo p{
-    color:#506056;
-    line-height:1.45;
-    font-size:14px;
-    max-width:470px;
-}
-
-.promo-btn{
-    margin-top:20px;
-    border:0;
-    background:var(--brand);
-    color:#fff;
-    border-radius:10px;
-    padding:11px 17px;
-    font-weight:800;
-    cursor:pointer;
-}
-
-.promo-btn span{
-    font-size:21px;
-    vertical-align:-2px;
-    margin-left:6px;
-}
-
-.promo-btn.dark{
-    background:#18251c;
-}
-
-.promo-badge{
-    width:145px;
-    height:145px;
-    border-radius:50%;
-    background:#fff;
-    box-shadow:0 12px 28px #2c6b3a20;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    transform:rotate(8deg);
-    flex:0 0 auto;
-}
-
-.promo-badge span{
-    font-size:48px;
-    font-weight:900;
-    color:var(--brand);
-    line-height:.8;
-}
-
-.promo-badge strong{
-    font-size:18px;
-    margin-top:7px;
-}
-
-.promo-badge small{
-    color:var(--brand);
-    font-weight:800;
-    font-size:10px;
-}
-
-.promo-basket{
-    width:165px;
-    height:165px;
-    border-radius:50%;
-    display:grid;
-    place-items:center;
-    background:#fff;
-    box-shadow:0 12px 28px #9b7a211c;
-    flex:0 0 auto;
-}
-
-.promo-basket img{
-    width:135px;
-    height:135px;
-    object-fit:contain;
-}
-
-.shop-layout{
-    display:block;
-}
-
-.category-sidebar{
-    position:sticky;
-    top:76px;
-    z-index:50;
-    width:100%;
-    background:#fff;
-    border-top:1px solid #f0f1f0;
-    border-bottom:1px solid #e7e9e7;
-    margin:0 -18px 18px;
-    padding:0 18px;
-}
-
-.cats{
-    height:auto;
-    min-height:60px;
-    padding:0;
-    display:flex;
-    flex-direction:row;
-    align-items:center;
-    gap:30px;
-    overflow-x:auto;
-    overflow-y:hidden;
-    scrollbar-width:none;
-}
-
-.cats::-webkit-scrollbar{display:none;}
-
-.cat{
-    width:auto;
-    min-height:60px;
-    border:0;
-    border-radius:0;
-    background:transparent;
-    padding:18px 5px 15px;
-    color:#58655b;
-    font-size:15px;
-    font-weight:700;
-    text-align:center;
-    white-space:nowrap;
-    box-shadow:none;
-    position:relative;
-}
-
-.cat:hover{
-    transform:none;
-    border-color:transparent;
-    box-shadow:none;
-    color:var(--brand);
-}
-
-.cat.active{
-    background:transparent;
-    color:var(--brand);
-    border:0;
-    box-shadow:none;
-}
-
-.cat.active::after{
-    content:"";
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:0;
-    height:3px;
-    border-radius:3px 3px 0 0;
-    background:var(--brand);
-}
-
-.product-scroll{
-    height:auto;
-    max-height:none;
-    min-height:0;
-    overflow:visible;
-    padding:0;
-    scrollbar-width:none;
-}
-
-.title{
-    margin:4px 0 12px;
-}
-
-.title h2{
-    font-size:25px;
-    letter-spacing:-.3px;
-}
-
-.title span{
-    font-size:13px;
-}
-
-.category-sections{
-    display:block;
-}
-
-.product-section{
-    margin:0 0 30px;
-}
-
-.section-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:14px;
-    margin:0 2px 12px;
-}
-
-.section-head h3{
-    font-size:22px;
-    color:#172019;
-    margin:0;
-}
-
-.see-all{
-    border:0;
-    background:transparent;
-    color:#e60046;
-    font-size:14px;
-    font-weight:800;
-    cursor:pointer;
-    padding:4px 0;
-}
-
-.see-all span{
-    font-size:22px;
-    vertical-align:-2px;
-    margin-left:3px;
-}
-
-.product-row{
-    display:grid;
-    grid-template-columns:repeat(8,minmax(0,1fr));
-    gap:18px;
-}
-
-.card{
-    min-width:0;
-    border:1px solid #e2e6e3;
-    border-radius:12px;
-    background:#fff;
-    box-shadow:none;
-    overflow:hidden;
-}
-
-.card:hover{
-    transform:none;
-    box-shadow:0 5px 16px #0000000c;
-}
-
-.pic{
-    width:100%;
-    aspect-ratio:1/1;
-    object-fit:contain;
-    background:#fafbfa;
-    display:block;
-}
-
-.info{
-    padding:10px;
-    gap:5px;
-}
-
-.category{
-    font-size:8px;
-    line-height:1.1;
-    color:#16823f;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-
-.name{
-    font-size:14px;
-    line-height:1.3;
-    min-height:36px;
-    display:-webkit-box;
-    -webkit-box-orient:vertical;
-    -webkit-line-clamp:2;
-    overflow:hidden;
-}
-
-.desc{
-    font-size:11px;
-    color:#788178;
-    min-height:0;
-    display:-webkit-box;
-    -webkit-box-orient:vertical;
-    -webkit-line-clamp:1;
-    overflow:hidden;
-}
-
-.meta{
-    font-size:11px;
-    min-height:16px;
-}
-
-.bottom{
-    padding-top:5px;
-    align-items:center;
-}
-
-.price{
-    font-size:17px;
-}
-
-.add{
-    min-width:64px;
-    padding:7px 10px;
-    border-radius:8px;
-    font-size:12px;
-    background:#fff;
-    color:#e60046;
-    border:1px solid #e60046;
-}
-
-.add:hover{
-    background:#fff5f8;
-}
-
-.add:disabled{
-    background:#f1f3f1;
-    color:#89928b;
-    border-color:#cfd5d0;
-}
-
-.product-controls{
-    gap:4px;
-}
-
-.product-qty{
-    gap:4px;
-}
-
-.product-qty button{
-    width:27px;
-    height:27px;
-    font-size:17px;
-}
-
-.product-remove{
-    font-size:9px;
-}
-
-.zeppo-search-grid{
-    display:grid;
-    grid-template-columns:repeat(8,minmax(0,1fr));
-    gap:18px;
-}
-
-@media(max-width:1250px){
-    .head{max-width:1200px;}
-    main{max-width:1200px;}
-    .logo{min-width:220px;}
-    .product-row,.zeppo-search-grid{
-        grid-template-columns:repeat(6,minmax(0,1fr));
-    }
-}
-
-@media(max-width:900px){
-    .head{
-        gap:10px;
-        padding:10px 12px;
-    }
-    .logo{min-width:190px;}
-    .logo h1{font-size:17px;}
-    .logo small{font-size:10px;}
-    .search input{height:46px;font-size:14px;}
-    .account-btn{height:44px;}
-    .cartbtn{height:44px;min-width:92px;}
-    .riddhi-hero{grid-template-columns:1fr;}
-    .promo{min-height:190px;padding:24px;}
-    .promo h2{font-size:27px;}
-    .product-row,.zeppo-search-grid{
-        grid-template-columns:repeat(5,minmax(0,1fr));
-        gap:12px;
-    }
-}
-
-@media(max-width:700px){
-    main{padding:10px 8px 50px;}
-    .head{
-        flex-wrap:wrap;
-        min-height:0;
-    }
-    .logo{flex:1;min-width:0;}
-    .logoicon{width:43px;height:43px;border-radius:11px;}
-    .logo h1{font-size:16px;}
-    .logo small{display:none;}
-    .account-area{order:2;}
-    .cartbtn{order:3;min-width:82px;padding:9px 10px;font-size:12px;}
-    .search{order:4;flex-basis:100%;}
-    .search input{height:43px;}
-    .category-sidebar{
-        position:sticky;
-        top:101px;
-        margin:0 -8px 12px;
-        padding:0 8px;
-    }
-    .cats{min-height:48px;gap:15px;}
-    .cat{
-        min-height:48px;
-        padding:14px 3px 12px;
-        font-size:12px;
-    }
-    .riddhi-hero{
-        grid-template-columns:1fr 1fr;
-        gap:8px;
-        overflow:hidden;
-    }
-    .promo{
-        min-height:150px;
-        border-radius:16px;
-        padding:15px;
-    }
-    .promo-copy{max-width:100%;}
-    .promo-kicker{font-size:8px;}
-    .promo h2{font-size:17px;}
-    .promo p{font-size:9px;line-height:1.3;}
-    .promo-btn{font-size:9px;padding:7px 9px;margin-top:10px;}
-    .promo-badge,.promo-basket{display:none;}
-    .title h2{font-size:18px;}
-    .section-head{margin-bottom:8px;}
-    .section-head h3{font-size:17px;}
-    .see-all{font-size:11px;}
-    .product-row{
-        display:grid;
-        grid-auto-flow:column;
-        grid-auto-columns:minmax(145px,1fr);
-        grid-template-columns:none;
-        overflow-x:auto;
-        gap:10px;
-        padding:1px 1px 7px;
-        scrollbar-width:none;
-    }
-    .product-row::-webkit-scrollbar{display:none;}
-    .card{border-radius:9px;}
-    .pic{aspect-ratio:1/1;}
-    .info{padding:7px;}
-    .name{font-size:11px;min-height:28px;}
-    .meta{font-size:9px;}
-    .desc{display:none;}
-    .price{font-size:13px;}
-    .add{font-size:10px;min-width:54px;padding:6px 7px;}
-    .zeppo-search-grid{
-        display:grid;
-        grid-template-columns:repeat(2,minmax(0,1fr));
-        gap:10px;
-    }
-}
-
-@media(max-width:390px){
-    .riddhi-hero{grid-template-columns:1fr;}
-    .promo-light{display:none;}
-    .product-row{grid-auto-columns:140px;}
-    .logo h1{font-size:15px;}
-}
-
-/* ============================================================
-   END RIDDHI SUPER MARKET STOREFRONT
-============================================================ */
-
-
 /* ============================================================
    CUSTOMER PROFILE — STEP 3A
 ============================================================ */
@@ -2283,6 +1794,98 @@ main{
     .customer-order-summary,.customer-order-bottom{align-items:flex-start;flex-direction:column}
     .customer-buy-again{width:100%}
 }
+
+/* ============================================================
+   RIDDHI MOBILE — ZEpto CATEGORY-PAGE MATCH
+   Reference: user-supplied Zepto mobile screenshots.
+   Layout only; all existing cart/account/order/API behavior remains.
+============================================================ */
+@media(max-width:700px){
+    body{overflow-x:hidden;background:#fff;}
+    main{padding:0 0 40px;max-width:none;}
+
+    /* Mobile header closely follows the reference: delivery/location row + search icon. */
+    header{position:sticky;top:0;z-index:200;background:#fff;border-bottom:1px solid #ececec;box-shadow:0 2px 8px #0000000a;}
+    .head{display:grid;grid-template-columns:1fr auto auto;grid-template-areas:"brand account cart" "search search search";gap:0 8px;padding:10px 14px 10px;min-height:0;}
+    .logo{grid-area:brand;min-width:0;gap:8px;}
+    .logoicon{width:42px;height:42px;border-radius:12px;box-shadow:none;}
+    .logo h1{font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .logo small{font-size:9px;}
+    .account-area{grid-area:account;min-width:40px;}
+    .account-btn{width:40px;height:40px;border:0;background:#fff;padding:0;font-size:22px;}
+    .cartbtn{grid-area:cart;height:40px;min-width:82px;padding:7px 9px;border-radius:10px;font-size:12px;}
+    .search{grid-area:search;margin-top:9px;}
+    .search input{height:44px;border-radius:22px;border:1px solid #dedede;background:#fff;padding:9px 14px 9px 43px;font-size:14px;box-shadow:none;}
+    .search span{left:14px;top:9px;font-size:20px;}
+
+    /* The Zepto category-home promo area is intentionally hidden on a category listing. */
+    .mobile-zepto-home{display:none;}
+    .hero{display:none;}
+    .status{margin:7px 12px;font-size:11px;}
+
+    /* Fixed-width left category rail. */
+    .shop-layout{display:grid;grid-template-columns:140px minmax(0,1fr);gap:0;align-items:start;}
+    .category-sidebar{position:sticky;top:112px;width:140px;height:calc(100dvh - 112px);margin:0;padding:0;background:#fff;border-right:1px solid #e7e7e7;z-index:80;overflow:hidden;}
+    .cats{height:100%;min-height:0;width:140px;display:flex;flex-direction:column;gap:0;padding:0 7px 20px 7px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;background:#fff;}
+    .cats::-webkit-scrollbar{display:none;}
+    .cat.zepto-side-cat{width:126px;min-width:126px;height:124px;min-height:124px;margin:0;border:0;border-radius:0;background:#fff;color:#7a7a7a;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;box-shadow:none;white-space:normal;text-align:center;font-size:11px;font-weight:600;line-height:1.2;}
+    .cat.zepto-side-cat:hover{transform:none;box-shadow:none;border:0;background:#fff;color:#5d5d5d;}
+    .cat.zepto-side-cat.active{background:#f8eaff;color:#5a227a;border:0;box-shadow:none;border-radius:14px;}
+    .cat.zepto-side-cat.active::after{display:none;}
+    .cat-image{width:68px;height:68px;border-radius:12px;display:grid;place-items:center;background:#fff;overflow:hidden;}
+    .cat-image img{width:100%;height:100%;object-fit:contain;display:block;}
+    .cat-label{max-width:112px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;}
+
+    .products-area{width:100%;min-width:0;}
+    .title{display:none;}
+    .product-scroll{height:auto;max-height:none;min-height:calc(100dvh - 112px);overflow:visible;padding:0 0 45px;background:#fff;}
+    .mobile-breadcrumb{height:42px;display:flex;align-items:center;gap:10px;padding:0 13px;border-bottom:1px solid #ededed;color:#7a8187;font-size:11px;white-space:nowrap;overflow:hidden;}
+    .mobile-breadcrumb strong{color:#202020;overflow:hidden;text-overflow:ellipsis;}
+    .mobile-breadcrumb b{font-size:18px;font-weight:400;color:#7f878c;}
+    .mobile-category-title{height:58px;display:flex;align-items:center;padding:0 13px;font-size:18px;font-weight:800;color:#121212;border-bottom:1px solid #ededed;background:#fff;}
+    .mobile-search-heading{font-size:18px;font-weight:800;padding:15px 13px 10px;}
+
+    /* Exact structural target from supplied screenshots: two products across. */
+    .mobile-product-grid,.zeppo-search-grid,.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 9px;padding:0 9px;align-items:start;}
+    .mobile-product-grid .card,.grid .card{min-width:0;border:1px solid #e6e6e6;border-radius:12px;background:#fff;box-shadow:none;overflow:hidden;margin:0 0 18px;}
+    .mobile-product-grid .pic,.grid .pic{width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff;display:block;}
+    .mobile-product-grid .info,.grid .info{padding:7px 2px 5px;gap:4px;}
+    .mobile-product-grid .category,.grid .category{display:none;}
+    .mobile-product-grid .name,.grid .name{font-size:14px;line-height:1.3;min-height:36px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:#171717;font-weight:500;}
+    .mobile-product-grid .desc,.grid .desc{display:none;}
+    .mobile-product-grid .meta,.grid .meta{font-size:11px;min-height:17px;color:#777;}
+    .mobile-product-grid .bottom,.grid .bottom{padding-top:3px;gap:4px;align-items:center;}
+    .mobile-product-grid .price,.grid .price{font-size:16px;font-weight:800;color:#171717;}
+    .mobile-product-grid .add,.grid .add{font-size:12px;font-weight:800;min-width:70px;min-height:38px;padding:7px 10px;border-radius:11px;background:#fff;color:#e50055;border:1.5px solid #e50055;}
+    .mobile-product-grid .add:hover,.grid .add:hover{transform:none;background:#fff;}
+    .mobile-product-grid .product-qty button,.grid .product-qty button{width:28px;height:28px;font-size:16px;}
+    .mobile-product-grid .qty-number,.grid .qty-number{font-size:11px;}
+    .mobile-product-grid .product-remove,.grid .product-remove{font-size:9px;}
+
+    .mobile-product-section{margin:0;padding-top:14px;}
+    .zepto-home-section .mobile-section-head{padding:0 13px 8px;margin:0;}
+    .mobile-section-head h3{font-size:18px;}
+    .mobile-section-head button{font-size:11px;}
+
+    /* Make the basket remain a true page-like drawer on mobile. */
+    .drawer{position:fixed;inset:0 0 0 auto;width:100%;height:100dvh;max-height:100dvh;z-index:500;}
+    .basket-back{display:block!important;border:0;background:transparent;width:40px;height:40px;font-size:30px;line-height:1;color:#111;}
+    .dhead{min-height:62px;padding:9px 14px;}
+    .basket-title-wrap{gap:5px;}
+    .dhead h2{font-size:19px;}
+}
+
+@media(max-width:390px){
+    .shop-layout{grid-template-columns:126px minmax(0,1fr);}
+    .category-sidebar,.cats{width:126px;}
+    .cat.zepto-side-cat{width:112px;min-width:112px;height:116px;min-height:116px;}
+    .cat-image{width:62px;height:62px;}
+    .mobile-product-grid,.zeppo-search-grid,.grid{gap:0 7px;padding:0 7px;}
+    .mobile-product-grid .name,.grid .name{font-size:13px;}
+    .mobile-product-grid .price,.grid .price{font-size:15px;}
+    .mobile-product-grid .add,.grid .add{min-width:62px;font-size:11px;}
+}
+
 </style>
 </head>
 
@@ -2312,7 +1915,7 @@ main{
     <div class="logo">
 
         <div class="logoicon">
-            H
+            <img src="favicon-riddhi.png" alt="Riddhi Super Market">
         </div>
 
         <div>
@@ -2396,53 +1999,99 @@ main{
 
 <main>
 
-<section class="riddhi-hero">
-    <div class="promo promo-green">
-        <div class="promo-copy">
-            <div class="promo-kicker">RIDDHI SUPER MARKET</div>
-            <h2>Fresh groceries.<br>Great prices.</h2>
-            <p>Everything you need for your home, delivered conveniently.</p>
-            <button type="button" class="promo-btn" onclick="document.getElementById('search').focus()">Shop Now <span>›</span></button>
+<!-- =========================================================
+     MOBILE ZEpto-STYLE HOME MODULES
+========================================================= -->
+<section class="mobile-zepto-home" aria-label="Riddhi Super Market home">
+    <div class="mobile-promo-row">
+        <div class="mobile-promo mobile-promo-green">
+            <div>
+                <span class="mobile-promo-tag">RIDDHI SUPER MARKET</span>
+                <h2>Fresh groceries<br>at great prices</h2>
+                <p>Daily essentials delivered to your doorstep.</p>
+                <button type="button" onclick="document.getElementById('search').focus()">Shop now&nbsp; ›</button>
+            </div>
+            <div class="promo-logo-circle"><img src="favicon-riddhi.png" alt="Riddhi"></div>
         </div>
-        <div class="promo-badge">
-            <span>₹</span>
-            <strong>VALUE</strong>
-            <small>EVERY DAY</small>
-        </div>
-    </div>
-
-    <div class="promo promo-light">
-        <div class="promo-copy">
-            <div class="promo-kicker">RIDDHI DELIVERY</div>
-            <h2>Daily essentials<br>at your doorstep.</h2>
-            <p>Shop rice, dals, oils, snacks, cleaning products and more.</p>
-            <button type="button" class="promo-btn dark" onclick="document.getElementById('search').focus()">Order Now <span>›</span></button>
-        </div>
-        <div class="promo-basket">
-            <img src="favicon-riddhi.png" alt="Riddhi Super Market">
+        <div class="mobile-promo mobile-promo-yellow">
+            <div>
+                <span class="mobile-promo-tag">QUICK DELIVERY</span>
+                <h2>Everything you<br>need, in one place</h2>
+                <p>Rice • Dal • Oil • Snacks • Home care & more.</p>
+                <button type="button" onclick="document.getElementById('search').focus()">Order now&nbsp; ›</button>
+            </div>
+            <div class="promo-cart-art">🛒</div>
         </div>
     </div>
+    <div class="mobile-category-heading">
+        <h2>Shop by category</h2>
+        <button type="button" onclick="setCategory('All')">See All&nbsp; ›</button>
+    </div>
+    <div id="mobileCategoryTiles" class="mobile-category-tiles"></div>
 </section>
 
-<div id="status" class="status"></div>
+<section class="hero">
+
+    <h2>
+        Shop groceries easily.
+    </h2>
+
+    <p>
+        Choose products, add them to your basket,
+        and place your order online.
+    </p>
+
+</section>
+
+
+<div
+    id="status"
+    class="status"
+></div>
+
 
 <div class="shop-layout">
-    <nav class="category-sidebar" aria-label="Product categories">
-        <div id="cats" class="cats"></div>
-    </nav>
+
+    <aside class="category-sidebar">
+
+        <div
+            id="cats"
+            class="cats"
+        ></div>
+
+    </aside>
+
 
     <section class="products-area">
+
         <div class="title">
-            <h2 id="storefrontTitle">Shop by category</h2>
+
+            <h2>
+                Products
+            </h2>
+
             <span id="results"></span>
+
         </div>
 
+
         <div class="product-scroll" id="productScroll">
-            <div id="products" class="category-sections">
-                <div class="empty">Loading products...</div>
+
+            <div
+                id="products"
+                class="grid"
+            >
+
+                <div class="empty">
+                    Loading products...
+                </div>
+
             </div>
+
         </div>
+
     </section>
+
 </div>
 
 </main>
@@ -2483,9 +2132,10 @@ main{
 
     <div class="dhead">
 
-        <h2>
-            Your Basket
-        </h2>
+        <div class="basket-title-wrap">
+            <button type="button" class="basket-back" onclick="closeCart()" aria-label="Back to shopping">‹</button>
+            <h2>Your Basket</h2>
+        </div>
 
         <button
             class="close"
@@ -2620,7 +2270,7 @@ main{
 
             <div class="field">
                 <label>Building / Apartment Name *</label>
-                <input id="building" autocomplete="organization" placeholder="e.g. Riddhi Residency" required>
+                <input id="building" autocomplete="organization" placeholder="e.g. HAMS Residency" required>
             </div>
 
             <div class="field">
@@ -3306,51 +2956,38 @@ function status(
 ============================================================ */
 
 function renderCats(){
+    let a = [
+        "All",
+        ...new Set(
+            products.map(p => String(p.category || "").trim()).filter(Boolean)
+        )
+    ];
 
-    let a =
-        [
-            "All",
-            ...new Set(
-                products
-                    .map(
-                        p =>
-                        String(
-                            p.category || ""
-                        ).trim()
-                    )
-                    .filter(Boolean)
-            )
-        ];
+    const isMobile = window.matchMedia && window.matchMedia("(max-width:700px)").matches;
+    const box = document.getElementById("cats");
 
-
-    document
-        .getElementById("cats")
-        .innerHTML =
-
-        a.map(
-
-            c =>
-
-            `<button
-                type="button"
-                class="cat ${c===category?"active":""}"
-                data-category="${attr(c)}"
-            >
-                ${esc(c)}
-            </button>`
-
-        ).join("");
-
-    /* Use real event listeners instead of inline onclick handlers.
-       This makes the category filter reliable on GitHub Pages. */
-    document
-        .querySelectorAll("#cats .cat")
-        .forEach(function(button){
-            button.addEventListener("click", function(){
-                setCategory(button.dataset.category || "All");
+    if(isMobile){
+        box.innerHTML = a.map(function(c){
+            const first = products.find(function(p){
+                return c === "All" || String(p.category || "").trim() === c;
             });
-        });
+            const image = first ? (first.imageUrl || placeholder(c)) : placeholder(c);
+            return `<button type="button" class="cat zepto-side-cat ${c===category?"active":""}" data-category="${attr(c)}">
+                <span class="cat-image"><img src="${attr(image)}" alt="${attr(c)}" loading="lazy"></span>
+                <span class="cat-label">${esc(c)}</span>
+            </button>`;
+        }).join("");
+    } else {
+        box.innerHTML = a.map(function(c){
+            return `<button type="button" class="cat ${c===category?"active":""}" data-category="${attr(c)}">${esc(c)}</button>`;
+        }).join("");
+    }
 
+    document.querySelectorAll("#cats .cat").forEach(function(button){
+        button.addEventListener("click", function(){
+            setCategory(button.dataset.category || "All");
+        });
+    });
 }
 
 
@@ -3374,74 +3011,79 @@ function setCategory(c){
 ============================================================ */
 
 function render(){
-
-    const q = document.getElementById("search").value.trim().toLowerCase();
-
-    const filtered = products.filter(function(p){
-        const text = `${p.productName||""} ${p.description||""} ${p.category||""}`.toLowerCase();
-        const matchesSearch = !q || text.includes(q);
-        const matchesCategory = category === "All" || String(p.category || "") === category;
-        return matchesSearch && matchesCategory;
+    let q = document.getElementById("search").value.trim().toLowerCase();
+    let list = products.filter(function(p){
+        let cat = category === "All" || String(p.category || "") === category;
+        let text = `${p.productName||""} ${p.description||""} ${p.category||""}`.toLowerCase();
+        return cat && (!q || text.includes(q));
     });
 
-    document.getElementById("results").textContent =
-        filtered.length + " product" + (filtered.length === 1 ? "" : "s");
+    document.getElementById("results").textContent = list.length + " product" + (list.length===1 ? "" : "s");
+    if(typeof renderMobileCategoryTiles === "function") renderMobileCategoryTiles();
 
-    const title = document.getElementById("storefrontTitle");
+    const isMobile = window.matchMedia && window.matchMedia("(max-width:700px)").matches;
 
-    if(q){
-        title.textContent = "Search results";
-        document.getElementById("products").innerHTML =
-            filtered.length
-            ? `<div class="zeppo-search-grid">${filtered.map(card).join("")}</div>`
+    if(isMobile){
+        // Zepto-style category page: left vertical category rail + 2-column product grid.
+        if(!q && category !== "All"){
+            document.getElementById("products").innerHTML = list.length
+                ? `<section class="zepto-mobile-category-page">
+                    <div class="mobile-breadcrumb"><span>Home</span><b>›</b><span>Groceries</span><b>›</b><strong>${esc(category)}</strong></div>
+                    <div class="mobile-category-title">Buy ${esc(category)} Online</div>
+                    <div class="mobile-product-grid">${list.map(card).join("")}</div>
+                   </section>`
+                : '<div class="empty">No products found.</div>';
+            return;
+        }
+
+        if(!q && category === "All"){
+            const groups=[];
+            const seen=new Set();
+            products.forEach(function(p){
+                const c=String(p.category||"Grocery").trim() || "Grocery";
+                if(!seen.has(c)){seen.add(c);groups.push(c);}
+            });
+            document.getElementById("products").innerHTML = groups.map(function(c){
+                const items=products.filter(function(p){return String(p.category||"Grocery").trim()===c;});
+                if(!items.length) return "";
+                return `<section class="mobile-product-section zepto-home-section">
+                    <div class="mobile-section-head"><h3>${esc(c)}</h3><button type="button" onclick="setCategory('${js(c)}')">See All&nbsp; ›</button></div>
+                    <div class="mobile-product-grid">${items.slice(0,10).map(card).join("")}</div>
+                </section>`;
+            }).join("") || '<div class="empty">No products found.</div>';
+            return;
+        }
+
+        document.getElementById("products").innerHTML = list.length
+            ? `<div class="mobile-search-heading">Search results</div><div class="mobile-product-grid">${list.map(card).join("")}</div>`
             : '<div class="empty">No products found.</div>';
         return;
     }
 
-    if(category !== "All"){
-        title.textContent = category;
-        document.getElementById("products").innerHTML =
-            filtered.length
-            ? `<section class="product-section single-category">
-                    <div class="section-head">
-                        <h3>${esc(category)}</h3>
-                    </div>
-                    <div class="product-row">${filtered.map(card).join("")}</div>
-               </section>`
-            : '<div class="empty">No products found in this category.</div>';
-        return;
-    }
+    document.getElementById("products").innerHTML = list.length
+        ? list.map(card).join("")
+        : '<div class="empty">No products found.</div>';
+}
 
-    title.textContent = "Shop by category";
-
-    const groups = [];
-    const seen = new Set();
-
+function renderMobileCategoryTiles(){
+    const box=document.getElementById("mobileCategoryTiles");
+    if(!box) return;
+    const seen=new Set(), data=[];
     products.forEach(function(p){
-        const cat = String(p.category || "Grocery").trim() || "Grocery";
-        if(!seen.has(cat)){
-            seen.add(cat);
-            groups.push(cat);
+        const c=String(p.category||"").trim();
+        if(c && !seen.has(c)){
+            seen.add(c);
+            data.push({name:c,image:p.imageUrl||placeholder(p.productName)});
         }
     });
-
-    document.getElementById("products").innerHTML = groups.map(function(cat){
-        const items = products.filter(function(p){
-            const text = `${p.productName||""} ${p.description||""} ${p.category||""}`.toLowerCase();
-            return String(p.category || "Grocery").trim() === cat && (!q || text.includes(q));
-        });
-
-        if(!items.length) return "";
-
-        return `<section class="product-section" data-section-category="${attr(cat)}">
-            <div class="section-head">
-                <h3>${esc(cat)}</h3>
-                <button type="button" class="see-all" onclick="setCategory('${js(cat)}')">See All <span>›</span></button>
-            </div>
-            <div class="product-row">${items.slice(0, 12).map(card).join("")}</div>
-        </section>`;
-    }).join("") || '<div class="empty">No products found.</div>';
+    box.innerHTML=data.slice(0,12).map(function(x){
+        return `<button type="button" class="mobile-category-tile" onclick="setCategory('${js(x.name)}')">
+            <span class="mobile-category-image"><img src="${attr(x.image)}" alt="${attr(x.name)}" loading="lazy"></span>
+            <span>${esc(x.name)}</span>
+        </button>`;
+    }).join("");
 }
+
 
 /* ============================================================
    PRODUCT CARD
@@ -4432,44 +4074,41 @@ function clearCart(){
    OPEN BASKET
 ============================================================ */
 
+let basketHistoryState = false;
+
 function openCart(){
 
-    document
-        .getElementById("overlay")
-        .classList.add("show");
-
-
-    document
-        .getElementById("drawer")
-        .classList.add("open");
-
-    /*
-       Lock the page behind the basket. The basket's own .items
-       area remains independently scrollable.
-    */
+    document.getElementById("overlay").classList.add("show");
+    document.getElementById("drawer").classList.add("open");
     document.body.style.overflow = "hidden";
 
+    /* Make Android/browser Back close the basket instead of leaving the site. */
+    if(!basketHistoryState){
+        try{ history.pushState({riddhiBasket:true}, "", location.href.split("#")[0] + "#basket"); }catch(e){}
+        basketHistoryState = true;
+    }
 }
 
+function closeCart(fromHistory){
 
-/* ============================================================
-   CLOSE BASKET
-============================================================ */
-
-function closeCart(){
-
-    document
-        .getElementById("overlay")
-        .classList.remove("show");
-
-
-    document
-        .getElementById("drawer")
-        .classList.remove("open");
-
+    document.getElementById("overlay").classList.remove("show");
+    document.getElementById("drawer").classList.remove("open");
     document.body.style.overflow = "";
 
+    if(basketHistoryState){
+        const wasHistory = !!fromHistory;
+        basketHistoryState = false;
+        if(!wasHistory){
+            try{ history.back(); }catch(e){}
+        }
+    }
 }
+
+window.addEventListener("popstate", function(){
+    if(basketHistoryState){
+        closeCart(true);
+    }
+});
 
 
 /* ============================================================
@@ -5066,7 +4705,7 @@ function buildWhatsAppMessage(orderId, payload, total){
     }
 
     return [
-        "🛒 RIDDHI SUPER MARKET",
+        "🛒 HAMS KIRANA STORE",
         "NEW ORDER",
         "",
         "Order ID: " + orderId,
