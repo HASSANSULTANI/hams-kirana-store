@@ -1404,6 +1404,31 @@ footer{
 ============================================================ */
 .account-profile-btn{width:100%;border:1px solid #bbf7d0;background:#f0fdf4;color:#166534;border-radius:9px;padding:9px 12px;cursor:pointer;font-weight:700;margin-top:10px}.account-profile-btn:hover{background:#dcfce7}.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}.profile-field{background:#f8faf8;border:1px solid #e7ece8;border-radius:10px;padding:11px}.profile-field.full{grid-column:1/-1}.profile-field-label{font-size:11px;color:#68736a;margin-bottom:4px}.profile-field-value{font-size:14px;font-weight:700;color:#172019;word-break:break-word}.profile-avatar-large{width:72px;height:72px;border-radius:50%;object-fit:cover;background:#dcfce7;display:block;margin:2px auto 12px}.profile-header{text-align:center;padding-bottom:14px;border-bottom:1px solid #edf0ed}.profile-header h3{margin:0 0 4px;font-size:18px}.profile-header p{margin:0;color:#68736a;font-size:12px;word-break:break-all}.profile-note{font-size:12px;line-height:1.5;color:#68736a;background:#f8faf8;border-radius:10px;padding:10px;margin-top:13px}@media(max-width:500px){.profile-grid{grid-template-columns:1fr}}
 
+
+/* ============================================================
+   SAVED CUSTOMER ADDRESSES — STEP 4
+============================================================ */
+.saved-address-section{margin:0 0 16px;padding:12px;background:#f8faf8;border:1px solid #e1e8e2;border-radius:12px}
+.saved-address-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.saved-address-head strong{font-size:14px;color:#172019}
+.saved-address-list{display:grid;gap:8px}
+.saved-address-card{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;border:1px solid #dce5de;background:#fff;border-radius:10px;padding:10px;cursor:pointer;color:#172019}
+.saved-address-card:hover{border-color:#86b893;background:#fbfffc}
+.saved-address-card.selected{border-color:#15803d;background:#f0fdf4;box-shadow:0 0 0 1px #15803d22}
+.saved-address-radio{width:18px;height:18px;flex:0 0 18px;margin-top:2px;border:2px solid #aeb9b0;border-radius:50%;position:relative}
+.saved-address-card.selected .saved-address-radio{border-color:#15803d}
+.saved-address-card.selected .saved-address-radio:after{content:"";position:absolute;inset:3px;border-radius:50%;background:#15803d}
+.saved-address-content{min-width:0;flex:1}
+.saved-address-title{font-weight:800;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.saved-address-default{font-size:10px;color:#166534;background:#dcfce7;border-radius:999px;padding:3px 6px;font-weight:800}
+.saved-address-text{font-size:12px;line-height:1.4;color:#58645b;margin-top:4px}
+.saved-address-map{font-size:11px;color:#166534;margin-top:4px}
+.saved-address-actions{display:flex;gap:8px;margin-top:9px}
+.saved-address-action{border:1px solid #cfd9d1;background:#fff;color:#166534;border-radius:8px;padding:8px 10px;cursor:pointer;font-weight:700;font-size:12px}
+.saved-address-action:hover{background:#f0fdf4}
+.saved-address-empty{font-size:12px;color:#68736a;padding:4px 0 8px}
+.address-mode-note{font-size:12px;color:#68736a;background:#fff;border:1px solid #e4e9e5;border-radius:9px;padding:9px;margin-bottom:12px}
+@media(max-width:600px){.saved-address-section{padding:10px}.saved-address-actions{flex-direction:column}.saved-address-action{width:100%}}
 </style>
 </head>
 
@@ -1714,6 +1739,25 @@ footer{
             This helps us deliver your order correctly.
         </div>
 
+        <div class="saved-address-section" id="savedAddressSection" style="display:none">
+            <div class="saved-address-head">
+                <strong>📍 Delivery Address</strong>
+            </div>
+            <div id="savedAddressList" class="saved-address-list"></div>
+            <div class="saved-address-actions">
+                <button type="button" class="saved-address-action" onclick="startNewCustomerAddress()">＋ Add New Address</button>
+            </div>
+        </div>
+
+        <div id="newAddressModeNote" class="address-mode-note" style="display:none">
+            Enter a new delivery address below. After this order is successfully placed, it will be saved to your account for future checkouts.
+        </div>
+
+        <div class="field" id="addressLabelField" style="display:none">
+            <label>Address Label</label>
+            <input id="addressLabel" maxlength="30" placeholder="e.g. Home, Office, Shop">
+        </div>
+
         <div class="field">
             <label>Full Name *</label>
             <input id="name" autocomplete="name" required>
@@ -1924,6 +1968,9 @@ const CUSTOMER_TOKEN_KEY = "hamsKiranaCustomerGoogleToken";
 const CUSTOMER_PROFILE_KEY = "hamsKiranaCustomerProfile";
 let customerGoogleToken = "";
 let customerProfile = null;
+let customerAddresses = [];
+let selectedCustomerAddressId = "";
+let usingNewCustomerAddress = false;
 
 
 /* ============================================================
@@ -1997,6 +2044,9 @@ function initializeCustomerGoogleLogin(){
         customerProfile=JSON.parse(localStorage.getItem(CUSTOMER_PROFILE_KEY)||"null");
     }catch(e){ customerGoogleToken=""; customerProfile=null; }
     updateCustomerAccountUI();
+    if(customerGoogleToken && customerProfile && customerProfile.customerId){
+        loadCustomerAddresses();
+    }
     waitForGoogleIdentity();
 }
 function waitForGoogleIdentity(){
@@ -2022,6 +2072,7 @@ async function handleGoogleCredential(response){
         localStorage.setItem(CUSTOMER_TOKEN_KEY,customerGoogleToken);
         localStorage.setItem(CUSTOMER_PROFILE_KEY,JSON.stringify(customerProfile));
         updateCustomerAccountUI();
+        loadCustomerAddresses();
         document.getElementById("accountMenu").classList.add("show");
         document.getElementById("accountBtn").setAttribute("aria-expanded","true");
     }catch(err){
@@ -2041,6 +2092,123 @@ function updateCustomerAccountUI(){
     const avatar=document.getElementById("accountAvatar");
     if(avatar){ avatar.src=customerProfile?.picture||placeholder(customerProfile?.name||"Customer"); avatar.onerror=function(){this.src=placeholder(customerProfile?.name||"Customer")}; }
 }
+/* ============================================================
+   CUSTOMER SAVED ADDRESSES — STEP 4
+============================================================ */
+async function loadCustomerAddresses(){
+    if(!customerGoogleToken || !customerProfile || !customerProfile.customerId){
+        customerAddresses=[];
+        return;
+    }
+    try{
+        const r=await fetch(API_URL+"?action=getCustomerAddresses&idToken="+encodeURIComponent(customerGoogleToken),{cache:"no-store"});
+        if(!r.ok) throw Error("Unable to load saved addresses.");
+        const d=await r.json();
+        if(!d.success) throw Error(d.message||"Unable to load saved addresses.");
+        customerAddresses=Array.isArray(d.addresses)?d.addresses:[];
+        const defaultAddress=customerAddresses.find(function(a){return a.isDefault;})||customerAddresses[0]||null;
+        selectedCustomerAddressId=defaultAddress ? defaultAddress.addressId : "";
+        updateCustomerAddressSection();
+    }catch(err){
+        console.error("Saved addresses:",err);
+        customerAddresses=[];
+        selectedCustomerAddressId="";
+    }
+}
+
+function formatSavedAddress(address){
+    if(!address) return "";
+    return [address.houseFlat,address.building,address.street,address.area,address.city,address.pincode].filter(Boolean).join(", ");
+}
+
+function updateCustomerAddressSection(){
+    const section=document.getElementById("savedAddressSection");
+    const list=document.getElementById("savedAddressList");
+    if(!section || !list) return;
+
+    if(!customerAddresses.length){
+        section.style.display="none";
+        return;
+    }
+
+    section.style.display="block";
+    list.innerHTML=customerAddresses.map(function(address){
+        const selected=!usingNewCustomerAddress && selectedCustomerAddressId===address.addressId;
+        const label=address.label||"Other";
+        const addressText=formatSavedAddress(address);
+        return '<button type="button" class="saved-address-card '+(selected?'selected':'')+'" onclick="selectCustomerAddress('+JSON.stringify(address.addressId)+')">'
+            +'<span class="saved-address-radio" aria-hidden="true"></span>'
+            +'<span class="saved-address-content">'
+            +'<span class="saved-address-title">'+escapeHtml(label)+(address.isDefault?' <span class="saved-address-default">Default</span>':'')+'</span>'
+            +'<span class="saved-address-text">'+escapeHtml(addressText)+'</span>'
+            +(address.latitude && address.longitude?'<span class="saved-address-map">📍 Location available</span>':'')
+            +'</span></button>';
+    }).join("");
+}
+
+function selectCustomerAddress(addressId){
+    const address=customerAddresses.find(function(a){return a.addressId===addressId;});
+    if(!address) return;
+    selectedCustomerAddressId=addressId;
+    usingNewCustomerAddress=false;
+    populateCheckoutFromSavedAddress(address);
+    updateCustomerAddressSection();
+    const note=document.getElementById("newAddressModeNote");
+    if(note) note.style.display="none";
+    const labelField=document.getElementById("addressLabelField");
+    if(labelField) labelField.style.display="none";
+}
+
+function populateCheckoutFromSavedAddress(address){
+    document.getElementById("name").value=customerProfile?.name||"";
+    document.getElementById("mobile").value=customerProfile?.mobile||"";
+    document.getElementById("houseFlat").value=address.houseFlat||"";
+    document.getElementById("building").value=address.building||"";
+    document.getElementById("street").value=address.street||"";
+    document.getElementById("area").value=address.area||"";
+    document.getElementById("city").value=address.city||"";
+    document.getElementById("pincode").value=address.pincode||"";
+    document.getElementById("landmark").value=address.landmark||"";
+    document.getElementById("mapAddress").value=address.mapAddress||"";
+    document.getElementById("latitude").value=address.latitude||"";
+    document.getElementById("longitude").value=address.longitude||"";
+    document.getElementById("mapsLink").value=address.mapsLink||"";
+    document.getElementById("locationStatus").textContent=(address.latitude&&address.longitude)?"✓ Saved map location available.":(address.mapsLink?"✓ Saved Google Maps link available.":"No map location saved for this address.");
+}
+
+function startNewCustomerAddress(){
+    usingNewCustomerAddress=true;
+    selectedCustomerAddressId="";
+    document.getElementById("form").reset();
+    document.getElementById("name").value=customerProfile?.name||"";
+    document.getElementById("mobile").value=customerProfile?.mobile||"";
+    document.getElementById("latitude").value="";
+    document.getElementById("longitude").value="";
+    document.getElementById("mapAddress").value="";
+    document.getElementById("locationStatus").textContent="No map location selected yet.";
+    document.getElementById("savedAddressSection").style.display=customerAddresses.length?"block":"none";
+    document.getElementById("addressLabelField").style.display="block";
+    document.getElementById("newAddressModeNote").style.display="block";
+    updateCustomerAddressSection();
+}
+
+function prepareCheckoutAddress(){
+    if(customerAddresses.length){
+        const defaultAddress=customerAddresses.find(function(a){return a.isDefault;})||customerAddresses[0];
+        selectedCustomerAddressId=defaultAddress.addressId;
+        usingNewCustomerAddress=false;
+        populateCheckoutFromSavedAddress(defaultAddress);
+    }else{
+        usingNewCustomerAddress=true;
+        selectedCustomerAddressId="";
+        document.getElementById("name").value=customerProfile?.name||"";
+        document.getElementById("mobile").value=customerProfile?.mobile||"";
+        document.getElementById("addressLabelField").style.display="block";
+        document.getElementById("newAddressModeNote").style.display="block";
+    }
+    updateCustomerAddressSection();
+}
+
 function openCustomerProfile(){
     if(!customerGoogleToken || !customerProfile || !customerProfile.email){
         alert("Please sign in with your Google account first.");
@@ -2083,7 +2251,7 @@ function toggleAccountMenu(){
     const open=!menu.classList.contains("show"); menu.classList.toggle("show",open); if(btn)btn.setAttribute("aria-expanded",String(open));
 }
 function customerLogout(){
-    customerGoogleToken=""; customerProfile=null; localStorage.removeItem(CUSTOMER_TOKEN_KEY); localStorage.removeItem(CUSTOMER_PROFILE_KEY);
+    customerGoogleToken=""; customerProfile=null; customerAddresses=[]; selectedCustomerAddressId=""; usingNewCustomerAddress=false; localStorage.removeItem(CUSTOMER_TOKEN_KEY); localStorage.removeItem(CUSTOMER_PROFILE_KEY);
     try{if(window.google&&google.accounts&&google.accounts.id)google.accounts.id.disableAutoSelect();}catch(e){}
     updateCustomerAccountUI(); const menu=document.getElementById("accountMenu"),btn=document.getElementById("accountBtn");
     if(menu)menu.classList.remove("show"); if(btn)btn.setAttribute("aria-expanded","false");
@@ -2098,6 +2266,10 @@ document.addEventListener("click",function(event){
     const area=document.getElementById("accountArea"),menu=document.getElementById("accountMenu");
     if(area&&menu&&!area.contains(event.target)){menu.classList.remove("show");const btn=document.getElementById("accountBtn");if(btn)btn.setAttribute("aria-expanded","false");}
 });
+
+function escapeHtml(value){
+    return String(value==null?"":value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
 
 /* ============================================================
    LOAD PRODUCTS
@@ -3399,6 +3571,7 @@ function checkout(){
 
 
     renderCheckoutItems();
+    prepareCheckoutAddress();
 
     document
         .getElementById(
@@ -3619,6 +3792,7 @@ async function placeOrder(e){
         latitude: finalLat,
         longitude: finalLng,
         mapsLink: mapsLink,
+        addressLabel: usingNewCustomerAddress ? (document.getElementById("addressLabel").value.trim() || "Other") : ((customerAddresses.find(function(a){return a.addressId===selectedCustomerAddressId;})||{}).label || "Other"),
 
         paymentMethod: "Cash on Delivery",
 
@@ -3680,8 +3854,17 @@ async function placeOrder(e){
         document.getElementById("mapAddress").value = "";
         document.getElementById("locationStatus").textContent =
             "No map location selected yet.";
+        usingNewCustomerAddress=false;
+        selectedCustomerAddressId="";
+        const addressLabelInput=document.getElementById("addressLabel");
+        if(addressLabelInput) addressLabelInput.value="";
+        const addressLabelField=document.getElementById("addressLabelField");
+        if(addressLabelField) addressLabelField.style.display="none";
+        const newAddressNote=document.getElementById("newAddressModeNote");
+        if(newAddressNote) newAddressNote.style.display="none";
 
         closeCheckout();
+        await loadCustomerAddresses();
 
         document.getElementById("confirmOrderId").textContent = d.orderId || "—";
         document.getElementById("confirmCustomer").textContent = name || "—";
