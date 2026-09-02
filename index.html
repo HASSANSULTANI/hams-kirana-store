@@ -1509,6 +1509,36 @@ footer{
 .customer-buy-again{border:0;border-radius:9px;background:#15803d;color:#fff;padding:8px 11px;font-size:11px;font-weight:800}
 .customer-buy-again:hover{background:#166534}
 .customer-order-empty{padding:30px 10px;text-align:center;color:#68736a;border:1px dashed #d8e2d8;border-radius:12px}
+.customer-order-card.active-order{border-color:#86efac;box-shadow:0 3px 14px rgba(22,101,52,.10)}
+.customer-live-banner{padding:10px 13px;background:#f0fdf4;border-bottom:1px solid #dcfce7;color:#166534;font-size:12px;font-weight:800}
+.customer-order-tracking{padding:11px 13px;background:#fbfdfb;border-bottom:1px solid #edf1ed}
+.customer-tracking-title{font-size:12px;font-weight:900;color:#166534;margin-bottom:9px}
+.customer-status-steps{display:flex;gap:4px;overflow-x:auto;padding-bottom:2px}
+.customer-status-step{min-width:72px;text-align:center;font-size:9px;color:#7a847c;font-weight:700}
+.customer-status-dot{width:18px;height:18px;border-radius:50%;border:2px solid #cfd8cf;background:#fff;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-size:9px}
+.customer-status-step.done .customer-status-dot,.customer-status-step.current .customer-status-dot{background:#16a34a;border-color:#16a34a;color:#fff}
+.customer-status-step.current{color:#166534}
+.customer-status-line{height:2px;background:#dce5dc;flex:1;margin-top:8px;min-width:12px}
+.customer-status-line.done{background:#86efac}
+.customer-activity{padding:10px 13px;border-bottom:1px solid #edf1ed}
+.customer-activity-title{font-size:11px;font-weight:900;margin-bottom:7px}
+.customer-activity-list{display:grid;gap:7px}
+.customer-activity-row{display:grid;grid-template-columns:10px 1fr;gap:8px;font-size:11px}
+.customer-activity-dot{width:7px;height:7px;border-radius:50%;background:#16a34a;margin-top:4px}
+.customer-activity-main{font-weight:700;color:#263229}
+.customer-activity-meta{font-size:9px;color:#7a847c;margin-top:2px}
+.customer-activity-reason{font-size:10px;color:#5f6961;margin-top:2px}
+.customer-order-products{padding:9px 13px}
+.customer-order-product-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #f0f3f0}
+.customer-order-product-row:last-child{border-bottom:0}
+.customer-product-info{min-width:0}
+.customer-product-name{font-size:12px;font-weight:700}
+.customer-product-status{font-size:9px;color:#68736a;margin-top:2px}
+.customer-reject-product{border:1px solid #fecaca;background:#fff;color:#b91c1c;border-radius:8px;padding:6px 8px;font-size:10px;font-weight:800;white-space:nowrap}
+.customer-reject-product:disabled{opacity:.45;cursor:not-allowed}
+.customer-order-history-label{font-size:11px;font-weight:900;color:#68736a;margin:3px 2px -2px}
+.customer-orders-refreshing{font-size:10px;color:#68736a;text-align:center;padding:5px}
+
 .customer-page-loading{text-align:center;padding:25px;color:#68736a}
 .address-editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .address-editor-grid .full{grid-column:1/-1}
@@ -4597,34 +4627,117 @@ async function deleteCustomerAddressUI(addressId){
     }catch(err){ alert(err.message||"Unable to delete address."); }
 }
 
+let customerOrdersRefreshTimer=null;
+let customerOrdersRefreshing=false;
+
 async function openCustomerOrdersPage(){
     if(!requireCustomerLogin()) return;
     closeAccountMenu();
     const modal=document.getElementById("customerOrdersModal");
     modal.classList.add("show");
     const box=document.getElementById("customerOrdersList");
-    box.innerHTML='<div class="customer-page-loading">Loading your orders...</div>';
+    box.innerHTML='<div class="customer-page-loading">Loading your lifetime orders...</div>';
+    await refreshCustomerOrders(true);
+    clearInterval(customerOrdersRefreshTimer);
+    customerOrdersRefreshTimer=setInterval(function(){
+        if(document.getElementById("customerOrdersModal")?.classList.contains("show")) refreshCustomerOrders(false);
+    },10000);
+}
+
+function closeCustomerOrdersPage(){
+    document.getElementById("customerOrdersModal")?.classList.remove("show");
+    clearInterval(customerOrdersRefreshTimer);
+    customerOrdersRefreshTimer=null;
+}
+
+async function refreshCustomerOrders(initial){
+    if(customerOrdersRefreshing || !customerGoogleToken) return;
+    customerOrdersRefreshing=true;
     try{
         const d=await customerAddressRequest("getCustomerOrders",{});
         window.__customerOrders=Array.isArray(d.orders)?d.orders:[];
-        renderCustomerOrdersPage(window.__customerOrders);
-    }catch(err){ box.innerHTML='<div class="customer-order-empty">Unable to load orders.<br>'+esc(err.message||"Please try again.")+'</div>'; }
+        renderCustomerOrdersPage(window.__customerOrders, !initial);
+    }catch(err){
+        if(initial){
+            document.getElementById("customerOrdersList").innerHTML='<div class="customer-order-empty">Unable to load orders.<br>'+esc(err.message||"Please try again.")+'</div>';
+        }
+    }finally{
+        customerOrdersRefreshing=false;
+    }
 }
-function closeCustomerOrdersPage(){ document.getElementById("customerOrdersModal")?.classList.remove("show"); }
 
-function renderCustomerOrdersPage(orders){
+function customerOrderStatusSteps(status){
+    const steps=["NEW","ASSIGNED","CONFIRMED","PACKING","OUT FOR DELIVERY","DELIVERED"];
+    const normalized=String(status||"NEW").toUpperCase();
+    const current=steps.indexOf(normalized);
+    if(normalized==="QUEUED") return {steps:steps,index:0,queued:true};
+    if(normalized==="CANCELLED") return {steps:steps,index:-1,cancelled:true};
+    return {steps:steps,index:current<0?0:current};
+}
+
+function renderCustomerOrderTracking(order){
+    const state=customerOrderStatusSteps(order.status);
+    if(state.cancelled){
+        return '<div class="customer-live-banner">✕ Order Cancelled</div>';
+    }
+    const parts=[];
+    state.steps.forEach(function(step,i){
+        const done=i<state.index || (i===state.index && step==="DELIVERED");
+        const current=i===state.index && step!=="DELIVERED";
+        parts.push('<div class="customer-status-step '+(done?'done ':'')+(current?'current':'')+'"><div class="customer-status-dot">'+(done?'✓':(i+1))+'</div>'+esc(step)+'</div>');
+        if(i<state.steps.length-1) parts.push('<div class="customer-status-line '+(i<state.index?'done':'')+'"></div>');
+    });
+    if(state.queued) parts.unshift('<div class="customer-live-banner" style="margin:-11px -13px 10px">⏸ Order is currently queued by the store.</div>');
+    return '<div class="customer-order-tracking"><div class="customer-tracking-title">LIVE ORDER TRACKING</div><div class="customer-status-steps">'+parts.join('')+'</div></div>';
+}
+
+function renderCustomerOrderActivity(order){
+    const timeline=Array.isArray(order.timeline)?order.timeline:[];
+    if(!timeline.length) return '';
+    return '<div class="customer-activity"><div class="customer-activity-title">Order Activity</div><div class="customer-activity-list">'+timeline.slice().reverse().map(function(a){
+        const statusText=a.toStatus ? (' → '+a.toStatus) : '';
+        const productText=a.product ? (' • '+a.product) : '';
+        return '<div class="customer-activity-row"><span class="customer-activity-dot"></span><div><div class="customer-activity-main">'+esc(a.action||"Activity")+esc(statusText)+esc(productText)+'</div><div class="customer-activity-meta">'+esc(a.timestamp||"")+(a.actor?' • '+esc(a.actor):'')+'</div>'+(a.reason?'<div class="customer-activity-reason">'+esc(a.reason)+'</div>':'')+'</div></div>';
+    }).join('')+'</div></div>';
+}
+
+function renderCustomerOrderProducts(order){
+    const items=Array.isArray(order.items)?order.items:[];
+    return '<div class="customer-order-products">'+items.map(function(item){
+        const rejectable=!!item.canReject;
+        return '<div class="customer-order-product-row"><div class="customer-product-info"><div class="customer-product-name">'+esc(item.productName||"Product")+' × '+(Number(item.quantity)||0)+'</div><div class="customer-product-status">Status: '+esc(item.productStatus||"PENDING")+'</div></div>'+(rejectable?'<button type="button" class="customer-reject-product" onclick="rejectCustomerProduct('+JSON.stringify(order.orderId)+','+Number(item.rowNumber||0)+','+JSON.stringify(item.productName||"Product")+')">Reject</button>':'')+'</div>';
+    }).join('')+'</div>';
+}
+
+function renderCustomerOrdersPage(orders, isRefresh){
     const box=document.getElementById("customerOrdersList");
     if(!orders.length){ box.innerHTML='<div class="customer-order-empty">You have not placed any orders yet.</div>'; return; }
-    box.innerHTML=orders.map(function(order){
+    const active=orders.filter(function(o){const s=String(o.status||'').toUpperCase();return s!=="DELIVERED"&&s!=="CANCELLED";}).length;
+    const refreshNote=isRefresh&&active?'<div class="customer-orders-refreshing">● Live status checked just now</div>':'';
+    box.innerHTML=refreshNote+orders.map(function(order){
         const items=Array.isArray(order.items)?order.items:[];
-        const shown=items.slice(0,4);
-        const more=items.length>4?'<div class="customer-order-more">+'+(items.length-4)+' more item(s)</div>':'';
-        return '<div class="customer-order-card">'
+        const isOpen=String(order.status||'').toUpperCase()!=="DELIVERED"&&String(order.status||'').toUpperCase()!=="CANCELLED";
+        return '<div class="customer-order-card '+(isOpen?'active-order':'')+'">'
           +'<div class="customer-order-summary"><div><div class="customer-order-id">'+esc(order.orderId||"Order")+'</div><div class="customer-order-date">'+esc(order.timestamp||"")+'</div></div><span class="customer-order-status">'+esc(order.status||"NEW")+'</span></div>'
-          +'<div class="customer-order-items">'+shown.map(function(item){return '<div class="customer-order-item"><span>'+esc(item.productName||"")+" × "+(Number(item.quantity)||0)+'</span><b>₹'+money(item.total ?? ((Number(item.price)||0)*(Number(item.quantity)||0)))+'</b></div>';}).join("")+more+'</div>'
+          +(isOpen?renderCustomerOrderTracking(order):'')
+          +renderCustomerOrderProducts(order)
+          +renderCustomerOrderActivity(order)
           +'<div class="customer-order-bottom"><span class="customer-order-total">Total ₹'+money(order.total||0)+'</span><button type="button" class="customer-buy-again" onclick="buyAgain('+JSON.stringify(order.orderId)+')">↻ Buy Again</button></div>'
           +'</div>';
     }).join("");
+}
+
+async function rejectCustomerProduct(orderId,rowNumber,productName){
+    if(!requireCustomerLogin()) return;
+    if(!rowNumber){ alert("This product cannot be rejected right now. Please refresh the order."); return; }
+    const reason=prompt('Why do you want to reject "'+productName+'"?','Not required / I do not want this product');
+    if(reason===null) return;
+    if(!confirm('Reject '+productName+' from order '+orderId+'?')) return;
+    try{
+        const d=await customerAddressRequest("customerRejectProduct",{orderId:orderId,rowNumber:rowNumber,reason:reason});
+        await refreshCustomerOrders(false);
+        alert(productName+' has been rejected from your order.');
+    }catch(err){ alert(err.message||"Unable to reject this product."); }
 }
 
 function buyAgain(orderId){
