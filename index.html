@@ -2395,6 +2395,82 @@ main{
     }
 }
 
+
+/* ============================================================
+   RIDDHI UI FIXES — ORDER HISTORY + MOBILE CATEGORY RAIL
+   Added as final overrides so existing functionality is preserved.
+============================================================ */
+
+/* Customer account/order pages must always sit above the sticky header
+   and every sticky storefront layer. */
+.customer-page-modal{
+    z-index:1200 !important;
+}
+
+.customer-page-modal .modalbox{
+    max-height:calc(100dvh - 24px);
+    overflow:auto;
+}
+
+/* Keep the mobile category rail in normal document flow.
+   This prevents it from sliding underneath/over the website header. */
+@media(max-width:700px){
+    .category-sidebar{
+        position:relative !important;
+        top:auto !important;
+        z-index:1 !important;
+        margin-top:0 !important;
+    }
+
+    .customer-page-modal{
+        padding:12px;
+    }
+
+    .customer-page-modal .modalbox{
+        width:100%;
+        max-width:720px;
+        max-height:calc(100dvh - 24px);
+        border-radius:16px;
+        padding:16px;
+    }
+
+    .customer-page-modal .mhead{
+        position:sticky;
+        top:-16px;
+        z-index:2;
+        background:#fff;
+        padding-top:2px;
+        padding-bottom:12px;
+        margin-bottom:8px;
+    }
+
+    .customer-activity{
+        padding:12px 13px;
+    }
+
+    .customer-activity-title{
+        font-size:13px;
+        color:#166534;
+    }
+
+    .customer-activity-row{
+        font-size:12px;
+        grid-template-columns:10px 1fr;
+        gap:8px;
+    }
+
+    .customer-activity-main{
+        line-height:1.35;
+    }
+
+    .customer-activity-meta{
+        font-size:10px;
+        line-height:1.35;
+    }
+}
+
+/* Customer can view store/order activity, but customer-originated
+   audit entries are intentionally not rendered in the customer UI. */
 </style>
 </head>
 
@@ -5840,8 +5916,13 @@ function renderCustomerOrderTracking(order){
 
 function renderCustomerOrderActivity(order){
     const timeline=Array.isArray(order.timeline)?order.timeline:[];
-    if(!timeline.length) return '';
-    return '<div class="customer-activity"><div class="customer-activity-title">Order Activity</div><div class="customer-activity-list">'+timeline.slice().reverse().map(function(a){
+    /* Customer order history is read-only: show store/manager activity,
+       while customer-originated audit entries remain hidden here. */
+    const visibleTimeline=timeline.filter(function(a){
+        return String(a.type||"STAFF").toUpperCase()!=="CUSTOMER";
+    });
+    if(!visibleTimeline.length) return '';
+    return '<div class="customer-activity"><div class="customer-activity-title">Order Activity</div><div class="customer-activity-list">'+visibleTimeline.slice().reverse().map(function(a){
         const statusText=a.toStatus ? (' → '+a.toStatus) : '';
         const productText=a.product ? (' • '+a.product) : '';
         return '<div class="customer-activity-row"><span class="customer-activity-dot"></span><div><div class="customer-activity-main">'+esc(a.action||"Activity")+esc(statusText)+esc(productText)+'</div><div class="customer-activity-meta">'+esc(a.timestamp||"")+(a.actor?' • '+esc(a.actor):'')+'</div>'+(a.reason?'<div class="customer-activity-reason">'+esc(a.reason)+'</div>':'')+'</div></div>';
