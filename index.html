@@ -2334,6 +2334,67 @@ main{
     .customer-order-summary,.customer-order-bottom{align-items:flex-start;flex-direction:column}
     .customer-buy-again{width:100%}
 }
+
+
+/* ============================================================
+   MOBILE BASKET POSITION — EMPTY TOP-RIGHT / ACTIVE CENTER-BOTTOM
+   Desktop layout is intentionally untouched.
+   ============================================================ */
+@media(max-width:700px){
+    .cartbtn{
+        position:fixed;
+        z-index:1000;
+        right:10px;
+        top:10px;
+        left:auto;
+        bottom:auto;
+        transform:translateX(0);
+        transition:
+            top 2s ease,
+            left 2s ease,
+            right 2s ease,
+            transform 2s ease,
+            background 0.25s ease,
+            box-shadow 0.25s ease,
+            border-radius 0.25s ease;
+    }
+
+    /* Empty basket: remain at the top-right. */
+    .cartbtn.mobile-basket-empty{
+        top:10px;
+        left:auto;
+        right:10px;
+        transform:translateX(0);
+    }
+
+    /* One or more items: smoothly move to the center-bottom. */
+    .cartbtn.mobile-basket-has-items{
+        top:calc(100dvh - 82px);
+        left:50%;
+        right:auto;
+        transform:translateX(-50%);
+        min-width:210px;
+        height:56px;
+        padding:8px 16px;
+        border-radius:30px;
+        background:#ff0a68;
+        box-shadow:0 8px 24px #00000025;
+    }
+
+    .cartbtn.mobile-basket-has-items:hover{
+        background:#ff0a68;
+    }
+}
+
+@media(max-width:390px){
+    .cartbtn.mobile-basket-has-items{
+        min-width:190px;
+        height:52px;
+        top:calc(100dvh - 74px);
+        padding:7px 14px;
+    }
+}
+
 </style>
 </head>
 
@@ -4537,10 +4598,22 @@ function updateCart(){
         );
 
 
+    const cartButton = document.querySelector(".cartbtn");
+
     document
         .getElementById("count")
         .textContent =
         count;
+
+    /*
+       Mobile only: move the basket between its two positions.
+       Desktop remains exactly as before.
+    */
+    if(cartButton){
+        const hasItems = count > 0;
+        cartButton.classList.toggle("mobile-basket-has-items", hasItems);
+        cartButton.classList.toggle("mobile-basket-empty", !hasItems);
+    }
 
 
     let box =
